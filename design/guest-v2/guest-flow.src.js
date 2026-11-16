@@ -614,6 +614,12 @@ function viewLocations(){
 }
 const OUT=ic("chevron_right",20),CHEV=ic("chevron_right",20);
 const mrow=(g,t,sub,act,extra="")=>`<button class="row" ${act}>${well(g)}<span class="rt"><b>${t}</b>${sub?`<span>${sub}</span>`:""}</span>${extra}</button>`;
+/* Appearance: System (follows the phone), Light, or Dark. Saved on the device; applied to the app screen only. */
+const darkMQ=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
+function applyTheme(){const d=S.theme==="dark"||(S.theme==="system"&&darkMQ&&darkMQ.matches);screen.classList.toggle("dark",d)}
+function setTheme(v){S.theme=v;store.set("theme",v);applyTheme();const n=$("#ap-note");if(n)n.textContent=(v==="system"?"Follows your phone’s setting.":`Always ${v}.`)+" Saved on this device.";
+  sayPolite(v==="system"?"Appearance follows your phone":`${v[0].toUpperCase()+v.slice(1)} appearance`)}
+if(darkMQ&&darkMQ.addEventListener)darkMQ.addEventListener("change",()=>{if(S.theme==="system")applyTheme()});
 function unread(){return INBOX.filter(m=>!S.inboxRead.has(m.id)).length}
 function viewMenu(){
   const n=unread();
@@ -635,6 +641,9 @@ function viewMenu(){
      ${mrow("language","Visit the full website","utsouthwestern.edu",`data-action="toast" data-kind="out" data-msg="Opens the UT Southwestern website"`,OUT)}</div></section>
    <section class="grp" aria-labelledby="mn-4"><h2 class="lbl-h" id="mn-4">Follow us</h2>
      <div class="chips">${["Facebook","Instagram","LinkedIn","X"].map(x=>`<button class="chip" data-action="toast" data-kind="out" data-msg="Opens UT Southwestern on ${x}" aria-label="${x}, opens in the ${x} app">${x}</button>`).join("")}</div></section>
+   <section class="grp" aria-labelledby="mn-ap"><h2 class="lbl-h" id="mn-ap">Appearance</h2>
+     <div class="card ap-card"><div class="segm" role="radiogroup" aria-labelledby="mn-ap">${[["system","System"],["light","Light"],["dark","Dark"]].map(([v,l])=>`<label><input type="radio" name="theme" value="${v}" ${S.theme===v?"checked":""}><span>${ic(v==="system"?"brightness_auto":v==="light"?"light_mode":"dark_mode",20)}${l}</span></label>`).join("")}</div>
+     <p class="fine" id="ap-note">${S.theme==="system"?"Follows your phone’s setting.":`Always ${S.theme}.`} Saved on this device.</p></div></section>
    <section class="grp" aria-labelledby="mn-5"><h2 class="sr-only" id="mn-5">Legal and settings</h2><div class="card list">
      ${mrow("privacy_tip","Privacy policy","",`data-action="toast" data-kind="out" data-msg="Opens the privacy policy"`,OUT)}
      ${mrow("description","Terms of use","",`data-action="toast" data-kind="out" data-msg="Opens the terms of use"`,OUT)}
@@ -1498,6 +1507,8 @@ function closeDrawer(keepFocus){
 }
 
 /* ---------- Boot ---------- */
+S.theme=store.get("theme","system");applyTheme();
+$("#drawer-body").addEventListener("change",e=>{if(e.target.name==="theme")setTheme(e.target.value)});
 $("#search-back").innerHTML=ico("arrow_back");syncSearchFilters();
 $("#search-ic").outerHTML=ic("search");
 $("#q-clear").innerHTML=ic("close",20);

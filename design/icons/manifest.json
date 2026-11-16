@@ -464,6 +464,15 @@
     ],
     "syringe": [
       "24"
+    ],
+    "brightness_auto": [
+      "20"
+    ],
+    "light_mode": [
+      "20"
+    ],
+    "dark_mode": [
+      "20"
     ]
   }
 }
