@@ -45,6 +45,9 @@ html:not(.ms-ready) .ms{color:transparent!important}
 .statusbar .sys i{display:block; width:16px; height:12px; border-radius:2px; background:currentColor}
 .statusbar .sys i:nth-child(2){width:24px; border-radius:4px; background:none; border:2px solid currentColor}
 .screen.st-dark .statusbar{background:transparent; position:absolute; inset:0 0 auto; z-index:30}
+/* Lock screen (push notification preview): only the OS lock screen, no app chrome underneath */
+.screen.st-dark :is(.appbar,.views,.tabbar){display:none}
+.screen.st-dark .lock{z-index:20}
 .appbar{background:var(--c-blue); color:var(--c-on-blue); display:flex; align-items:center; gap:var(--sp-4); padding-inline:var(--sp-8); height:64px; flex:none; position:relative; z-index:3}
 .appbar .ttl{flex:1; min-width:0; font-size:var(--fs-20); line-height:var(--lh-20); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-left:var(--sp-8)}
 .appbar.home{padding-inline:var(--sp-16) var(--sp-12); gap:var(--sp-8)}
