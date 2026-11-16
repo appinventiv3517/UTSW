@@ -1,0 +1,20 @@
+<style>
+  body{font:13px/1.5 Inter,system-ui,sans-serif;margin:16px;color:#333}
+  h2{font-size:14px;margin:0 0 8px}
+  p{margin:0 0 12px;color:#5b6770}
+  button{background:#004278;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-weight:600;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #log{margin-top:12px;white-space:pre-wrap;font-size:12px;max-height:150px;overflow:auto}
+</style>
+<h2>MyCare screens import</h2>
+<p>Choose <b>mycare-screens.json</b>. Every screen is built in light and dark, in its own section, on the current page. Screens with the same name are replaced.</p>
+<input type="file" id="f" accept=".json"><br><br>
+<button id="go" disabled>Build screens</button>
+<div id="log"></div>
+<script>
+  let text = null;
+  const f = document.getElementById('f'), go = document.getElementById('go'), log = document.getElementById('log');
+  f.onchange = async () => { text = await f.files[0].text(); go.disabled = !text; log.textContent = 'Ready: ' + Math.round(text.length / 1024) + ' KB'; };
+  go.onclick = () => { go.disabled = true; log.textContent = 'Building…'; parent.postMessage({ pluginMessage: { type: 'build', text } }, '*'); };
+  onmessage = e => { const m = e.data.pluginMessage; if (!m) return; log.textContent += '\n' + m.msg; if (m.done) go.disabled = false; };
+</script>

@@ -82,6 +82,7 @@ for(const [n,svg,g] of ITEMS){if(have.has(n))continue;const f=figma.createNodeFr
 return {lib:LIB.children.length};`); chunk = []; size = 0; };
   for (const it of libItems) { if (size + it.svg.length > 17000) flush(); chunk.push(it); size += it.svg.length + it.n.length + 10; } flush();
   // screens
+  const SCREENS = [];
   const bySec = {}; caps.forEach(c => (bySec[c.section] = bySec[c.section] || []).push(c));
   let n = 10; const report = [];
   for (const [sec, list] of Object.entries(bySec)) {
@@ -97,7 +98,7 @@ return {lib:LIB.children.length};`); chunk = []; size = 0; };
       const th = [{ tree: L.tree, x, y: 200, clone: cap.same ? { x: x + L.w + 80, y: 200, swap } : null }];
       if (!cap.same) { prep(cap.dark.tree, []); th.push({ tree: cap.dark.tree, x: x + L.w + 80, y: 200, dark: 1 }); }
       // the builder looks components up by name through D.gl / D.sv
-      const data = { sec, label: cap.label, lib: LIB, v: vmap, gl, sv, th };
+      const data = { sec, label: cap.label, lib: LIB, v: vmap, gl, sv, th }; SCREENS.push(data);
       const code = `const D=${JSON.stringify(data)};\n` + BUILDER;
       const file = `${n++}-${cap.id}.js`; fs.writeFileSync(path.join(CALLS, file), code);
       report.push([file, code.length]); x += L.w * 2 + 80 + 200;
@@ -105,4 +106,9 @@ return {lib:LIB.children.length};`); chunk = []; size = 0; };
   }
   console.log('mismatched nodes', mism); console.log('pairs', pairs.length, 'named', names.filter(n => n.startsWith('token/')).length, 'glyphs', glyphs.size, 'svgs', svgs.length, 'unknown glyphs', [...glyphs].filter(d => !IC[d]).length);
   report.forEach(r => console.log(r.join('  ')));
+  // one data file for the Figma plugin in ../figma-plugin (variables, components, every screen)
+  const bundle = { vars: VARS, lib: libItems.map(x => [x.n, x.svg, x.g ? 1 : 0]), sections: Object.keys(bySec), screens: SCREENS };
+  const PL = path.join(HERE, '..', 'figma-plugin'); fs.mkdirSync(PL, { recursive: true });
+  fs.writeFileSync(path.join(PL, 'mycare-screens.json'), JSON.stringify(bundle));
+  console.log('bundle', Math.round(JSON.stringify(bundle).length / 1024) + ' KB', SCREENS.length, 'screens');
 })();
