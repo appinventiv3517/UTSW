@@ -6,7 +6,7 @@ window.__dom2fig = function (rootSel) {
   const q = n => Math.round(n * 10) / 10;
   const colors = [], cIdx = new Map(), glyphs = [], gIdx = new Map(), svgs = [], sIdx = new Map();
   const reg = (arr, map, v) => { if (!map.has(v)) { map.set(v, arr.length); arr.push(v); } return map.get(v); };
-  const parse = s => { const m = String(s).match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? +p[3] : 1]; };
+  const parse = s => { const cm = String(s).match(/color\(srgb\s+([-\d.e]+)\s+([-\d.e]+)\s+([-\d.e]+)(?:\s*\/\s*([\d.]+))?\)/); if (cm) return [cm[1] * 255, cm[2] * 255, cm[3] * 255, cm[4] != null ? +cm[4] : 1]; const m = String(s).match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? +p[3] : 1]; };
   const col = s => { const c = parse(s); if (!c || c[3] === 0) return null; return reg(colors, cIdx, c.map((v, i) => i < 3 ? Math.round(v) : Math.round(v * 1000) / 1000).join(',')); };
   const splitTop = s => { const out = []; let d = 0, cur = ''; for (const ch of s) { if (ch === '(') d++; if (ch === ')') d--; if (ch === ',' && d === 0) { out.push(cur.trim()); cur = ''; } else cur += ch; } if (cur.trim()) out.push(cur.trim()); return out; };
   const inv = ([[a, c, e], [b, d, f]]) => { const det = a * d - b * c; return [[d / det, -c / det, (c * f - d * e) / det], [-b / det, a / det, (b * e - a * f) / det]]; };
@@ -39,7 +39,7 @@ window.__dom2fig = function (rootSel) {
   };
   const effects = cs => {
     const out = []; const s = cs.boxShadow;
-    if (s && s !== 'none') for (const p of splitTop(s)) { const c = col(p); if (c == null) continue; const toks = p.replace(/rgba?\([^)]*\)/, '').trim().split(/\s+/); const inset = toks.includes('inset'); const n = toks.filter(x => x !== 'inset').map(parseFloat); out.push({ t: inset ? 'I' : 'D', x: n[0] || 0, y: n[1] || 0, b: n[2] || 0, s: n[3] || 0, c }); }
+    if (s && s !== 'none') for (const p of splitTop(s)) { const c = col(p); if (c == null) continue; const toks = p.replace(/(rgba?|color)\([^)]*\)/, '').trim().split(/\s+/); const inset = toks.includes('inset'); const n = toks.filter(x => x !== 'inset').map(parseFloat); out.push({ t: inset ? 'I' : 'D', x: n[0] || 0, y: n[1] || 0, b: n[2] || 0, s: n[3] || 0, c }); }
     const bf = cs.backdropFilter || cs.webkitBackdropFilter; const bm = bf && bf.match(/blur\(([\d.]+)px\)/); if (bm) out.push({ t: 'B', b: +bm[1] });
     return out;
   };

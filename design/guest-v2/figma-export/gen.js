@@ -9,6 +9,7 @@ fs.rmSync(CALLS, { recursive: true, force: true }); fs.mkdirSync(CALLS);
 const index = JSON.parse(fs.readFileSync(path.join(OUT, 'index.json')));
 const caps = index.map(e => JSON.parse(fs.readFileSync(path.join(OUT, e.id + '.json'))));
 const BUILDER = fs.readFileSync(path.join(HERE, 'builder.js'), 'utf8');
+const PRUNE_LATER = true;
 
 // glyph names from the icon library
 const IC = {}; const ICDIR = path.join(HERE, '..', '..', 'icons', 'svg');
@@ -38,11 +39,18 @@ for (const f of fs.readdirSync(ICDIR)) { const m = fs.readFileSync(path.join(ICD
     if (n.p) n.p.forEach(x => r.push([x, 1])); return r; };
   const walk2 = (a, b, fn) => { fn(a, b); (a.ch || []).forEach((c, i) => walk2(c, b ? b.ch[i] : null, fn)); };
   const svgs = [], sIdx = new Map(); const svgName = (mk, n) => { if (!sIdx.has(mk)) { sIdx.set(mk, svgs.length); svgs.push({ mk, n: 'asset/' + (n || 'svg').split(' ')[0].replace(/[^\w-]/g, '') + '-' + (svgs.length + 1) }); } return svgs[sIdx.get(mk)].n; };
-  const glyphs = new Set();
+  const glyphs = new Set(); const mism = [];
+  // drop layers that a later opaque sibling hides completely (e.g. the app under the onboarding overlay)
+  const opaque = (n, cols) => n.k === 'F' && n.o == null && n.fl && n.fl.some(f => f.c != null && +cols[f.c].split(',')[3] === 1) && !n.r;
+  const prune = (n, cols) => { if (!n.ch) return; n.ch = n.ch.filter((c, i) => !n.ch.slice(i + 1).some(o => opaque(o, cols) && o.x <= c.x + 0.5 && o.y <= c.y + 0.5 && o.x + o.w >= c.x + c.w - 0.5 && o.y + o.h >= c.y + c.h - 0.5)); n.ch.forEach(c => prune(c, cols)); };
   for (const cap of caps) {
+    if (cap.same) { /* prune both trees identically: decide on light, apply same indexes to dark */ const pr = (l, d) => { if (!l.ch) return; const keep = l.ch.map((c, i) => !l.ch.slice(i + 1).some(o => opaque(o, cap.light.colors) && o.x <= c.x + 0.5 && o.y <= c.y + 0.5 && o.x + o.w >= c.x + c.w - 0.5 && o.y + o.h >= c.y + c.h - 0.5)); l.ch = l.ch.filter((_, i) => keep[i]); d.ch = d.ch.filter((_, i) => keep[i]); l.ch.forEach((c, i) => pr(c, d.ch[i])); }; pr(cap.light.tree, cap.dark.tree); }
+    else { prune(cap.light.tree, cap.light.colors); prune(cap.dark.tree, cap.dark.colors); }
     const L = cap.light, D = cap.dark;
     if (cap.same) {
-      walk2(L.tree, D.tree, (a, b) => { const ra = refs(a), rb = refs(b); ra.forEach(([o, k], i) => { const [ob, kb] = rb[i]; o[k] = pair(L.colors[o[k]], D.colors[ob[kb]]); });
+      walk2(L.tree, D.tree, (a, b) => { const cats = n => { const c = { t: [], f: [], s: [], e: [], p: [] }; if (n.c != null && n.k === 'T') c.t.push([n, 'c']); if (n.fl) n.fl.forEach(f => { if (f.c != null) c.f.push([f, 'c']); if (f.s) f.s.forEach(x => c.f.push([x, 1])); }); if (n.st) c.s.push([n.st, 'c']); if (n.fx) n.fx.forEach(e => { if (e.c != null) c.e.push([e, 'c']); }); if (n.p) n.p.forEach(x => c.p.push([x, 1])); return c; };
+        const ca = cats(a), cb = cats(b); for (const key of Object.keys(ca)) { const A = ca[key], B = cb[key]; if (A.length !== B.length) mism.push(cap.id + ':' + (a.n || a.t || a.k) + ':' + key);
+          A.forEach(([o, k], i) => { const l = L.colors[o[k]]; const m = B[i]; if (!m) { const j = pairs.findIndex(x => x.startsWith(l + '|')); o[k] = j >= 0 ? j : pair(l, l); return; } o[k] = pair(l, D.colors[m[0][m[1]]]); }); }
         if (a.k === 'S') { a.sn = svgName(L.svgs[a.s], a.n); a.dsn = svgName(D.svgs[b.s], b.n); }
         if (a.k === 'I') a.p.forEach(x => { x[0] = L.glyphs[x[0]]; glyphs.add(x[0]); }); });
     } else {
@@ -55,7 +63,7 @@ for (const f of fs.readdirSync(ICDIR)) { const m = fs.readFileSync(path.join(ICD
   // variable names
   const used = new Set(); const hex = c => '#' + c.split(',').slice(0, 3).map(v => (+v).toString(16).padStart(2, '0')).join('').toUpperCase() + (+c.split(',')[3] < 1 ? ' ' + Math.round(+c.split(',')[3] * 100) + '%' : '');
   const names = pairs.map((k, i) => { const t = (tokByPair[k] || []).sort((a, b) => a.length - b.length)[0]; let n = t ? 'token/' + t : 'other/' + hex(k.split('|')[0]).replace('#', '') + (k.split('|')[0] === k.split('|')[1] ? '' : ' → ' + hex(k.split('|')[1]).replace('#', '')); n = n.replace(/[.{}]/g, '_'); let u = n, j = 2; while (used.has(u)) u = n + ' ' + j++; used.add(u); return u; });
-  const rgba = c => { const v = c.split(',').map(Number); return { r: v[0] / 255, g: v[1] / 255, b: v[2] / 255, a: v[3] }; };
+  const rgba = c => { const v = c.split(',').map(Number); const r4 = x => Math.round(x * 10000) / 10000; return { r: r4(v[0] / 255), g: r4(v[1] / 255), b: r4(v[2] / 255), a: v[3] }; };
   const VARS = pairs.map((k, i) => [names[i], rgba(k.split('|')[0]), rgba(k.split('|')[1])]);
   fs.writeFileSync(path.join(CALLS, '00-vars.js'), `const VARS=${JSON.stringify(VARS)};
 let c=(await figma.variables.getLocalVariableCollectionsAsync()).find(c=>c.name==='Prototype colors');
@@ -72,7 +80,7 @@ for(const [n,svg,g] of ITEMS){if(have.has(n))continue;const f=figma.createNodeFr
  if(g)c.findAll(v=>v.type==='VECTOR').forEach(v=>v.constraints={horizontal:'SCALE',vertical:'SCALE'});else c.findAll(()=>true).forEach(v=>{if('constraints' in v)v.constraints={horizontal:'SCALE',vertical:'SCALE'}});
  c.x=(x%20)*64;c.y=Math.floor(x/20)*64;x++}
 return {lib:LIB.children.length};`); chunk = []; size = 0; };
-  for (const it of libItems) { if (size + it.svg.length > 44000) flush(); chunk.push(it); size += it.svg.length + it.n.length + 10; } flush();
+  for (const it of libItems) { if (size + it.svg.length > 17000) flush(); chunk.push(it); size += it.svg.length + it.n.length + 10; } flush();
   // screens
   const bySec = {}; caps.forEach(c => (bySec[c.section] = bySec[c.section] || []).push(c));
   let n = 10; const report = [];
@@ -95,6 +103,6 @@ return {lib:LIB.children.length};`); chunk = []; size = 0; };
       report.push([file, code.length]); x += L.w * 2 + 80 + 200;
     }
   }
-  console.log('pairs', pairs.length, 'named', names.filter(n => n.startsWith('token/')).length, 'glyphs', glyphs.size, 'svgs', svgs.length, 'unknown glyphs', [...glyphs].filter(d => !IC[d]).length);
+  console.log('mismatched nodes', mism); console.log('pairs', pairs.length, 'named', names.filter(n => n.startsWith('token/')).length, 'glyphs', glyphs.size, 'svgs', svgs.length, 'unknown glyphs', [...glyphs].filter(d => !IC[d]).length);
   report.forEach(r => console.log(r.join('  ')));
 })();

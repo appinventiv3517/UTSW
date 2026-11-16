@@ -38,7 +38,7 @@ const STATES = [
   ['wayfinding', '08 Wayfinding', 'Wayfinding', seq(jump('home'), clickA('#tabbar [data-tab="wayfinding"]'))],
   ['saved', '09 Favorites', 'Favorites', jump('saved')],
   ['mychart', '10 MyChart', 'MyChart sign in', jump('mychart')],
-  ['locations', '11 Locations', 'Locations', seq(jump('home'), async p => { await p.evaluate(() => { const b = document.querySelector('[data-action="push"][data-v="locations"]'); if (b) b.click(); }); await p.waitForTimeout(1000); })],
+  ['locations', '11 Locations', 'Locations', seq(jump('menu'), clickA('#drawer [data-tab="locations"]'))],
   ['medblog', '12 MedBlog and Inbox', 'MedBlog', jump('medblog')],
   ['inbox', '12 MedBlog and Inbox', 'Inbox', seq(jump('menu'), clickA('#drawer [data-v="inbox"]'))],
   ['e-results', '13 Empty states', 'No matching doctors', jump('empty')],
@@ -65,11 +65,12 @@ const shape = t => t.k + (t.ch ? '(' + t.ch.map(shape).join(',') + ')' : '');
     await p.click('[data-ctl="theme"] [data-v="light"]'); await p.waitForTimeout(200);
     await go(p);
     const read = async th => { await p.click(`[data-ctl="theme"] [data-v="${th}"]`); await p.waitForTimeout(700);
-      await p.screenshot({ path: path.join(OUT, `${id}-${th}.png`), clip: await p.locator('#screen').evaluate(e => { const r = e.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, width: r.width, height: r.height }; }), fullPage: true });
-      await p.addScriptTag({ content: SRC }); return p.evaluate(() => window.__dom2fig('#screen')); };
+      await p.addScriptTag({ content: SRC }); const r = await p.evaluate(() => window.__dom2fig('#screen'));
+      await p.screenshot({ path: path.join(OUT, `${id}-${th}.png`), clip: await p.locator('#screen').evaluate(e => { const r = e.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, width: r.width, height: r.height }; }), fullPage: !PHONE.has(id) });
+      return r; };
     const L = await read('light'), D = await read('dark');
     const same = shape(L.tree) === shape(D.tree);
-    fs.writeFileSync(path.join(OUT, id + '.json'), JSON.stringify({ id, section, label, same, light: L, dark: same ? { colors: D.colors, tree: D.tree } : D }));
+    fs.writeFileSync(path.join(OUT, id + '.json'), JSON.stringify({ id, section, label, same, light: L, dark: D }));
     index.push({ id, section, label, same, w: L.w, h: L.h, bytes: JSON.stringify(L.tree).length });
     console.log(id, L.w + '×' + L.h, same ? 'paired' : 'DIFFERENT', JSON.stringify(L.tree).length);
   }

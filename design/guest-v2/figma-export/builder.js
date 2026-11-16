@@ -43,12 +43,12 @@ function build(n, parent) {
   if (n.k === 'S') {
     const i = COMP[D.sv[n.s]].createInstance(); i.resize(Math.max(n.w, 1), Math.max(n.h, 1)); parent.appendChild(i); i.x = n.x; i.y = n.y; return i;
   }
-  const f = figma.createFrame(); f.name = n.n || 'frame'; parent.appendChild(f);
+  const f = figma.createFrame(); f.name = n.n || 'frame'; if (/^tab-ind/.test(f.name)) parent.insertChild(0, f); else parent.appendChild(f);
   f.resize(Math.max(n.w, 0.01), Math.max(n.h, 0.01)); f.x = n.x; f.y = n.y;
   f.fills = n.fl ? n.fl.map(paint) : []; f.clipsContent = !!n.c;
   if (n.st) { f.strokes = [SOL(n.st.c)]; f.strokeAlign = 'INSIDE';
     if (Array.isArray(n.st.w)) { [f.strokeTopWeight, f.strokeRightWeight, f.strokeBottomWeight, f.strokeLeftWeight] = n.st.w; } else f.strokeWeight = n.st.w;
-    if (n.st.d) f.dashPatterns = [Math.max(...[].concat(n.st.w)) * 3, Math.max(...[].concat(n.st.w)) * 2]; }
+    if (n.st.d) f.dashPattern = [Math.max(...[].concat(n.st.w)) * 3, Math.max(...[].concat(n.st.w)) * 2]; }
   if (n.r != null) { if (Array.isArray(n.r)) { [f.topLeftRadius, f.topRightRadius, f.bottomRightRadius, f.bottomLeftRadius] = n.r; } else f.cornerRadius = n.r; }
   if (n.fx) f.effects = n.fx.map(effect);
   if (n.o != null) f.opacity = n.o;
@@ -62,7 +62,7 @@ for (const th of D.th) {
   root.name = D.label + ' — ' + (th.dark ? 'Dark' : 'Light'); root.x = th.x; root.y = th.y; root.clipsContent = true;
   root.setExplicitVariableModeForCollection(COLL, th.dark ? DARK : LIGHT);
   if (th.swap) for (const [path, comp] of th.swap) { let n = root; for (const i of path) n = n.children[i]; n.swapComponent(COMP[comp]); }
-  out.push(root.id);
+  out.push(root.id); SEC.resizeWithoutConstraints(Math.max(SEC.width, th.x + root.width * (th.clone ? 2 : 1) + 200), Math.max(SEC.height, th.y + root.height + 120));
   if (th.clone) { const c = root.clone(); SEC.appendChild(c); c.name = D.label + ' — Dark'; c.x = th.clone.x; c.y = th.clone.y; c.setExplicitVariableModeForCollection(COLL, DARK);
     for (const [path, comp] of th.clone.swap || []) { let n = c; for (const i of path) n = n.children[i]; n.swapComponent(COMP[comp]); }
     out.push(c.id); }
