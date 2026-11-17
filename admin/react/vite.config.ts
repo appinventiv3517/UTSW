@@ -41,16 +41,17 @@ function usedOutsideIcons(k: string): boolean {
 }
 export const iconFontUrl = (): string => 'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
   + `&icon_names=${glyphNames().join(',')}&display=block`;
-const iconFont = (): Plugin => ({
+const iconFont = (dashboard: boolean): Plugin => ({
   name: 'icon-font-subset',
   transformIndexHtml(html) {
     const url = iconFontUrl();
-    return html.replace('__ICON_FONT_URL__', url.replace(/&/g, '&amp;'));
+    const out = html.replace('__ICON_FONT_URL__', url.replace(/&/g, '&amp;'));
+    return dashboard ? out.replace('<title>MyCare Admin</title>', '<title>MyCare Admin Dashboard</title>') : out;
   }
 });
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), iconFont(), viteSingleFile()],
+  plugins: [react(), iconFont(mode === 'dashboard'), viteSingleFile()],
   define: { __DASHBOARD_ONLY__: JSON.stringify(mode === 'dashboard'), __ICON_FONT_URL__: JSON.stringify(iconFontUrl()) },
   server: { fs: { allow: [path.resolve(__dirname, '..', '..')] } },
   build: { outDir: mode === 'dashboard' ? 'dist-dashboard' : 'dist', assetsInlineLimit: 100000000, cssCodeSplit: false, target: 'es2020' }

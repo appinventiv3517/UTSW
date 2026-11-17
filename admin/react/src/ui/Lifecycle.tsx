@@ -29,16 +29,16 @@ export function EnvBadges({ r }: { r: ConfigRecord }) {
 export const envRank = (r: ConfigRecord): string => r.draft ? 'draft' : r.demo !== r.production ? 'demo' : 'production';
 
 /* A page with unsaved changes asks before the person leaves it */
-export function useLeaveGuard(dirty: boolean, what: string) {
+export function useLeaveGuard(dirty: boolean, what: string, custom?: { title: string; body: string }) {
   useEffect(() => {
     const g = async () => {
       if (!dirty) return true;
-      const r = await confirmDialog({ title: 'Leave without saving?', body: <p>Your changes to {what} aren’t saved. If you leave, they’re lost.</p>, confirmLabel: 'Leave page', variant: 'danger', cancelLabel: 'Stay on this page' });
+      const r = await confirmDialog({ title: custom ? custom.title : 'Leave without saving?', body: <p>{custom ? custom.body : `Your changes to ${what} aren’t saved. If you leave, they’re lost.`}</p>, confirmLabel: 'Leave page', variant: 'danger', cancelLabel: 'Stay on this page' });
       return r.ok;
     };
     Router.setGuard(g);
     return () => Router.clearGuard(g);
-  }, [dirty, what]);
+  }, [dirty, what, custom?.title, custom?.body]);
 }
 
 export type SavedKind = 'created' | 'save' | 'discardDraft' | 'review' | 'deploy' | 'changes' | 'publish' | 'rollback';

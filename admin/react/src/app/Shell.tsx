@@ -19,7 +19,7 @@ let lastSection: string | null = null;
 
 export const visibleNav = (role: Role): NavSection[] =>
   NAV.map(sec => ({ ...sec, items: sec.items.filter(i => can(role, i.area, 'view')) })).filter(sec => sec.items.length);
-export const initials = (u: User): string => `${u.first[0]}${u.last[0]}`;
+export const initials = (u: Pick<User, "first" | "last">): string => `${u.first[0]}${u.last[0]}`;
 
 function Sidebar({ route, rail, onNavigate }: { route: RouteDef | null; rail: boolean; onNavigate: () => void }) {
   const role = Session.role()!;
