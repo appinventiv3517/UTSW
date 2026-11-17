@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UTSW MyCare Admin – Screens</title>
+<style>
+  :root{--bg:var(--figma-color-bg,#fff);--fg:var(--figma-color-text,#1f2a33);--muted:var(--figma-color-text-secondary,#5b6770);--line:var(--figma-color-border,#d5dde5);--accent:#004278;--accent-fg:#fff;--tint:var(--figma-color-bg-secondary,#ebf0f5)}
+  *{box-sizing:border-box}
+  body{margin:0;font:12px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--fg);background:var(--bg);display:flex;flex-direction:column;height:100vh}
+  header{padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+  h1{font-size:14px;margin:0 0 4px;font-weight:700}
+  header p{margin:0;color:var(--muted)}
+  .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .tools button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;cursor:pointer}
+  .tools label{display:flex;gap:6px;align-items:center;margin-left:auto;cursor:pointer}
+  main{flex:1;overflow:auto;padding:4px 8px 12px}
+  details{border-bottom:1px solid var(--line)}
+  summary{display:flex;gap:8px;align-items:center;padding:10px 8px;cursor:pointer;font-weight:600;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary .n{margin-left:auto;color:var(--muted);font-weight:400}
+  summary .tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--tint);border-radius:999px;padding:1px 6px;color:var(--muted)}
+  ul{list-style:none;margin:0 0 8px;padding:0 8px 0 30px}
+  li label{display:flex;gap:8px;align-items:baseline;padding:3px 0;cursor:pointer}
+  li .r{color:var(--muted);font-family:ui-monospace,Menlo,monospace;font-size:11px;margin-left:auto;white-space:nowrap}
+  li.done label{color:var(--muted)} li.done label::after{content:"✓";color:#2c6e1b;font-weight:700}
+  li.fail label::after{content:"!";color:#b0003a;font-weight:700}
+  footer{border-top:1px solid var(--line);padding:12px 16px;display:grid;gap:8px}
+  .bar{height:6px;border-radius:999px;background:var(--tint);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+  #status{color:var(--muted);min-height:18px}
+  #go{font:inherit;font-weight:600;border:0;border-radius:6px;padding:9px 12px;background:var(--accent);color:var(--accent-fg);cursor:pointer}
+  #go:disabled{opacity:.5;cursor:default}
+  input[type=checkbox]{accent-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>UTSW MyCare Admin – Screens</h1>
+  <p id="sub">Editable layers for every Admin portal screen, empty state and error state.</p>
+</header>
+<div class="tools">
+  <button type="button" id="all">Select all</button>
+  <button type="button" id="none">Select none</button>
+  <button type="button" id="empties">Only empty states</button>
+  <label><input type="checkbox" id="perSection" checked> One page per section</label>
+</div>
+<main id="list"></main>
+<footer>
+  <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+  <div id="status" role="status"></div>
+  <button type="button" id="go">Create screens</button>
+</footer>
+<script>
+/*__DATA__*/
+</script>
+<script>
+(function () {
+  const S = window.SCREENS || [], A = window.ASSETS || {};
+  const groups = [];
+  S.forEach(s => { let g = groups.find(x => x.name === s.group); if (!g) groups.push(g = { name: s.group, items: [] }); g.items.push(s); });
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  document.getElementById('sub').textContent = `${S.length} screens in ${groups.length} sections, captured from the Admin portal on ${new Date(window.CAPTURED || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. Text, boxes and colors are editable; icons and the phone preview are images.`;
+  document.getElementById('list').innerHTML = groups.map((g, gi) => `<details ${/state/i.test(g.name) || gi < 1 ? 'open' : ''}><summary><input type="checkbox" data-g="${gi}" checked aria-label="All of ${esc(g.name)}">${esc(g.name)}${/state/i.test(g.name) ? '<span class="tag">States</span>' : ''}<span class="n">${g.items.length}</span></summary>
+    <ul>${g.items.map(s => `<li id="li-${s.id}"><label><input type="checkbox" data-s="${s.id}" checked>${esc(s.name)}<span class="r">#${esc(s.route)}</span></label></li>`).join('')}</ul></details>`).join('');
+  const boxes = () => [...document.querySelectorAll('[data-s]')];
+  const sync = () => { groups.forEach((g, gi) => { const b = g.items.map(s => document.querySelector(`[data-s="${s.id}"]`)); const gb = document.querySelector(`[data-g="${gi}"]`); gb.checked = b.every(x => x.checked); gb.indeterminate = !gb.checked && b.some(x => x.checked); });
+    const n = boxes().filter(b => b.checked).length; const go = document.getElementById('go'); go.textContent = n ? `Create ${n} screen${n === 1 ? '' : 's'}` : 'Choose screens'; go.disabled = !n; };
+  document.getElementById('list').addEventListener('change', e => { if (e.target.dataset.g != null) groups[+e.target.dataset.g].items.forEach(s => { document.querySelector(`[data-s="${s.id}"]`).checked = e.target.checked; }); sync(); });
+  document.getElementById('list').addEventListener('click', e => { if (e.target.matches('summary input')) e.stopPropagation(); });
+  document.getElementById('all').onclick = () => { boxes().forEach(b => { b.checked = true; }); sync(); };
+  document.getElementById('none').onclick = () => { boxes().forEach(b => { b.checked = false; }); sync(); };
+  document.getElementById('empties').onclick = () => { boxes().forEach(b => { b.checked = /state/i.test(S.find(s => s.id === b.dataset.s).group); }); sync(); };
+  sync();
+  const assetsFor = s => { const out = {}; const walk = n => { if (n.a && A[n.a]) out[n.a] = A[n.a]; (n.ch || []).forEach(walk); }; walk(s.root); return out; };
+  let queue = [], total = 0, failed = 0;
+  const status = t => { document.getElementById('status').textContent = t; };
+  function next() {
+    document.getElementById('prog').style.width = `${total ? (total - queue.length) / total * 100 : 0}%`;
+    const s = queue.shift();
+    if (!s) { parent.postMessage({ pluginMessage: { type: 'finish' } }, '*'); status(`Done: ${total - failed} created${failed ? `, ${failed} failed` : ''}.`); document.getElementById('go').disabled = false; return; }
+    status(`Creating ${s.group} / ${s.name}… (${total - queue.length} of ${total})`);
+    parent.postMessage({ pluginMessage: { type: 'screen', screen: s, assets: assetsFor(s), perSection: document.getElementById('perSection').checked } }, '*');
+  }
+  window.onmessage = e => {
+    const m = e.data && e.data.pluginMessage; if (!m) return;
+    if (m.type === 'built' || m.type === 'failed') { const li = document.getElementById(`li-${m.id}`); if (li) li.classList.add(m.type === 'built' ? 'done' : 'fail'); if (m.type === 'failed') { failed++; console.warn(m.id, m.error); } next(); }
+  };
+  document.getElementById('go').onclick = () => {
+    const pick = new Set(boxes().filter(b => b.checked).map(b => b.dataset.s));
+    queue = S.filter(s => pick.has(s.id)); total = queue.length; failed = 0;
+    document.querySelectorAll('li').forEach(li => li.classList.remove('done', 'fail'));
+    document.getElementById('go').disabled = true; next();
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "UTSW MyCare Admin – Screens",
+  "id": "utsw-mycare-admin-screens",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "reasoning": "Everything the plugin draws is bundled in ui.html; it makes no network requests."
+  }
+}
