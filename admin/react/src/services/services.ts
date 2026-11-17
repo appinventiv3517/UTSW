@@ -15,7 +15,13 @@ export function loadDb(): void {
   DB = saved && saved.db && saved.db.schema === SCHEMA ? saved : { db: seedDb(), session: saved && saved.session && saved.db && saved.db.schema === SCHEMA ? saved.session : null, prefs: (saved && saved.prefs) || {} };
   MockSettings.simulateErrors = !!DB.prefs.simulateErrors;
 }
-export const saveDb = (): void => store.write(DB);
+/* Screens re-render after any change to the mock data (see useDb in app/store.ts) */
+const listeners = new Set<() => void>();
+let dbVersion = 0;
+export const onDbChange = (fn: () => void): (() => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; };
+export const getDbVersion = (): number => dbVersion;
+export const notifyDb = (): void => { dbVersion++; listeners.forEach(f => f()); };
+export const saveDb = (): void => { store.write(DB); notifyDb(); };
 export function resetMockData(): void {
   DB = { db: seedDb(), session: DB.session, prefs: {} };
   MockSettings.simulateErrors = false;
