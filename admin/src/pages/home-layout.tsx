@@ -139,19 +139,22 @@ function LayoutEditor({ aud, rec0, dirtyRef }: { aud: 'guest' | 'authenticated';
     const natural = row.getBoundingClientRect().top;
     row.style.transform = `translateY(${dragY.current.last - dragY.current.grab - natural}px)`;
   };
-  /* FLIP: rows displaced by the drag slide into their new place */
+  /* FLIP: rows displaced by a reorder slide into their new place. Positions are measured within the list and only
+     compared when the order changed, so scrolling or a re-render for another reason never animates anything. */
+  const orderKey = useRef('');
   useLayoutEffect(() => {
     const l = list.current; if (!l) return;
     const rows = [...l.querySelectorAll<HTMLElement>('.mod-row')];
-    rows.forEach(x => {
+    const key = rows.map(x => x.dataset.id).join(',');
+    if (key !== orderKey.current && orderKey.current) rows.forEach(x => {
       const id = x.dataset.id!, before = tops.current.get(id);
-      if (drag && id === drag.id) return;
-      if (before == null) return;
-      const dy = before - x.getBoundingClientRect().top; if (!dy) return;
+      if ((drag && id === drag.id) || before == null) return;
+      const dy = before - x.offsetTop; if (!dy) return;
       x.style.transition = 'none'; x.style.transform = `translateY(${dy}px)`;
       requestAnimationFrame(() => { x.style.transition = ''; x.style.transform = ''; });
     });
-    tops.current = new Map(rows.map(x => [x.dataset.id!, x.getBoundingClientRect().top]));
+    orderKey.current = key;
+    tops.current = new Map(rows.map(x => [x.dataset.id!, x.offsetTop]));
     if (drag) placeDragged();
   });
   const onPointerDown = (e: RPointerEvent<HTMLOListElement>) => {

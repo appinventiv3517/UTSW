@@ -6,7 +6,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const ROOT = path.resolve(__dirname, '..');
-const PORTAL = path.resolve(ROOT, '..', 'admin-portal.html');
+const PORTAL = process.env.PORTAL ? path.resolve(process.env.PORTAL) : path.resolve(ROOT, '..', 'admin-portal.html');
 const URL = 'file://' + PORTAL;
 const KEY = 'utsw-admin-mock-v1', RAIL = 'utsw-admin-nav-rail';
 const W = 1440;
@@ -122,7 +122,8 @@ const SCREENS = [
   await p.goto(URL); await wait(300); await p.evaluate(() => localStorage.clear()); await p.reload(); await wait(400);
   await p.click('#sso'); await p.click('button[type=submit]'); await wait(300); await p.click('#mfa-ok'); await wait(1500);
   const baseline = await p.evaluate(k => localStorage.getItem(k), KEY);
-  const fontUrl = decodeURIComponent(fs.readFileSync(PORTAL, 'utf8').match(/const ICON_FONT_URL = "([^"]+)"/)[1]);
+  /* The icon font request (Material Symbols subset): the stylesheet link in the page's head */
+  const fontUrl = fs.readFileSync(PORTAL, 'utf8').match(/href="(https:\/\/fonts\.googleapis\.com\/css2\?family=Material\+Symbols[^"]+)"/)[1].replace(/&amp;/g, '&');
 
   const assets = {}, iconKeys = new Set(), out = [];
   const addAsset = (buf, mime) => { const h = crypto.createHash('sha1').update(buf).digest('hex').slice(0, 14); assets[h] = { m: mime, d: buf.toString('base64') }; return h; };

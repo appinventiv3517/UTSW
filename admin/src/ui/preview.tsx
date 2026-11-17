@@ -1,43 +1,44 @@
 /* ---------- Preview frame ----------
-   An isolated iframe (srcdoc, sandbox="allow-scripts" without same-origin) so the designs/guest CSS can't leak into
-   the Admin and the Admin can't reach into it. The Admin posts the configuration in; the frame renders it. */
+   The phone app (preview/PhoneApp.tsx) is a React tree rendered into an iframe's own document through a portal, so the
+   designs/guest CSS can't leak into the Admin and the Admin's can't leak into it. The frame runs no scripts of its own
+   (sandbox without allow-scripts); it holds the app's styles and fonts, and the Admin renders into it. */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import PREVIEW_CSS from '../preview/mobile.css?raw';
-import PREVIEW_HTML from '../preview/mobile.html?raw';
-import PREVIEW_JS_RAW from '../preview/mobile.js?raw';
-import { LOGO_ICON_B64, LOGO_REVERSED_B64 } from '../app/assets';
+import { PhoneApp } from '../preview/PhoneApp';
 import { ConfigService, dataAt, latestData } from '../services/services';
 import { STATIC_CONTENT } from '../mock/seed';
 import { Badge, Icon, Segmented } from './kit';
 import { fmtDay, fmtLocal, windowStatus } from '../app/util';
 import type { ConfigRecord, Data } from '../app/types';
 
-const PREVIEW_JS = PREVIEW_JS_RAW.replace('__LOGO_ICON__', LOGO_ICON_B64).replace('__LOGO_REVERSED__', LOGO_REVERSED_B64);
 const previewDoc = () => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <link rel="stylesheet" href="${__ICON_FONT_URL__}">
-<style>${PREVIEW_CSS}</style></head><body>${PREVIEW_HTML.replace('__LOGO_REVERSED__', LOGO_REVERSED_B64)}<script>${PREVIEW_JS}<\/script></body></html>`;
+<style>${PREVIEW_CSS}</style></head><body><div id="pv-root"></div></body></html>`;
 
 export type Payload = Data & { label?: string };
-/* The phone: posts each new payload into the frame once the frame says it is ready */
+/* The phone: once the frame's document is ready, the app renders into it and re-renders with each new payload */
 export function PhoneFrame({ title, payload }: { title: string; payload: Payload | null }) {
   const frame = useRef<HTMLIFrameElement>(null), dev = useRef<HTMLDivElement>(null);
-  const ready = useRef(false), latest = useRef<Payload | null>(payload);
-  latest.current = payload;
-  const send = () => { const p = latest.current; if (p && frame.current?.contentWindow) frame.current.contentWindow.postMessage({ type: 'mycare-preview', ...p }, '*'); };
-  useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
-      if (!frame.current || e.source !== frame.current.contentWindow || !e.data) return;
-      if (e.data.type === 'mycare-preview-ready') { ready.current = true; send(); }
-      if (e.data.type === 'mycare-preview-rendered') { const host = dev.current?.parentElement; if (host) host.dataset.rendered = String(Date.now()); }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const json = JSON.stringify(payload);
-  useEffect(() => { if (ready.current) send(); }, [json]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [mount, setMount] = useState<HTMLElement | null>(null);
   const [doc] = useState(previewDoc);
-  return <div className="pv-device" ref={dev}><div className="pv-screen"><iframe ref={frame} className="pv-frame" sandbox="allow-scripts" title={title} srcDoc={doc}></iframe></div></div>;
+  const ready = () => {
+    const d = frame.current?.contentDocument, root = d?.getElementById('pv-root');
+    if (!d || !root) return;
+    const mark = () => d.documentElement.classList.add('ms-ready');
+    if (d.fonts && d.fonts.load) { d.fonts.load('24px "Material Symbols Rounded"', 'home').then(f => { if (f.length) mark(); }).catch(() => {}); setTimeout(mark, 3000); } else mark();
+    setMount(root);
+  };
+  /* The frame may finish loading before React attaches onLoad */
+  useEffect(() => { if (frame.current?.contentDocument?.getElementById('pv-root')) ready(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const rendered = () => { const host = dev.current?.parentElement; if (host) host.dataset.rendered = String(Date.now()); };
+  return (
+    <div className="pv-device" ref={dev}><div className="pv-screen">
+      <iframe ref={frame} className="pv-frame" sandbox="allow-same-origin" title={title} srcDoc={doc} onLoad={ready}></iframe>
+      {mount && payload && createPortal(<PhoneApp msg={payload} onRendered={rendered} />, mount)}
+    </div></div>
+  );
 }
 
 /* ---------- What the app shows: assembles preview content from the config records ----------

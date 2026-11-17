@@ -21,7 +21,7 @@ const ensureDashSession = () => { if (__DASHBOARD_ONLY__ && !Session.current()) 
 
 type View = { kind: 'public'; name: string } | { kind: 'redirect'; to: string; returnTo?: string; say?: boolean; end?: boolean } | { kind: 'shell'; name: string; route: RouteDef | null; page: Page | null; denied: boolean; title: string };
 function resolve(name: string): View {
-  if (__DASHBOARD_ONLY__) { if (name !== 'dashboard') return { kind: 'redirect', to: 'dashboard', say: !!name && Router.loaded }; }
+  if (__DASHBOARD_ONLY__) { const raw = location.hash.slice(1); if (raw !== 'dashboard') return { kind: 'redirect', to: 'dashboard', say: !!raw && Router.loaded }; }
   if (PUBLIC_ROUTES.includes(name)) return { kind: 'public', name };
   if (!Session.current()) return { kind: 'redirect', to: 'login', returnTo: name };
   if (Session.expired()) return { kind: 'redirect', to: 'expired', end: true };

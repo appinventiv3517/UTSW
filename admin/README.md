@@ -6,16 +6,16 @@ The UTSW MyCare 2.0 Admin Portal. All 12 modules from `handoff/admin-portal/BRIE
 
 ## Build
 
-`python3 build.py` writes two files from the same source: `admin-portal.html` (the full portal) and `dashboard.html` (Dashboard only: opens signed in as the sample Super Admin; every other page, link and user-menu action is locked and says so).
+The portal is a React 18 + TypeScript (strict) app built with Vite. `npm run build` typechecks, then writes two single, self-contained files from the same source: `admin-portal.html` (the full portal, published as a claude.ai Artifact) and `dashboard.html` (Dashboard only: opens signed in as the sample Super Admin; every other page, link and user-menu action is locked and says so).
 
 ```
 cd admin
-python3 build.py
+npm install
+npm run build      # typecheck, then admin-portal.html and dashboard.html
+npm run dev        # local dev server with hot reload
 ```
 
-The build writes `admin-portal.html`, a single self-contained file published as a claude.ai Artifact and committed beside its source. It needs Python 3 only. At run time the page loads Inter and a Material Symbols Rounded subset from Google Fonts; everything else is inline.
-
-`build.py` concatenates `src/styles/` and the JS files (in `FILES` order) into one strict-mode script. It inlines the `mycare-logo/` SVGs unaltered and the mobile preview (`src/preview/`) for a sandboxed `srcdoc` iframe. It also derives the icon subset from every glyph the code names.
+Both files are committed beside the source. `vite-plugin-singlefile` inlines the script and styles; `vite.config.ts` inlines the `mycare-logo/` SVGs unaltered and requests a Material Symbols Rounded subset made of every glyph the code names (`<Icon name="…">`, `icon: '…'`, `glyph: '…'`, the phone app's `ICONS` map and `EXTRA_GLYPHS` comments). At run time the page loads Inter and that icon subset from Google Fonts; everything else is inline.
 
 ## What each module does
 
@@ -56,31 +56,41 @@ Tables: every table shows 8 rows a page, with numbered pages once it has more th
 
 Forms: helper text sits below its field; every date-and-time value is entered as a separate Date and Time input (campaigns, alerts, notifications), and paired controls share one column gap.
 
-Dropdowns: every select uses one dropdown design (ui/select.js). The native select stays in the page, hidden, as the source of truth for forms and validation; a button shows the choice and opens a listbox in the top layer, so tables, cards and dialogs never clip it. Table filters are multi-select (checkboxes, an All row that clears, values within one filter combine with OR, filters combine with AND). Form fields stay single-select, since each holds one value. Keyboard: Down, Enter or Space opens; arrows, Home, End and typing move; Enter or Space picks; Escape closes.
+Dropdowns: every select uses one dropdown design (`ui/Select.tsx`). The native select stays in the page, hidden, as the source of truth for forms and validation; a button shows the choice and opens a listbox in the top layer, so tables, cards and dialogs never clip it. Table filters are multi-select (checkboxes, an All row that clears, values within one filter combine with OR, filters combine with AND). Form fields stay single-select, since each holds one value. Keyboard: Down, Enter or Space opens; arrows, Home, End and typing move; Enter or Space picks; Escape closes.
 
 Theme: the Admin is light only, and so is the app (Guest Flow 2: “The app UI is light-only, per the brand deck”), so the previews have no Light/Dark toggle.
 
 ## Stack decision
 
-Zero-dependency static app, the option recommended in HANDOVER §6.2: vanilla JS, CSS custom properties, hash routing and a Python build. There is no `package.json`. If UTSW wants production code, the alternative (Vite + React + TypeScript) is still open; see open question 1.
+React 18 + TypeScript (strict) with Vite, the production-style option from HANDOVER §6.2, which replaced the earlier zero-dependency vanilla build. The output is still one static HTML file with no backend: hash routing, CSS custom properties, and mock services. Class names, element ids and behavior are the same as the vanilla build, so the stylesheets and the Playwright checks carried over unchanged.
 
 ## Structure
 
 ```
 admin/
-  build.py, admin-portal.html (built), README.md
+  package.json, vite.config.ts, tsconfig.json, index.html
+  admin-portal.html, dashboard.html (built), README.md
   src/
-    index.html            page template
-    styles/tokens.css     designs/guest tokens (lines 11–61, unchanged) + admin layout tokens + guest dark values
+    main.tsx              entry: loads the mock data, starts session upkeep, renders <App>
+    styles/tokens.css     designs/guest tokens (unchanged) + admin layout tokens
     styles/admin.css      components and layouts
-    app/                  util, permissions (one matrix object), session, nav (IA), shell (header, sidebar, theme, user menu), router, boot
-    ui/                   components (button, badge, table, modal, toast…), forms, select (dropdown), charts, lifecycle, preview
-    services/services.js  MOCK services: config + lifecycle, users, notifications, wayfinding, zero results, analytics, audit, platform, settings
-    mock/seed.js          MOCK fixtures, sample content from the Guest Flow 2 design
-    preview/              mobile.css, mobile.html, mobile.js – Guest Flow 2 home (alerts, Find Care hero, modules), floating tab bar, menu, onboarding and Welcome, rebuilt from the design
-    pages/                auth, home-layout, collection (campaigns, alerts, quick links, cards, segments), config-pages,
-                          notifications, users, wayfinding, analytics (+ dashboard), admin-pages (audit, platform, settings, rules, targeting, zero results)
+    app/                  App (routing, redirects, focus, Dashboard-only mode), router (hash routes, leave guard, useDb),
+                          Shell (header, collapsible sidebar, user menu, page heading), session, permissions (one matrix
+                          object), nav (IA), types, util, useLoad, assets (logos)
+    ui/                   kit (Icon, Btn, Badge, Switch, Segmented, Card, states, Stepper), Select (dropdown), DataTable,
+                          forms (Field, Form, validation, change lists), overlays (toasts, dialogs, confirm), Lifecycle
+                          (publishing row, history, form dialogs), FeatureBar (Publishing bar), charts, preview (phone frame,
+                          preview card, what the app shows)
+    services/services.ts  MOCK services: config + lifecycle, users, notifications, wayfinding, zero results, analytics, audit, platform, settings
+    mock/seed.ts          MOCK fixtures, sample content from the Guest Flow 2 design
+    preview/              PhoneApp.tsx and mobile.css – the Guest Flow 2 phone (alerts, Find Care hero, modules, tab bar, menu,
+                          onboarding and Welcome, lock screen), rendered by React into the preview frame's own document
+    pages/                Auth, dashboard, analytics, home-layout, collection (campaigns, alerts, quick links, cards, segments),
+                          config-pages (colors, menu, app entry, search tables, ranking, locations), notifications, users,
+                          wayfinding, admin-pages (audit, history, platform, settings, rules, targeting, zero results), profile, registry
 ```
+
+The phone preview is an iframe with no scripts of its own (`sandbox="allow-same-origin"`): it holds the app's stylesheet and fonts, and the Admin renders the React phone app into it through a portal, so neither page's CSS reaches the other.
 
 Nothing outside `admin/` is modified.
 
@@ -100,16 +110,15 @@ Routes are plain hash names (`#home-layout`, `#home-campaigns-campaign-flu`) bec
 
 ## Permissions (proposed, pending confirmation)
 
-The matrix lives in one object, `PERMISSIONS` in `src/app/permissions.js`, and is shown read-only on the settings page. Navigation hides areas a role can't view, and visiting one directly shows access denied. The services check the same matrix. The role switcher (prototype only) keeps the signed-in sample person.
+The matrix lives in one object, `PERMISSIONS` in `src/app/permissions.ts`, and is shown read-only on the settings page. Navigation hides areas a role can't view, and visiting one directly shows access denied. The services check the same matrix. The role switcher (prototype only) keeps the signed-in sample person.
 
-## Verification (Oct. 30, 2026)
+## Verification (Nov. 17, 2026, React build)
 
 Headless Chromium with the pre-installed Playwright, against the built file:
-- `python3 build.py` succeeds: 23 JS files, 114 icons, about 450 KB.
-- **Route sweep:** 53 routes, covering every page, create page and sample detail page, × 3 roles × light and dark. No console or page errors, no error or stuck loading states, every control has a name, every rendered icon is in the subset, and no horizontal overflow.
-- **End-to-end flows:** 48 checks pass, from campaign creation (validation, preview, deploy and publish) through wayfinding bad and good files, the notification lifecycle, users, audit rollback, settings and Marketing permissions.
-- **Contrast:** every visible text element, plus dialogs, the user menu, the error summary and validation results.
-- **Widths:** 1024, 1280, 1440 and phone width.
+- `npm run build` succeeds: strict typecheck with no errors, about 580 KB per file, 129 icons in the subset (every glyph the vanilla build used, plus `timer_off` on the session-ended page, which the old build missed, and `place`).
+- **Route sweep:** 55 routes, covering every page, create page and sample detail page, × 3 roles. No console or page errors, no error or stuck loading states, every control has a name, every rendered icon (Admin and phone preview) is in the subset, and no horizontal overflow.
+- **End-to-end flows:** all 50 checks pass, the same suite the vanilla build passed: campaign creation (validation, preview, deploy and publish) through wayfinding bad and good files, the notification lifecycle, users, audit rollback, settings and Marketing permissions.
+- **Component suites:** drag and keyboard reordering (20), accordion create (25), Publishing bar (19), dropdowns (28), table filters (19), forms (12), collapsible rail (13), light theme (27), Layout card (6), Dashboard-only build (13), lock-screen and Services previews, and the Guest Flow 2 checks all pass.
 
 ### Known issue in the copied mobile design
 
@@ -117,7 +126,7 @@ Campaign tags such as "Flu season" (white on 14% white over the campaign gradien
 
 ## Open questions (HANDOVER §10) – not guessed
 
-1. **Stack:** static, zero-dependency (in use) vs a framework app if this becomes production code.
+1. **Stack:** React + TypeScript with Vite (in use since Nov. 17, 2026). Confirm it matches UTSW's production standards before this becomes production code.
 2. **Which prototype the preview mirrors:** `designs/guest` (in use) vs `design/guest-v2`, whose labels differ ("Find my Care" vs "Find my care"; "I'm a patient" vs "Sign in as a patient").
 3. **Configurable modules:** the brief names four, but the prototype has nine module ids. Alerts, Welcome and Search are shown as fixed; the six reorderable ones are configurable here. Which does the Admin manage, and do MedBlog and announcements come from the CMS or a website feed?
 4. **Services and resources:** the Featured cards type now holds the Guest Flow 2 Services and resources cards. The MedBlog stories stay outside the Admin. Confirm.
@@ -143,7 +152,7 @@ Also pending: the session timeout (30 minutes is a placeholder) and the final pe
 
 ## Next
 
-- Connect the services to a real backend once an API contract exists. Screens only call the service interfaces in `src/services/services.js`.
+- Connect the services to a real backend once an API contract exists. Screens only call the service interfaces in `src/services/services.ts`.
 - Replace the simulated sign-in with the approved identity provider, and the proposed permission matrix with the confirmed one.
 - Swap in real data sources for analytics, push and the Gozio export schema as UTSW confirms them.
 

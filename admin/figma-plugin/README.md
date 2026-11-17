@@ -44,7 +44,7 @@ Fonts: the plugin uses **Inter** (Regular, Medium, Semi Bold, Bold, Extra Bold),
 The screen data is inlined in `ui.html`. After changing the portal, rebuild it and capture again:
 
 ```sh
-python3 admin/build.py
+(cd admin && npm run build)                       # React + TypeScript build → admin/admin-portal.html
 node admin/figma-plugin/tools/capture.js          # all screens → admin/figma-plugin/ui.html
 node admin/figma-plugin/tools/capture.js campaign  # only screens whose id contains "campaign" → ui.partial.html
 ```

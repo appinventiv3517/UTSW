@@ -1,7 +1,7 @@
 /* MyCare logos, read from mycare-logo/ at build time (the logo files are never edited) and inlined as data URIs */
-import reversed from '../../../../mycare-logo/reversed.svg?raw';
-import horizontal from '../../../../mycare-logo/horizontal.svg?raw';
-import icon from '../../../../mycare-logo/icon.svg?raw';
+import reversed from '../../../mycare-logo/reversed.svg?raw';
+import horizontal from '../../../mycare-logo/horizontal.svg?raw';
+import icon from '../../../mycare-logo/icon.svg?raw';
 
 export const b64 = (s: string): string => btoa(unescape(encodeURIComponent(s)));
 export const LOGO_REVERSED_B64 = b64(reversed);

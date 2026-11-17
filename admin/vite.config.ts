@@ -1,5 +1,5 @@
-/* Builds the Admin portal into one self-contained HTML file (the published Artifact), plus a Dashboard-only build
-   with `--mode dashboard`. The Material Symbols font is requested with only the glyphs the code names. */
+/* Builds the Admin portal into one self-contained HTML file, admin-portal.html (the published Artifact), plus the
+   Dashboard-only dashboard.html with `--mode dashboard`. `npm run build` makes both. The Material Symbols font is requested with only the glyphs the code names. */
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
@@ -23,21 +23,14 @@ export function glyphNames(): string[] {
     add(/\['[a-z]+', '[A-Z][^']*', '([a-z0-9_]+)'\]/g);
     for (const m of code.matchAll(/EXTRA_GLYPHS: ([a-z0-9_ ]+)\*\//g)) m[1].split(/\s+/).filter(Boolean).forEach(g => set.add(g));
   }
-  /* The phone preview: its ICONS map (concept → glyph), ico('x') and circle('x') calls, and glyphs in its markup */
-  const pvJs = fs.readFileSync(path.join(SRC, 'preview/mobile.js'), 'utf8'), pvHtml = fs.readFileSync(path.join(SRC, 'preview/mobile.html'), 'utf8');
-  const icons = (pvJs.match(/const ICONS = \{([\s\S]*?)\};/) || ['', ''])[1];
-  for (const m of icons.matchAll(/\w+: '([a-z0-9_]+)'/g)) set.add(m[1]);
-  for (const m of pvJs.matchAll(/\b(?:ico|circle)\('([a-z0-9_]+)'/g)) set.add(m[1]);
-  for (const m of pvHtml.matchAll(/class="ms[^"]*"[^>]*>([a-z0-9_]+)</g)) set.add(m[1]);
-  /* Concept keys of the ICONS map that are not glyphs themselves */
-  const keys = new Set([...icons.matchAll(/(\w+): '[a-z0-9_]+'/g)].map(m => m[1])), vals = new Set([...icons.matchAll(/\w+: '([a-z0-9_]+)'/g)].map(m => m[1]));
-  for (const k of keys) if (!vals.has(k) && !usedOutsideIcons(k)) set.delete(k);
+  /* The phone preview: its ICONS map (concept → glyph). Concept keys that are not glyphs themselves are left out. */
+  const pv = fs.readFileSync(path.join(SRC, 'preview/PhoneApp.tsx'), 'utf8');
+  const icons = (pv.match(/const ICONS = \{([\s\S]*?)\};/) || ['', ''])[1];
+  const vals = new Set([...icons.matchAll(/\w+: '([a-z0-9_]+)'/g)].map(m => m[1]));
+  vals.forEach(g => set.add(g));
+  for (const m of pv.matchAll(/<Ico k="([a-z0-9_]+)"/g)) if (!/[A-Z]/.test(m[1]) && !(icons.includes(`${m[1]}:`) && !vals.has(m[1]))) set.add(m[1]);
   set.delete('f1');
   return [...set].sort();
-}
-/* A preview concept key such as 'checked' is only a glyph if the Admin code names it too */
-function usedOutsideIcons(k: string): boolean {
-  return walk(SRC).some(f => new RegExp(`(?:name|icon|glyph)[=:]\\s*\\{?['"]${k}['"]`).test(fs.readFileSync(f, 'utf8')));
 }
 export const iconFontUrl = (): string => 'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
   + `&icon_names=${glyphNames().join(',')}&display=block`;
@@ -50,9 +43,18 @@ const iconFont = (dashboard: boolean): Plugin => ({
   }
 });
 
+/* The published files sit beside the source: admin-portal.html (the full portal) and dashboard.html (Dashboard only) */
+const publish = (dashboard: boolean): Plugin => ({
+  name: 'publish-single-file',
+  closeBundle() {
+    const out = path.resolve(__dirname, dashboard ? 'dist-dashboard' : 'dist', 'index.html');
+    if (fs.existsSync(out)) fs.copyFileSync(out, path.resolve(__dirname, dashboard ? 'dashboard.html' : 'admin-portal.html'));
+  }
+});
+
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), iconFont(mode === 'dashboard'), viteSingleFile()],
+  plugins: [react(), iconFont(mode === 'dashboard'), viteSingleFile(), publish(mode === 'dashboard')],
   define: { __DASHBOARD_ONLY__: JSON.stringify(mode === 'dashboard'), __ICON_FONT_URL__: JSON.stringify(iconFontUrl()) },
-  server: { fs: { allow: [path.resolve(__dirname, '..', '..')] } },
+  server: { fs: { allow: [path.resolve(__dirname, '..')] } },
   build: { outDir: mode === 'dashboard' ? 'dist-dashboard' : 'dist', assetsInlineLimit: 100000000, cssCodeSplit: false, target: 'es2020' }
 }));
