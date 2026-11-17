@@ -358,5 +358,5 @@ defineSingleton({
       blank: () => ({ name: '', type: 'Clinic', message: '', parking: '', indoor: false, enabled: true }), validate: (v, others) => dupCheck('name', 'record')(v, others),
       onChange, onExtraClick: e => { const b = e.target.closest('[data-loc-pv]'); if (b) { st.pvLoc = b.dataset.locPv; onChange(); announce(`Preview shows ${b.getAttribute('aria-label').replace('Preview ', '')}`); } } });
   },
-  preview: (d, src, st) => { const l = d.rows.find(r => r.id === st.pvLoc) || d.rows[0]; return { screen: 'location', layout: layoutFor('guest'), content: { ...appContent(), location: l.enabled ? l : { ...l, message: '', parking: '' } }, label: `${l.name}, ${src === 'working' ? 'your edits' : src}` }; }
+  preview: (d, src, st) => { const l = d.rows.find(r => r.id === st.pvLoc) || d.rows[0]; if (!l) return { screen: 'location', layout: layoutFor('guest'), content: { ...appContent(), location: null }, label: 'no facilities' }; return { screen: 'location', layout: layoutFor('guest'), content: { ...appContent(), location: l.enabled ? l : { ...l, message: '', parking: '' } }, label: `${l.name}, ${src === 'working' ? 'your edits' : src}` }; }
 });

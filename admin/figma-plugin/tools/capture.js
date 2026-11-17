@@ -112,7 +112,7 @@ const SCREENS = [
 
 (async () => {
   const only = process.argv[2];
-  const list = only ? SCREENS.filter(s => s.id.includes(only)) : SCREENS;
+  const list = only ? SCREENS.filter(s => only.split(',').some(o => s.id.includes(o))) : SCREENS;
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: W, height: 900 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
   /* The prepared state is applied before the app boots, so nothing in flight can overwrite it */
@@ -134,7 +134,8 @@ const SCREENS = [
     st.prefs = { ...(st.prefs || {}), ...(sc.prefs || {}) };
     await p.setViewportSize({ width: W, height: 900 });
     await p.evaluate(v => { sessionStorage.setItem('__figState', v); }, JSON.stringify({ db: JSON.stringify(st), rail: !!sc.rail }));
-    await p.goto(`${URL}#${sc.route}`); await p.reload(); await wait(1900);
+    /* A new query string makes every screen a fresh document, so nothing from the previous page can write over the state */
+    await p.goto(`${URL}?screen=${encodeURIComponent(sc.id)}#${sc.route}`); await wait(1900);
     if (sc.act) await sc.act(p);
     await p.waitForFunction(() => !document.querySelector('.state-loading'), null, { timeout: 8000 }).catch(() => {});
     await p.evaluate(() => { const t = document.getElementById('toasts'); if (t) t.innerHTML = ''; document.activeElement && document.activeElement.blur && document.activeElement.blur(); });
@@ -157,7 +158,7 @@ const SCREENS = [
     };
     fix(root);
     out.push({ id: sc.id, group: sc.group, name: sc.name, route: sc.route, w: root.w, h: root.h, root });
-    console.log(`${sc.id.padEnd(30)} ${root.w}×${root.h}  ${Math.round(JSON.stringify(root).length / 1024)} KB  ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+    console.log(`${sc.id.padEnd(30)} ${root.w}×${root.h}  ${Math.round(JSON.stringify(root).length / 1024)} KB  ${((Date.now() - t0) / 1000).toFixed(1)} s${errs.length ? `  PAGE ERRORS: ${errs.splice(0).join(' | ')}` : ''}`);
   }
 
   /* Icons: each glyph, size, color and fill drawn once on a transparent page, at 3× */

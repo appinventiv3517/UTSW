@@ -19,7 +19,7 @@ Each section goes on its own page (`Admin – Home Screen`, `Admin – Empty sta
 
 Fonts: the plugin uses **Inter** (Regular, Medium, Semi Bold, Bold, Extra Bold), which Figma includes. Small line-wrap differences are possible because Figma's Inter may be a different version from the web font.
 
-## Screens (81)
+## Screens (83)
 
 | Section | Screens |
 |---|---|

@@ -173,6 +173,7 @@
   }
   function location() {
     const l = C.location;
+    if (!l) return { title: 'Locations', tab: -1, view: '<div class="res-body"><p class="pv-empty">No facilities have location-specific information.</p></div>' };
     return { title: 'Locations', tab: -1, view: `<div class="res-body"><article class="card loc-card"><div class="loc-map" aria-hidden="true"><i></i></div><div class="loc-body"><h2>${esc(l.name)}</h2>
       <p class="loc-row">${ico('place', 20)}<span>${esc(l.type)}</span></p>
       ${l.message ? `<p class="loc-tip">${ico('info', 20)}<span>${esc(l.message)}</span></p>` : ''}
