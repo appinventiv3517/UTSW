@@ -118,7 +118,7 @@ BUILT_PAGES['home-layout'] = (() => {
     if (id !== 'campaign') return meta.desc;
     const fits = d => !d.audience || d.audience === 'seg-all' || (st.aud === 'guest' ? d.audience !== 'seg-signedin' : d.audience !== 'seg-guests');
     const live = ConfigService.peekAll('campaign').map(r => dataAt(r, 'production')).filter(d => d && d.enabled !== false && fits(d) && windowStatus(d) === 'active');
-    return live.length ? `Live: ${live[0].title} · until ${fmtLocal(live[0].end, false)}. Ended campaigns hide automatically.` : 'No campaign is live, so the module hides itself. Ended campaigns hide automatically.';
+    return live.length ? `Live: ${live[0].title} · until ${fmtLocal(live[0].end, false).replace(/\.$/, '')}. Ended campaigns hide automatically.` : 'No campaign is live, so the module hides itself. Ended campaigns hide automatically.';
   }
 
   function renderEditor(focus) {

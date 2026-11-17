@@ -3671,7 +3671,7 @@ BUILT_PAGES['home-layout'] = (() => {
     if (id !== 'campaign') return meta.desc;
     const fits = d => !d.audience || d.audience === 'seg-all' || (st.aud === 'guest' ? d.audience !== 'seg-signedin' : d.audience !== 'seg-guests');
     const live = ConfigService.peekAll('campaign').map(r => dataAt(r, 'production')).filter(d => d && d.enabled !== false && fits(d) && windowStatus(d) === 'active');
-    return live.length ? `Live: ${live[0].title} · until ${fmtLocal(live[0].end, false)}. Ended campaigns hide automatically.` : 'No campaign is live, so the module hides itself. Ended campaigns hide automatically.';
+    return live.length ? `Live: ${live[0].title} · until ${fmtLocal(live[0].end, false).replace(/\.$/, '')}. Ended campaigns hide automatically.` : 'No campaign is live, so the module hides itself. Ended campaigns hide automatically.';
   }
 
   function renderEditor(focus) {
@@ -5338,7 +5338,8 @@ BUILT_PAGES.dashboard = {
 
         <section class="card db-card db-in ga-a" style="--i:3" aria-labelledby="dr-h">
           <div class="db-card-head"><h2 id="dr-h">Recent activity</h2>${can(role, 'audit', 'view') ? '<a class="text-link small" href="#audit">Audit log</a>' : ''}</div>
-          <ul class="db-feed">${recent.map(a => { const who = UserService.byId(a.by); return `<li>
+          ${recent.length ? '' : `<div class="db-empty">${ic('history', 24)}<p>No activity yet. Changes and publishing appear here.</p></div>`}
+          <ul class="db-feed"${recent.length ? '' : ' hidden'}>${recent.map(a => { const who = UserService.byId(a.by); return `<li>
               <span class="avatar sm ${avatarTone(a.by)}" aria-hidden="true">${who ? esc(initials(who)) : '?'}</span>
               <span class="db-feed-t"><span><b>${esc(UserService.name(a.by))}</b> ${esc(activityVerb(a.action))}</span><span class="db-feed-o">${esc(a.target)}</span></span>
               <time class="db-feed-w" datetime="${esc(a.at)}">${esc(ago(a.at))}</time></li>`; }).join('')}</ul>

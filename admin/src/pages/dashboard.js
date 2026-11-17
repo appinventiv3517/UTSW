@@ -115,7 +115,8 @@ BUILT_PAGES.dashboard = {
 
         <section class="card db-card db-in ga-a" style="--i:3" aria-labelledby="dr-h">
           <div class="db-card-head"><h2 id="dr-h">Recent activity</h2>${can(role, 'audit', 'view') ? '<a class="text-link small" href="#audit">Audit log</a>' : ''}</div>
-          <ul class="db-feed">${recent.map(a => { const who = UserService.byId(a.by); return `<li>
+          ${recent.length ? '' : `<div class="db-empty">${ic('history', 24)}<p>No activity yet. Changes and publishing appear here.</p></div>`}
+          <ul class="db-feed"${recent.length ? '' : ' hidden'}>${recent.map(a => { const who = UserService.byId(a.by); return `<li>
               <span class="avatar sm ${avatarTone(a.by)}" aria-hidden="true">${who ? esc(initials(who)) : '?'}</span>
               <span class="db-feed-t"><span><b>${esc(UserService.name(a.by))}</b> ${esc(activityVerb(a.action))}</span><span class="db-feed-o">${esc(a.target)}</span></span>
               <time class="db-feed-w" datetime="${esc(a.at)}">${esc(ago(a.at))}</time></li>`; }).join('')}</ul>

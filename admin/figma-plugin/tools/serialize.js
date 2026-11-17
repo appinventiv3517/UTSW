@@ -58,7 +58,10 @@ window.__figSerialize = function () {
     let s = tn.nodeValue;
     if (!/^pre/.test(ws)) s = s.replace(/\s+/g, ' ');
     if (!s.trim()) return null;
-    const range = document.createRange(); range.selectNodeContents(tn);
+    /* Measure only the visible characters, so a text run that follows a bold name keeps its gap */
+    const raw = tn.nodeValue, a0 = raw.search(/\S/), a1 = raw.length - raw.split('').reverse().join('').search(/\S/);
+    const range = document.createRange();
+    if (/^pre/.test(ws) || a0 < 0) range.selectNodeContents(tn); else { range.setStart(tn, a0); range.setEnd(tn, a1); }
     const rects = [...range.getClientRects()].filter(r => r.width > 0.5 && r.height > 0.5);
     if (!rects.length) return null;
     const c = color(cs.color); if (!c) return null;

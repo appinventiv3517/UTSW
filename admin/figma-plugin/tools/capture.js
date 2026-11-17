@@ -88,7 +88,7 @@ const SCREENS = [
   S('Empty states', 'empty-quick-links', 'No quick links yet', 'home-quick-links', { setup: dropType('quickLink') }),
   S('Empty states', 'empty-services', 'No services and resources yet', 'home-featured-cards', { setup: dropType('featuredCard') }),
   S('Empty states', 'empty-layout', 'Layout – no modules (preview: no modules visible)', 'home-layout', { setup: emptyLayout }),
-  S('Empty states', 'empty-preview-tiles', 'Preview – no quick links or resource cards on', 'home-quick-links-new', { setup: db => { dropType('quickLink')(db); dropType('featuredCard')(db); }, act: async p => { await p.evaluate(() => { location.hash = 'home-layout'; }); await wait(400); const lv = await p.$('dialog[open] button:has-text("Leave page")'); if (lv) await lv.click(); await wait(1800); } }),
+  S('Empty states', 'empty-preview-tiles', 'Preview – no quick links or resource cards on', 'home-quick-links-new', { setup: db => { dropType('quickLink')(db); dropType('featuredCard')(db); }, act: async p => { await p.evaluate(() => { location.hash = 'home-layout'; }); await wait(400); const lv = await p.$('dialog[open] button:has-text("Leave page")'); if (lv) await lv.click(); await wait(1800); await p.click('#pv-alert'); await wait(900); } }),
   S('Empty states', 'empty-segments', 'No audience segments yet', 'audiences', { setup: dropType('segment') }),
   S('Empty states', 'empty-notifications', 'No notifications yet', 'notifications', { setup: db => { db.notifications = []; } }),
   S('Empty states', 'empty-search-top', 'No top or popular searches yet', 'search-top', { setup: emptyRows('search-top') }),
@@ -133,9 +133,18 @@ const SCREENS = [
     if (sc.setup) sc.setup(st.db);
     st.prefs = { ...(st.prefs || {}), ...(sc.prefs || {}) };
     await p.setViewportSize({ width: W, height: 900 });
-    await p.evaluate(v => { sessionStorage.setItem('__figState', v); }, JSON.stringify({ db: JSON.stringify(st), rail: !!sc.rail }));
-    /* A new query string makes every screen a fresh document, so nothing from the previous page can write over the state */
-    await p.goto(`${URL}?screen=${encodeURIComponent(sc.id)}#${sc.route}`); await wait(1900);
+    /* A new query string makes every screen a fresh document. A marker in the data proves the app booted with this
+       screen's state; if anything wrote over it, the state is set again and the page reloaded. */
+    st.db.__figMark = sc.id;
+    const state = JSON.stringify({ db: JSON.stringify(st), rail: !!sc.rail });
+    let ok = false;
+    for (let tries = 0; tries < 4 && !ok; tries++) {
+      await p.evaluate(v => { sessionStorage.setItem('__figState', v); }, state);
+      if (tries) await p.evaluate(([k, v]) => { localStorage.setItem(k, JSON.parse(v).db); }, [KEY, state]);
+      await p.goto(`${URL}?screen=${encodeURIComponent(sc.id)}&try=${tries}#${sc.route}`); await wait(1900);
+      ok = await p.evaluate(([k, id]) => { try { return JSON.parse(localStorage.getItem(k)).db.__figMark === id; } catch (e) { return false; } }, [KEY, sc.id]);
+    }
+    if (!ok) console.log(`  ! ${sc.id}: the prepared data did not load`);
     if (sc.act) await sc.act(p);
     await p.waitForFunction(() => !document.querySelector('.state-loading'), null, { timeout: 8000 }).catch(() => {});
     await p.evaluate(() => { const t = document.getElementById('toasts'); if (t) t.innerHTML = ''; document.activeElement && document.activeElement.blur && document.activeElement.blur(); });
