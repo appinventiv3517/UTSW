@@ -38,7 +38,7 @@ for (const f of fs.readdirSync(ICDIR)) { const m = fs.readFileSync(path.join(ICD
     if (n.st) r.push([n.st, 'c']); if (n.fx) n.fx.forEach(e => { if (e.c != null) r.push([e, 'c']); });
     if (n.p) n.p.forEach(x => r.push([x, 1])); return r; };
   const walk2 = (a, b, fn) => { fn(a, b); (a.ch || []).forEach((c, i) => walk2(c, b ? b.ch[i] : null, fn)); };
-  const svgs = [], sIdx = new Map(); const svgName = (mk, n) => { if (!sIdx.has(mk)) { sIdx.set(mk, svgs.length); svgs.push({ mk, n: 'asset/' + (n || 'svg').split(' ')[0].replace(/[^\w-]/g, '') + '-' + (svgs.length + 1) }); } return svgs[sIdx.get(mk)].n; };
+  const svgs = [], sIdx = new Map(); const svgName = (mk, n) => { if (!sIdx.has(mk)) { sIdx.set(mk, svgs.length); svgs.push({ mk, n: 'asset/' + (n || 'svg').split(' ')[0].replace(/[^\w-]/g, '') + '-' + require('crypto').createHash('md5').update(mk).digest('hex').slice(0, 6) }); } return svgs[sIdx.get(mk)].n; };
   const glyphs = new Set(); const mism = [];
   // drop layers that a later opaque sibling hides completely (e.g. the app under the onboarding overlay)
   const opaque = (n, cols) => n.k === 'F' && n.o == null && n.fl && n.fl.some(f => f.c != null && +cols[f.c].split(',')[3] === 1) && !n.r;

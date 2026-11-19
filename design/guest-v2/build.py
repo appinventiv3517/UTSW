@@ -31,9 +31,9 @@ def icons():
 
 src = (here / "guest-flow.src.html").read_text()
 js = (here / "guest-flow.src.js").read_text()
-assert "<!--SCRIPT-->" in src and "/*ICONS*/{}" in js and "`" not in logo("reversed.svg")
+assert "<!--SCRIPT-->" in src and "/*ICONS*/{}" in js and "`" not in logo("utsw-mycare-reversed.svg")
 src = src.replace("<!--SCRIPT-->", "<script>\n" + js + "</script>")
-out = (src.replace("<!--LOGO_REVERSED-->", logo("reversed.svg"))
+out = (src.replace("<!--LOGO_REVERSED-->", logo("utsw-mycare-reversed.svg"))
           .replace("<!--APP_ICON-->", logo("icon.svg"))
           .replace("/*ICONS*/{}", icons()))
 (here / "guest-flow.html").write_text(out)
