@@ -3,7 +3,7 @@
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 const HERE = __dirname, OUT = path.join(HERE, 'out'), BASE = 'file://' + path.join(HERE, '..', 'guest-flow.html');
 // overlays and onboarding are captured at phone size; scrolling pages are captured full length
-const PHONE = new Set(['ob-1','ob-2','ob-3','ob-4','welcome','menu','search','search-history','gsearch','filters','sort','share','e-denied','e-search','e-history']);
+const PHONE = new Set(['ob-1','ob-2','ob-3','ob-4','menu','search','search-history','gsearch','filters','sort','share','e-denied','e-search','e-history']);
 fs.mkdirSync(OUT, { recursive: true });
 const SRC = fs.readFileSync(path.join(HERE, 'dom2fig.js'), 'utf8');
 const W = ms => p => p.waitForTimeout(ms);
@@ -18,8 +18,9 @@ const STATES = [
   ['ob-2', '01 Onboarding', 'Onboarding 2', seq(jump('onboarding'), obTo(1))],
   ['ob-3', '01 Onboarding', 'Onboarding 3', seq(jump('onboarding'), obTo(2))],
   ['ob-4', '01 Onboarding', 'Onboarding 4', seq(jump('onboarding'), obTo(3))],
-  ['welcome', '01 Onboarding', 'Welcome', jump('welcome')],
   ['home', '02 Home', 'Home', jump('home')],
+  ['home-facility', '02 Home', 'Home · At a UTSW facility', jump('wf-here')],
+  ['home-visit', '02 Home', 'Home · Upcoming visit', jump('wf-visit')],
   ['menu', '03 Menu', 'Menu', jump('menu')],
   ['search', '04 Search', 'Search · Saved providers', seq(jump('home'), clickA('#tabbar [data-action="open-search"]'))],
   ['search-history', '04 Search', 'Search · Search history', seq(jump('home'), clickA('#tabbar [data-action="open-search"]'), clickA('#yt-history'))],
@@ -35,10 +36,12 @@ const STATES = [
   ['profile', '07 Doctor profile', 'Doctor profile', jump('profile')],
   ['missing', '07 Doctor profile', 'Doctor profile · Missing data', jump('missing')],
   ['share', '07 Doctor profile', 'Doctor profile · Share', jump('share')],
-  ['wayfinding', '08 Wayfinding', 'Wayfinding', seq(jump('home'), clickA('#tabbar [data-tab="wayfinding"]'))],
-  ['saved', '09 Favorites', 'Favorites', jump('saved')],
+  ['wayfinding', '08 Wayfinding', 'Wayfinding', jump('wayfinding')],
+  ['wayfinding-here', '08 Wayfinding', 'Wayfinding · At a UTSW facility', seq(jump('wf-here'), clickA('.wf-ctx-go'))],
+  ['saved', '09 Favorites', 'Favorites · Providers', jump('saved')],
+  ['saved-locs', '09 Favorites', 'Favorites · Locations', jump('saved-locs')],
   ['mychart', '10 MyChart', 'MyChart sign in', jump('mychart')],
-  ['locations', '11 Locations', 'Locations', seq(jump('menu'), clickA('#drawer [data-tab="locations"]'))],
+  ['locations', '11 Locations', 'Locations', jump('locations')],
   ['medblog', '12 MedBlog and Inbox', 'MedBlog', jump('medblog')],
   ['inbox', '12 MedBlog and Inbox', 'Inbox', seq(jump('menu'), clickA('#drawer [data-v="inbox"]'))],
   ['e-results', '13 Empty states', 'No matching doctors', jump('empty')],
@@ -46,6 +49,7 @@ const STATES = [
   ['e-offline', '13 Empty states', 'Offline', jump('offline')],
   ['e-denied', '13 Empty states', 'Location denied', jump('denied')],
   ['e-saved', '13 Empty states', 'No saved providers', seq(jump('home'), clickA('#tabbar [data-tab="saved"]'))],
+  ['e-saved-locs', '13 Empty states', 'No saved locations', seq(jump('home'), clickA('#tabbar [data-tab="saved"]'), clickA('.fav-seg label:nth-child(2)'))],
   ['e-search', '13 Empty states', 'Search · nothing saved yet', seq(jump('home'), clickA('#tabbar [data-action="open-search"]'))],
   ['e-history', '13 Empty states', 'Search · no history yet', seq(jump('home'), clickA('#tabbar [data-action="open-search"]'), clickA('#yt-history'))],
 ];
@@ -58,8 +62,8 @@ const shape = t => t.k + (t.ch ? '(' + t.ch.map(shape).join(',') + ')' : '');
   for (const [id, section, label, go] of STATES) {
     if (only.length && !only.includes(id)) continue;
     const PAGE = BASE + (PHONE.has(id) ? '' : '#capture'); await p.goto('about:blank'); await p.goto(PAGE); await p.waitForTimeout(500);
-    const empty = /^e-(saved|search|history)$/.test(id);
-    await p.evaluate(empty => { if (empty) { localStorage.removeItem('mycare-guest-saved'); localStorage.removeItem('mycare-guest-recent'); } else { localStorage.setItem('mycare-guest-saved', JSON.stringify(['priya-shah', 'avery-morgan'])); localStorage.setItem('mycare-guest-recent', JSON.stringify(['Knee pain', 'Dermatology', 'Spanish speaking pediatrician'])); } }, empty);
+    const empty = /^e-(saved|saved-locs|search|history)$/.test(id);
+    await p.evaluate(empty => { if (empty) { localStorage.removeItem('mycare-guest-saved'); localStorage.removeItem('mycare-guest-saved-locs'); localStorage.removeItem('mycare-guest-recent'); } else { localStorage.setItem('mycare-guest-saved', JSON.stringify(['priya-shah', 'avery-morgan'])); localStorage.setItem('mycare-guest-saved-locs', JSON.stringify(['L6', 'L1'])); localStorage.setItem('mycare-guest-recent', JSON.stringify(['Knee pain', 'Dermatology', 'Spanish speaking pediatrician'])); } }, empty);
     await p.reload(); await p.waitForTimeout(3000);
     if (PHONE.has(id)) { await p.click('[data-ctl="rm"] [data-v="1"]').catch(() => {}); }
     await p.click('[data-ctl="theme"] [data-v="light"]'); await p.waitForTimeout(200);
