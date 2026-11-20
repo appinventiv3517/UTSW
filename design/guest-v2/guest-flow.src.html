@@ -195,7 +195,7 @@ ul,ol{padding:0}
 .views{flex:1;position:relative;min-height:0;overflow:hidden}
 .view{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:var(--c-bg)}
 .view::-webkit-scrollbar{display:none}
-.v-inner{display:flex;flex-direction:column;gap:var(--sp-24);padding-bottom:var(--sp-48)}
+.v-inner{display:flex;flex-direction:column;gap:var(--sp-32);padding-bottom:var(--sp-48)}
 
 /* ---------- Shared components ---------- */
 .btn{min-height:48px;padding-inline:var(--sp-16);border-radius:var(--r-12);border:0;font-size:var(--fs-16);line-height:var(--lh-16);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-8);cursor:pointer;text-decoration:none;text-align:center;transition:background var(--dur-fast) var(--ease-std),transform var(--dur-fast) var(--ease-std),box-shadow var(--dur-fast)}
@@ -313,11 +313,32 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .top{display:flex;flex-direction:column}
 .hero{background:var(--c-brand);color:var(--c-on-blue);padding:var(--sp-8) var(--sp-16) var(--sp-24);display:flex;flex-direction:column;gap:var(--sp-16);border-radius:0 0 var(--r-24) var(--r-24)}
 .hero h1{font-size:var(--fs-28);line-height:var(--lh-28);font-weight:700;letter-spacing:-.01em;text-wrap:balance}
-.fc-kick{display:inline-flex;align-items:center;gap:var(--sp-8);font-size:var(--fs-20);line-height:var(--lh-20);font-weight:700;color:#FFFFFF;margin-bottom:var(--sp-4)}
+.fc-kick{display:inline-flex;align-items:center;gap:var(--sp-8);font-size:var(--fs-20);line-height:var(--lh-20);font-weight:700;color:#FFFFFF}
 .fc-kick .ic{color:var(--c-cyan)}
-.hero .sub{color:var(--c-on-blue);font-size:var(--fs-16);line-height:var(--lh-16);font-weight:500;max-width:32em}
-.hero .top-s{display:flex;flex-direction:column;gap:var(--sp-8)}
-.hero .top-s .eyebrow{color:var(--c-on-blue-2)}
+/* Contextual wayfinding card: only at a UTSW facility (location on) or before a visit */
+.wf-ctx{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-12) var(--sp-12);padding:var(--sp-16);box-shadow:0 0 0 1px var(--c-border),inset 4px 0 0 var(--c-cyan)}
+.wf-ctx-ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--c-tint);color:var(--c-blue)}
+.wf-ctx-txt{display:flex;flex-direction:column;gap:var(--sp-4);min-width:0}
+.wf-ctx-txt h2{font-size:var(--fs-16);line-height:var(--lh-16);font-weight:700;color:var(--c-blue);text-wrap:balance}
+.wf-ctx-txt p{font-size:var(--fs-14);line-height:var(--lh-14);color:var(--c-text-2)}
+.wf-ctx-go{grid-column:2;justify-self:start}
+.wf-here{padding:var(--sp-16);display:flex;flex-direction:column;gap:var(--sp-4)}
+.wf-here h2{font-size:var(--fs-18);line-height:var(--lh-18);font-weight:700;color:var(--c-blue)}
+.wf-here p{font-size:var(--fs-14);line-height:var(--lh-14);color:var(--c-text-2)}
+.wf-here .row-btns{margin-top:var(--sp-12);align-items:center}
+/* Favorites: Providers / Locations */
+.fav-seg{background:var(--c-surface);box-shadow:0 0 0 1px var(--c-border)}
+.segm.fav-seg>label>span{display:flex;align-items:center;justify-content:center;gap:var(--sp-4)}
+.fav-seg .seg-n{margin:0;min-width:20px;height:20px;padding-inline:6px;border-radius:var(--r-full);background:var(--c-tint);color:var(--c-blue);font-size:var(--fs-12);line-height:20px;display:inline-grid;place-items:center}
+.fav-seg input:checked+span .seg-n{background:#FFFFFF;color:#004278}
+.wf-go .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--sp-4)}
+.fav-seg .seg-n{font-weight:700;font-variant-numeric:tabular-nums;margin-inline-start:var(--sp-4)}
+.fav-loc{color:var(--c-blue);flex:none}
+.fav-loc[aria-pressed="true"]{color:var(--c-magenta)}
+.row-wrap .fav-loc{color:var(--c-blue)}
+.row-wrap .fav-loc[aria-pressed="true"]{color:var(--c-magenta)}
+.loc-card{position:relative}
+.loc-card>.fav-loc+.kv{padding-right:var(--sp-40)}
 .search-entry{display:flex;align-items:center;gap:var(--sp-12);min-height:56px;padding-inline:var(--sp-16);border-radius:var(--r-full);border:0;background:var(--c-surface);color:var(--c-text-2);cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(0,20,40,.2);transition:transform var(--dur-fast) var(--ease-std);width:100%}
 .search-entry .ic{color:var(--c-blue)}
 .search-entry:active{transform:scale(.98)}
@@ -457,7 +478,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .mini{flex:0 0 144px;scroll-snap-align:start;padding:var(--sp-16) var(--sp-12);display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);text-align:center;border:0;cursor:pointer;color:var(--c-text);min-width:0}
 .mini b{font-size:var(--fs-14);line-height:var(--lh-14);font-weight:600}
 .mini b+span{margin-top:calc(var(--sp-4) * -1)}
-.mini span{font-size:var(--fs-12);line-height:var(--lh-12);color:var(--c-text-2)}
+.mini>b+span{font-size:var(--fs-12);line-height:var(--lh-12);color:var(--c-text-2)}
 
 /* MyChart sign-in card: deep Blue with a soft cyan glow, white primary pill, outline secondary pill */
 .mychart{position:relative;overflow:hidden;isolation:isolate;padding:var(--sp-16) var(--sp-16) var(--sp-24);display:flex;flex-direction:column;gap:var(--sp-16);border-radius:var(--r-16);color:var(--c-on-blue);
@@ -661,33 +682,6 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .ob [tabindex="-1"]:focus{outline:none}
 
 /* Welcome (sign-in choice) */
-.ob-welcome{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--c-bg);z-index:3}
-.ob-welcome .ob-stage{height:364px}
-.ob-wel-art{position:relative;z-index:1;flex:none;height:308px;display:grid;place-items:center}
-.ob-wel-icon{width:120px;height:120px;border-radius:28px;overflow:hidden;box-shadow:0 24px 48px rgba(0,10,30,.4)}
-.ob-wel-icon svg{width:100%;height:100%;display:block}
-.ob-wel-ring{position:absolute;width:200px;height:200px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--c-on-blue-line)}
-.ob-wel-ring.r2{width:280px;height:280px;opacity:.6}
-.ob-wel-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;gap:var(--sp-16);padding:var(--sp-32) var(--sp-24) var(--sp-40)}
-.ob-wel-body h2{font-size:var(--fs-28);line-height:var(--lh-28);font-weight:700;color:var(--c-blue);text-align:center;letter-spacing:-.01em;text-wrap:balance}
-.ob-wel-body>p{color:var(--c-text-2);text-align:center;text-wrap:pretty}
-.ob-choices{display:flex;flex-direction:column;gap:var(--sp-12);margin-top:auto}
-.ob-choice{display:flex;align-items:center;gap:var(--sp-16);width:100%;min-height:72px;padding:var(--sp-12) var(--sp-16);border-radius:var(--r-16);border:0;cursor:pointer;text-align:left;font:inherit}
-.ob-choice .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--sp-4)}
-.ob-choice .rt b{font-size:var(--fs-16);line-height:var(--lh-16);font-weight:700}
-.ob-choice .rt span{font-size:var(--fs-14);line-height:var(--lh-14)}
-.ob-choice.primary{background:var(--c-brand);color:var(--c-on-blue);box-shadow:0 8px 20px rgba(0,40,80,.24)}
-.ob-choice.primary .rt span{color:var(--c-on-blue-2)}
-.ob-choice.primary .ob-ic{background:var(--c-on-blue-fill);color:var(--c-on-blue)}
-.ob-choice.secondary{background:var(--c-surface);color:var(--c-text);box-shadow:0 0 0 1px var(--c-border)}
-.ob-choice.secondary .rt span{color:var(--c-text-2)}
-.ob-choice.secondary .ob-ic{background:var(--c-tint);color:var(--c-blue)}
-.ob-choice.secondary:hover{box-shadow:0 0 0 2px var(--c-blue)}
-.ob-ic{width:44px;height:44px;border-radius:var(--r-12);display:grid;place-items:center;flex:none}
-.ob-choice>.ic{flex:none;transition:transform 300ms cubic-bezier(0.32,0.72,0,1)}
-.ob-choice:hover>.ic{transform:translateX(4px)}
-.ob-wel-link{align-self:center;min-height:44px;border:0;background:transparent;color:var(--c-blue);font:inherit;font-size:var(--fs-14);font-weight:600;cursor:pointer;padding-inline:var(--sp-12);border-radius:var(--r-8)}
-.ob-wel-link u{text-underline-offset:3px}
 .screen .ob .on-blue :focus-visible{outline-color:var(--c-on-blue)}
 
 /* MyChart sign-in */
@@ -1088,7 +1082,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
           <div class="sys-layer" id="sys" hidden></div>
         </div>
       </div>
-      <p class="stage-note">Tap or click anything. Scroll slowly to see the scroll-linked motion. The location prompt and share sheet are simulated system UI. Saved providers are stored in this browser only. Each load starts with the splash and onboarding.</p>
+      <p class="stage-note">Tap or click anything. Scroll slowly to see the scroll-linked motion. The location prompt and share sheet are simulated system UI. Saved providers are stored in this browser only. Each load starts with the splash and onboarding, then goes straight to Home as a guest.</p>
     </div>
 
     <div class="side">
@@ -1097,6 +1091,9 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
         <div class="ctrl-grid">
           <fieldset class="ctrl"><legend>Location permission</legend>
             <div class="seg" data-ctl="perm"><button data-v="ask">Ask</button><button data-v="granted">Allowed</button><button data-v="denied">Denied</button><button data-v="unavailable">Can’t locate</button></div></fieldset>
+          <fieldset class="ctrl"><legend>Wayfinding on Home</legend>
+            <div class="seg" data-ctl="wf"><button data-v="none">Hidden</button><button data-v="facility">At a facility</button><button data-v="visit">Upcoming visit</button></div>
+            <span class="cap-note">“At a facility” needs location permission, so it also sets Location to Allowed; switching location off hides the card. “Upcoming visit” stands in for a signed-in MyChart appointment.</span></fieldset>
           <fieldset class="ctrl"><legend>Provider search service</legend>
             <div class="seg" data-ctl="data"><button data-v="live">Works</button><button data-v="slow">Slow</button><button data-v="error">Fails</button><button data-v="offline">Offline</button></div></fieldset>
           <fieldset class="ctrl"><legend>Emergency alerts</legend>
@@ -1113,7 +1110,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
             <button class="page-btn" id="capture-mode" aria-pressed="false">Freeze for capture</button>
             <span class="cap-note">Stops all motion, shows every section in its final place, and lets the phone grow to the full length of the screen so the whole page can be captured. Or open the link with <code>#capture</code> at the end.</span></div>
           <div class="ctrl"><span class="lbl">Local data</span>
-            <button class="page-btn" id="reset-local">Clear saved providers and recent searches</button></div>
+            <button class="page-btn" id="reset-local">Clear favorites and recent searches</button></div>
           <div class="ctrl"><span class="lbl">First run</span>
             <div class="row-btns" style="gap:8px"><button class="page-btn" id="replay-splash">Replay splash</button><button class="page-btn" id="replay-ob">Replay onboarding</button></div></div>
         </div>
@@ -1146,7 +1143,10 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
           <li><b>Plain-language search</b>: phrases map to specialties, conditions, languages, gender, and availability (for example “spanish speaking pediatrician”, “heart doctor”, “afib”). Misspellings within one or two letters are corrected and the correction is shown. Mapped filters appear as removable chips.</li>
           <li><b>Location</b>: “Use my location” asks the OS once. If permission is denied or the location can’t be found, the app says so, offers ZIP code or city entry, and keeps searching without distance.</li>
           <li><b>States</b>: loading uses skeleton cards (no shimmer with reduced motion); service failure and offline each name the problem and offer “Try again”; offline also points to saved providers, which work without a connection.</li>
-          <li><b>Favorites</b>: a heart toggle (outline → filled magenta with a 300 ms pop) with a spoken name (“Save …” / “Remove … from saved”) and an Undo toast. Guest favorites live on the device only.</li>
+          <li><b>Favorites</b>: a heart toggle (outline → filled magenta with a 300 ms pop) with a spoken name (“Save …” / “Remove … from saved”) and an Undo toast that says “saved to Favorites”. Doctors and locations (clinics, hospitals) can be saved; the Favorites tab splits them into Providers and Locations, each with its own empty state. Guest favorites live on the device only.</li>
+          <li><b>Wayfinding</b>: not a tab. It is an in-app page reached from the Wayfinding quick link, Locations, saved locations, the menu, and a contextual card on Home that appears only when relevant: at a UTSW facility (location allowed) or before an upcoming visit (signed-in, mocked). No appointment or MyChart account is needed to use it.</li>
+          <li><b>Home</b>: one “Find Care” heading and one search field (“Doctors, locations, and more”); no repeated description and no top searches. 32 pt between sections.</li>
+          <li><b>First run</b>: splash, four slides, then Home as a guest. Sign in stays on Home (app bar pill and the “Sign in for more” card).</li>
           <li><b>Share</b>: opens the native share sheet with a public profile link and the provider’s name and specialty. No personal or health information is shared.</li>
           <li><b>Profile fields</b>: name, credentials, specialty, and at least one location are required. Bio, languages, education, research, and media show only when the directory has them; a missing section is left out rather than shown empty.</li>
           <li><b>Motion</b>: one transition for every screen, sheet, menu, and search: 420 ms, chips and toggles 150–200 ms. Reduced motion turns all of it into instant changes.</li>

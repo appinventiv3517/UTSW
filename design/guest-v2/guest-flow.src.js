@@ -46,6 +46,7 @@ const LOCS={
  L5:{n:"Cedar Hill Family Clinic",a:"300 Sample Lane, Richardson, TX",ph:"972-555-0178",x:2,y:13,city:"Richardson"},
  L6:{n:"Lakeview University Hospital",a:"5000 Sample Parkway, Dallas, TX",ph:"214-555-0100",x:1.5,y:2,city:"Dallas"}
 };
+Object.entries(LOCS).forEach(([k,l])=>l.id=k);
 const HOSPS=["Lakeview University Hospital","Northgate Medical Center","Riverside Children’s Hospital"];
 const SPECS=["Cardiology","Dermatology","Family Medicine","Internal Medicine","Neurology","Obstetrics and Gynecology","Orthopaedic Surgery","Pediatrics","Sports Medicine"];
 const LANGS=["English","Spanish","Vietnamese","Mandarin","Hindi","Korean","Arabic","Russian","Portuguese","French","Gujarati"];
@@ -165,7 +166,6 @@ const INBOX=[
 ];
 /* Services and resources: [icon, category label, title, description, destination] */
 const RESOURCES=[
- ["route","Wayfinding","Directions on campus","Turn-by-turn directions inside and outside our main campuses","Opens Wayfinding"],
  ["videocam","Video visits","Prepare for a video visit","Check your device and connection before your visit","Opens the video visit checklist"],
  ["article","Resources","New patient guide","Insurance, forms, and what to bring","Opens the new patient guide"],
  ["receipt_long","Resources","Billing and insurance","Estimates, payment plans, and help","Opens Billing and insurance"]
@@ -254,20 +254,20 @@ const store={get(k,d){try{const v=localStorage.getItem("mycare-guest-"+k);return
 const blankFilters=()=>({specs:new Set(),conds:new Set(),langs:new Set(),gender:"any",hosp:new Set(),dist:"any",accepting:false,online:false});
 const osRM=window.matchMedia("(prefers-reduced-motion: reduce)");
 const MODS={
- tiles:{name:"Quick links",meta:"Four tiles · all open MyChart"},
+ tiles:{name:"Quick links",meta:"Six tiles · Wayfinding and locations, then four MyChart tasks"},
  featured:{name:"MedBlog",meta:"Carousel · three stories"},
  campaign:{name:"Campaign banner · Flu shots",meta:"Live Oct. 1 – Nov. 30"},
- resources:{name:"Services and resources",meta:"Wayfinding, video visits, and resources"},
+ resources:{name:"Services and resources",meta:"Video visits and patient resources"},
  mychart:{name:"MyChart sign-in card",meta:"Guest only"},
  announcements:{name:"Announcements",meta:"Newest first"},
  summer:{name:"Campaign banner · Summer safety",meta:"Ended Sept. 30 – hidden automatically",expired:true}
 };
 const S={
   alerts:1,fw:390,ts:1,rm:osRM.matches,playing:!osRM.matches,
-  tab:"home",stacks:{home:[{v:"home"}],find:[{v:"find"}],wayfinding:[{v:"wayfinding"}],locations:[{v:"locations"}],saved:[{v:"saved"}],mychart:[{v:"mychart"}]},
+  tab:"home",stacks:{home:[{v:"home"}],find:[{v:"find"}],saved:[{v:"saved"}],mychart:[{v:"mychart"}]},wf:"none",favSeg:"providers",
   perm:"ask",osAnswer:null,loc:null,data:"live",
   q:"",pq:null,filters:blankFilters(),sort:"relevance",loading:false,
-  saved:store.get("saved",[]),recent:store.get("recent",[]),
+  saved:store.get("saved",[]),savedLocs:store.get("saved-locs",[]),recent:store.get("recent",[]),
   layout:["tiles","mychart","featured","campaign","resources","announcements","summer"].map(id=>({id,on:!MODS[id].expired})),
   dismissed:new Set(),draft:null,fcText:"",blogCat:"All",blogMore:false,inboxRead:new Set(INBOX.filter(m=>m.read).map(m=>m.id))
 };
@@ -275,6 +275,8 @@ const rm=()=>S.rm||osRM.matches;
 const screen=$("#screen"),view=$("#view");
 const top=()=>{const s=S.stacks[S.tab];return s[s.length-1]};
 const isSaved=id=>S.saved.includes(id);
+const isLocSaved=id=>S.savedLocs.includes(id);
+const favTotal=()=>S.saved.length+S.savedLocs.length;
 
 /* ---------- Distance ---------- */
 function distTo(p){if(!S.loc)return null;return Math.min(...p.locs.map(k=>Math.hypot(LOCS[k].x-S.loc.x,LOCS[k].y-S.loc.y)))}
@@ -341,7 +343,7 @@ function switchTab(t,reset){
 function focusTitle(){setTimeout(()=>{const h=$("#appbar .ttl")||$("#view h1");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:true})}},rm()?0:50)}
 
 /* ---------- App bar + tab bar ---------- */
-const TABS=[["home","Home","home"],["find","Find Care","stethoscope"],["search","Search","search"],["wayfinding","Wayfinding","directions_walk"],["saved","Favorites","favorite"]];
+const TABS=[["home","Home","home"],["find","Find Care","stethoscope"],["search","Search","search"],["saved","Favorites","favorite"]];
 const TITLES={wayfinding:"Wayfinding",find:"Find Care",results:"Doctors",profile:"Doctor profile",saved:"Favorites",locations:"Locations",menu:"Menu",mychart:"MyChart",medblog:"MedBlog",inbox:"Inbox"};
 function renderAppbar(){
   const t=top(),depth=S.stacks[S.tab].length;
@@ -353,7 +355,7 @@ function renderAppbar(){
   $("#appbar").innerHTML=`${back}<h1 class="ttl${back?" with-back":""}"><span class="t1">${TITLES[t.v]}</span>${t.v==="profile"?`<span class="t2" aria-hidden="true">${esc(name(PBY[t.id]))}</span>`:""}</h1>${menuBtn}`;
 }
 function renderTabbar(){
-  $("#tabbar").innerHTML=TABS.map(([k,l,g])=>`<button class="tab" ${k==="search"?`data-action="open-search" aria-haspopup="dialog"`:`data-action="tab" data-tab="${k}"`}${k==="mychart"?` aria-label="Sign in to MyChart"`:""}${k==="saved"&&S.saved.length?` aria-label="${l}, ${S.saved.length} provider${S.saved.length>1?"s":""}"`:""}><span class="pill">${ict(g)}</span><span>${l}</span></button>`).join("")+`<span class="tab-ind" id="tab-ind" aria-hidden="true"></span>`;
+  $("#tabbar").innerHTML=TABS.map(([k,l,g])=>`<button class="tab" ${k==="search"?`data-action="open-search" aria-haspopup="dialog"`:`data-action="tab" data-tab="${k}"`}${k==="mychart"?` aria-label="Sign in to MyChart"`:""}${k==="saved"&&favTotal()?` aria-label="${l}, ${favTotal()} saved"`:""}><span class="pill">${ict(g)}</span><span>${l}</span></button>`).join("")+`<span class="tab-ind" id="tab-ind" aria-hidden="true"></span>`;
   markTab();
 }
 function markTab(){$$("#tabbar .tab").forEach(b=>b.dataset.tab===S.tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));placeInd()}
@@ -385,7 +387,7 @@ function renderAlerts(){
 }
 const M={};
 M.tiles=()=>`<div class="mod-head"><h2 class="sec-h" id="h-tiles">Quick links</h2></div>
-  <div class="tiles">${[["message","Message your doctor","chat",1],["results","Get your test results","labs",1],["visits","Manage Your Visits","calendar_month",1],["billing","Manage Billing","credit_card",1]]
+  <div class="tiles">${[["wayfinding","Wayfinding","directions",0],["locations","Find a location","location_on",0],["message","Message your doctor","chat",1],["results","Get your test results","labs",1],["visits","Manage your visits","calendar_month",1],["billing","Manage billing","credit_card",1]]
    .map(([k,l,g,out])=>`<button class="tile press" data-action="tile" data-k="${k}" data-l="${l}"${out?` aria-label="${l}, opens MyChart"`:""}>${well(g,40)}<span>${l}</span></button>`).join("")}</div>`;
 M.featured=()=>`<div class="mod-head"><h2 class="sec-h" id="h-featured">MedBlog</h2><button class="btn btn-ghost btn-sm" data-action="push" data-v="medblog" aria-label="See all MedBlog stories">See all</button></div>
   <ul class="h-scroll mb-row" id="car-scroll" aria-labelledby="h-featured">${SLIDES.map(b=>{const [g,t]=TOPIC[b.cat]||["article","t-blue"];
@@ -413,11 +415,10 @@ function visibleModules(){return S.layout.filter(m=>m.on&&!MODS[m.id].expired)}
 function viewHome(){
   return `<div class="ptr" id="ptr" aria-hidden="true"></div><div class="v-inner"><div class="top">${renderAlerts()}
     <section class="hero on-blue" aria-labelledby="h-hero"><span class="aurora" aria-hidden="true"><i></i></span>
-      <div class="hero-copy"><h1 class="sr-only" id="h-hero">UTSW MyCare home</h1>
-      <p class="fc-kick">${ic("stethoscope",20)}Find Care</p><p class="sub">Search UTSW MyCare for doctors, locations, and more.</p></div>
-      <button class="search-entry" id="hero-search" data-action="open-search" aria-haspopup="dialog" >${ic("search")}<span>Doctors, locations, and more</span></button>
-      <div class="top-s"><span class="eyebrow" id="top-h">Top searches</span><div class="chips" role="group" aria-labelledby="top-h">${GS_TOP.slice(0,4).map(t=>`<button class="chip on-blue-chip" data-action="search-term" data-q="${t}">${ic("trending_up",16)}${t}</button>`).join("")}</div></div>
+      <div class="hero-copy"><h1 class="sr-only">UTSW MyCare home</h1><h2 class="fc-kick" id="h-hero">${ic("stethoscope",20)}Find Care</h2></div>
+      <button class="search-entry" id="hero-search" data-action="open-search" aria-haspopup="dialog" aria-label="Search doctors, locations, and more">${ic("search")}<span aria-hidden="true">Doctors, locations, and more</span></button>
     </section></div>
+    ${wfContextCard()}
     ${visibleModules().map((m,i)=>`<section class="mod rise" style="--i:${i+1}" aria-labelledby="h-${m.id}">${M[m.id]()}</section>`).join("")}</div>`;
 }
 
@@ -570,7 +571,7 @@ function viewProfile(id){
      <div class="p-sub"><h4>Conditions treated</h4><div class="chips">${p.conds.map(c=>`<button class="chip" data-action="run" data-q="${esc(c)}" aria-label="${esc(c)}: find other doctors">${esc(c)}</button>`).join("")}</div></div></section>
    <section class="p-sec" aria-labelledby="ps-lang"><h3 id="ps-lang">Languages</h3><div class="kv"><div><span class="lead lead-16">${ic("translate",20)}</span><p>${esc(p.langs.join(", "))}</p></div></div></section>
    <section class="p-sec" aria-labelledby="ps-loc"><h3 id="ps-loc">Locations and contact</h3>
-     ${locs.map(l=>`<div class="card loc-card"><div class="kv"><div><span class="lead lead-16">${ic("location_on",20)}</span><p><b>${esc(l.n)}</b><span>${esc(l.a)}${locDist(l)!=null?` · ${fmtMi(locDist(l))}`:""}</span></p></div>
+     ${locs.map(l=>`<div class="card loc-card">${locFavBtn(l).replace('class="icon-btn fav-loc"','class="icon-btn fav-loc fav"')}<div class="kv"><div><span class="lead lead-16">${ic("location_on",20)}</span><p><b>${esc(l.n)}</b><span>${esc(l.a)}${locDist(l)!=null?` · ${fmtMi(locDist(l))}`:""}</span></p></div>
        <div><span class="lead lead-16">${ic("call",20)}</span><p><span class="ph" style="color:var(--c-text);font-size:var(--fs-16);line-height:var(--lh-16)">${l.ph}</span><span>Appointments and questions</span></p></div></div>
        <div class="row-btns"><button class="btn btn-secondary btn-sm" data-action="toast" data-kind="out" data-msg="Opens your maps app">${ic("directions",20)}<span>Directions</span></button>
        <button class="btn btn-secondary btn-sm" data-action="toast" data-kind="out" data-msg="Opens the phone app: ${l.ph}">${ic("call",20)}<span>Call</span></button></div></div>`).join("")}
@@ -585,32 +586,74 @@ function viewProfile(id){
   </div>`;
 }
 
-/* ---------- Saved, Locations, Menu ---------- */
+/* ---------- Favorites, Wayfinding, Locations, Menu ---------- */
+/* Favorites tab: one place for everything a guest saves on this device, split into Providers and Locations */
+function favSeg(){const segs=[["providers","Providers",S.saved.length],["locations","Locations",S.savedLocs.length]];
+  return `<div class="segm fav-seg" role="radiogroup" aria-label="Show saved">${segs.map(([v,l,n])=>`<label><input type="radio" name="favseg" value="${v}" ${S.favSeg===v?"checked":""}><span>${l}${n?` <b class="seg-n">${n}</b>`:""}</span></label>`).join("")}</div>`}
 function viewSaved(){
+  const note=`<p class="fine">Favorites stay on this device. Find them any time under Favorites in the tab bar. If you delete the app, they’re removed.</p>`;
+  if(S.favSeg==="locations"){
+    const ls=S.savedLocs.map(k=>LOCS[k]).filter(Boolean);
+    if(!ls.length)return `<div class="res-body">${favSeg()}<div class="card state">${well("location_on",48)}<h2>No saved locations yet</h2><p>Tap the heart next to a clinic or hospital to keep its address, phone number, and directions here.</p>
+      <button class="btn btn-primary" data-action="push" data-v="locations">${ic("location_on",20)}<span>Browse locations</span></button></div>${note}</div>`;
+    return `<div class="res-body">${favSeg()}<div class="res-sum"><h2>${ls.length} saved location${ls.length>1?"s":""}</h2><p>Tap a location for directions.</p></div>
+      <div class="card list">${ls.map(l=>locRow(l)).join("")}</div>${note}</div>`;
+  }
   const ps=S.saved.map(id=>PBY[id]).filter(Boolean);
-  if(!ps.length)return `<div class="v-inner" style="padding:var(--sp-16)"><div class="card state">${well("favorite",48)}<h2>No saved providers yet</h2><p>Tap the heart on a doctor’s profile or search result to keep them here.</p>
-    <button class="btn btn-primary" data-action="tab" data-tab="find">${ic("stethoscope",20)}<span>Find a doctor</span></button></div>
-    <p class="fine">Saved providers stay on this device. If you delete the app, they’re removed.</p></div>`;
-  return `<div class="res-body"><div class="res-sum"><h2>${ps.length} saved provider${ps.length>1?"s":""}</h2><p>Saved on this device. They stay until you remove them or delete the app.</p></div>
-    ${ps.map((p,i)=>pcard(p,i)).join("")}</div>`;
+  if(!ps.length)return `<div class="res-body">${favSeg()}<div class="card state">${well("favorite",48)}<h2>No saved providers yet</h2><p>Tap the heart on a doctor’s profile or search result to keep them here.</p>
+    <button class="btn btn-primary" data-action="tab" data-tab="find">${ic("stethoscope",20)}<span>Find a doctor</span></button></div>${note}</div>`;
+  return `<div class="res-body">${favSeg()}<div class="res-sum"><h2>${ps.length} saved provider${ps.length>1?"s":""}</h2><p>Saved on this device. They stay until you remove them or delete the app.</p></div>
+    ${ps.map((p,i)=>pcard(p,i)).join("")}${note}</div>`;
 }
-/* Wayfinding tab: where to, quick destinations, campuses. Indoor routes hand off to the wayfinding app (simulated). */
+/* Heart for a location (clinic, hospital); same toggle as providers, smaller target sits at the end of a row */
+function locFavBtn(l){const on=isLocSaved(l.id);
+  return `<button class="icon-btn fav-loc" data-action="fav-loc" data-id="${l.id}" aria-pressed="${on}" aria-label="${on?`Remove ${esc(l.n)} from saved`:`Save ${esc(l.n)}`}">${on?heart(24):ic("favorite")}</button>`}
+function locRow(l,act){const d=locDist(l);
+  return `<div class="row-wrap" data-loc="${l.id}"><button class="row" ${act||`data-action="push" data-v="wayfinding" data-to="${l.id}"`}>${well(/Hospital/.test(l.n)?"local_hospital":"location_on")}<span class="rt"><b>${esc(l.n)}</b><span>${esc(l.a)}${d!=null?` · ${fmtMi(d)}`:""}</span></span></button>${locFavBtn(l)}</div>`}
+/* Wayfinding: an in-app page (push), reached from the Wayfinding quick link, the contextual card on Home, Locations, saved locations, and the menu.
+   Works for any visitor: no appointment or MyChart account needed. Indoor routes hand off to the wayfinding provider (simulated). */
 const WF_DEST=[["local_parking","Parking"],["door_front","Main entrance"],["local_pharmacy","Pharmacy"],["restaurant","Cafeteria"],["wc","Restrooms"],["elevator","Elevators"]];
+const WF_FAC="L6",WF_VISIT={when:"Today, 2:30 p.m.",what:"Primary care visit",loc:"L1",room:"Suite 200, Floor 2"};
+/* Which contextual state applies: at a facility needs location permission; an upcoming visit comes from MyChart (mocked) */
+function wfCtx(){if(S.wf==="facility"&&S.perm==="granted")return "facility";if(S.wf==="visit")return "visit";return null}
+function wfContextCard(){
+  const c=wfCtx();if(!c)return "";
+  if(c==="facility"){const l=LOCS[WF_FAC];
+    return `<section class="mod rise" style="--i:0" aria-labelledby="h-wfctx"><div class="card wf-ctx">
+      <span class="wf-ctx-ic" aria-hidden="true">${ic("my_location")}</span>
+      <div class="wf-ctx-txt"><span class="eyebrow">You’re here</span><h2 id="h-wfctx">You’re at ${esc(l.n)}</h2><p>Get step-by-step directions to a clinic, parking, or the pharmacy.</p></div>
+      <button class="btn btn-primary btn-sm wf-ctx-go" data-action="push" data-v="wayfinding" data-to="${l.id}">${ic("directions",20)}<span>Get directions</span></button></div></section>`}
+  const l=LOCS[WF_VISIT.loc];
+  return `<section class="mod rise" style="--i:0" aria-labelledby="h-wfctx"><div class="card wf-ctx">
+    <span class="wf-ctx-ic" aria-hidden="true">${ic("calendar_month")}</span>
+    <div class="wf-ctx-txt"><span class="eyebrow">Upcoming visit</span><h2 id="h-wfctx">${WF_VISIT.when}</h2><p>${WF_VISIT.what} at ${esc(l.n)}, ${WF_VISIT.room}</p></div>
+    <button class="btn btn-primary btn-sm wf-ctx-go" data-action="push" data-v="wayfinding" data-to="${l.id}">${ic("directions",20)}<span>Get directions</span></button></div></section>`;
+}
 function viewWayfinding(){
-  const ls=Object.values(LOCS).slice(0,4);
-  return `<div class="res-body">
+  const t=top(),c=wfCtx(),to=t.to?LOCS[t.to]:null;
+  const here=c==="facility"?LOCS[WF_FAC]:null,visit=c==="visit"?LOCS[WF_VISIT.loc]:null;
+  const place=to||here||visit;
+  const ls=Object.values(LOCS).sort((a,b)=>(locDist(a)??0)-(locDist(b)??0)).slice(0,4);
+  const head=here&&(!to||to===here)?`<div class="card wf-here"><span class="eyebrow">You’re here</span><h2>${esc(here.n)}</h2><p>Choose where you’re going inside. Directions start from where you are.</p></div>`
+    :visit&&(!to||to===visit)?`<div class="card wf-here"><span class="eyebrow">Your visit · ${WF_VISIT.when}</span><h2>${esc(visit.n)}</h2><p>${WF_VISIT.room}. Plan to arrive 15 minutes early.</p>
+      <div class="row-btns"><button class="btn btn-primary btn-sm" data-action="toast" data-kind="out" data-msg="Opens your maps app: ${esc(visit.n)}">${ic("near_me",20)}<span>Drive there</span></button>
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-kind="go" data-msg="Shows the indoor route to ${WF_VISIT.room}">${ic("route",20)}<span>Route to ${WF_VISIT.room.split(",")[0]}</span></button></div></div>`
+    :to?`<div class="card wf-here"><span class="eyebrow">Directions to</span><h2>${esc(to.n)}</h2><p>${esc(to.a)}</p>
+      <div class="row-btns"><button class="btn btn-primary btn-sm" data-action="toast" data-kind="out" data-msg="Opens your maps app: ${esc(to.n)}">${ic("near_me",20)}<span>Get there</span></button>${locFavBtn(to).replace('class="icon-btn fav-loc"','class="icon-btn fav-loc inline"')}</div></div>`:"";
+  return `<div class="res-body">${head}
    <button class="card wf-go press" data-action="toast" data-kind="go" data-msg="Opens indoor wayfinding: choose a destination">
-     <span class="wf-go-ic">${ic("directions_walk")}</span><span class="rt"><b>Where are you going?</b><span>Turn-by-turn directions to and inside our campuses</span></span>${ic("chevron_right",20)}</button>
-   <section class="grp" aria-labelledby="wf-q"><h2 class="lbl-h" id="wf-q">Quick destinations</h2>
+     <span class="wf-go-ic">${ic("directions_walk")}</span><span class="rt"><b>Where are you going?</b><span>${place?`Clinics, rooms, and services at ${esc(place.n)}`:"Turn-by-turn directions to and inside our buildings"}</span></span>${ic("chevron_right",20)}</button>
+   <section class="grp" aria-labelledby="wf-q"><h2 class="lbl-h" id="wf-q">${place?"Nearby inside":"Quick destinations"}</h2>
      <div class="wf-grid">${WF_DEST.map(([g,l])=>`<button class="card wf-dest press" data-action="toast" data-kind="go" data-msg="Shows the route to the nearest ${l.toLowerCase()}">${well(g)}<span>${l}</span></button>`).join("")}</div></section>
    <section class="grp" aria-labelledby="wf-c"><h2 class="lbl-h" id="wf-c">Campuses and buildings</h2>
-     <div class="card list">${ls.map(l=>`<button class="row" data-action="toast" data-kind="go" data-msg="Opens indoor maps for ${esc(l.n)}">${well("apartment")}<span class="rt"><b>${esc(l.n)}</b><span>${esc(l.a)}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div></section>
-   <p class="fine">Sample campuses. Indoor maps and live directions come from the wayfinding provider in the real app.</p></div>`;
+     <div class="card list">${ls.map(l=>locRow(l,`data-action="toast" data-kind="go" data-msg="Opens indoor maps for ${esc(l.n)}"`)).join("")}</div></section>
+   <p class="fine">No appointment or MyChart account needed. Sample campuses; indoor maps and live directions come from the wayfinding provider in the real app.</p></div>`;
 }
 function viewLocations(){
   const ls=Object.values(LOCS).sort((a,b)=>(locDist(a)??0)-(locDist(b)??0));
-  return `<div class="res-body"><div class="notice"><span class="lead">${ic("info",20)}</span><span>Find a location and indoor maps are outside this prototype. Sample locations are listed for context.</span></div>
-   <div class="card list">${ls.map(l=>`<button class="row" data-action="toast" data-kind="go" data-msg="Opens ${esc(l.n)}">${well("location_on")}<span class="rt"><b>${esc(l.n)}</b><span>${esc(l.a)}${locDist(l)!=null?` · ${fmtMi(locDist(l))}`:""}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div></div>`;
+  return `<div class="res-body"><p class="fine" style="margin:0">Tap a location for directions. Tap the heart to keep it in Favorites.</p>
+   <div class="card list">${ls.map(l=>locRow(l)).join("")}</div>
+   <p class="fine">Sample locations. Location search by specialty and type is outside this prototype.</p></div>`;
 }
 const OUT=ic("chevron_right",20),CHEV=ic("chevron_right",20);
 const mrow=(g,t,sub,act,extra="")=>`<button class="row" ${act}>${well(g)}<span class="rt"><b>${t}</b>${sub?`<span>${sub}</span>`:""}</span>${extra}</button>`;
@@ -627,8 +670,9 @@ function viewMenu(){
   return `<div class="res-body" style="gap:var(--sp-24)">
    <section class="grp" aria-labelledby="mn-1"><h2 class="lbl-h" id="mn-1">Updates</h2><div class="card list">
      ${mrow("inbox","Inbox",n?`${n} new message${n>1?"s":""} from UTSW MyCare`:"No new messages",`data-action="push" data-v="inbox"${n?` aria-label="Inbox, ${n} new"`:""}`,(n?`<span class="new-pill" aria-hidden="true">${n} new</span>`:"")+CHEV)}
-     ${mrow("favorite","Saved providers",S.saved.length?`${S.saved.length} saved on this device`:"Doctors you save appear here",`data-action="tab" data-tab="saved"`,CHEV)}
-     ${mrow("location_on","Locations","Hospitals, clinics, and urgent care",`data-action="tab" data-tab="locations"`,CHEV)}
+     ${mrow("favorite","Favorites",favTotal()?`${favTotal()} saved on this device · also in the tab bar`:"Doctors and locations you save · also in the tab bar",`data-action="tab" data-tab="saved"`,CHEV)}
+     ${mrow("location_on","Locations","Hospitals, clinics, and urgent care",`data-action="push" data-v="locations"`,CHEV)}
+     ${mrow("directions","Wayfinding","Directions to and inside our buildings",`data-action="push" data-v="wayfinding"`,CHEV)}
      ${mrow("login","Sign in to MyChart","Messages, test results, visits, and billing",`data-action="mychart"`,CHEV)}
      ${mrow("newspaper","MedBlog","Health news and tips from our experts",`data-action="push" data-v="medblog"`,CHEV)}</div></section>
    <section class="grp" aria-labelledby="mn-2"><h2 class="lbl-h" id="mn-2">Patients and visitors</h2><div class="card list">
@@ -925,7 +969,15 @@ function toggleFav(id,src){
     $$(`[data-action="fav"][data-id="${id}"]`).forEach(b=>{if(on){b.classList.add("popping","filling");setTimeout(()=>b.classList.remove("popping","filling"),480)}});
     if(src)$(`[data-action="fav"][data-id="${id}"]${src==="hero"?'[data-style="hero"]':':not([data-style])'}`)?.focus();
   }
-  toast(on?`${drName(p)} saved on this device`:`${drName(p)} removed from saved`,"done",{label:"Undo",fn:()=>toggleFav(id)});
+  toast(on?`${drName(p)} saved to Favorites`:`${drName(p)} removed from Favorites`,"done",{label:"Undo",fn:()=>toggleFav(id)});
+}
+
+function toggleLocFav(id){
+  const l=LOCS[id],on=!isLocSaved(id);
+  S.savedLocs=on?[...S.savedLocs,id]:S.savedLocs.filter(x=>x!==id);store.set("saved-locs",S.savedLocs);renderTabbar();
+  if(top().v==="saved"&&!on){const r=$(`[data-loc="${id}"]`);if(r&&canMove())collapseOut(r,()=>rerenderKeep());else rerenderKeep()}
+  else $$(`[data-action="fav-loc"][data-id="${id}"]`).forEach(b=>{b.setAttribute("aria-pressed",String(on));b.setAttribute("aria-label",on?`Remove ${l.n} from saved`:`Save ${l.n}`);b.innerHTML=on?heart(24):ic("favorite");if(on&&canMove()){b.classList.add("popping","filling");setTimeout(()=>b.classList.remove("popping","filling"),480)}});
+  toast(on?`${l.n} saved to Favorites`:`${l.n} removed from Favorites`,"done",{label:"Undo",fn:()=>toggleLocFav(id)});
 }
 
 /* ---------- Global search overlay (kept from the home prototype) ---------- */
@@ -1041,7 +1093,7 @@ screen.addEventListener("click",e=>{
    case "search-saved":closeSearch(()=>switchTab("saved",true));break;
    case "clear-history":S.recent=[];store.set("recent",[]);renderYours(false);$("#yt-history")?.focus();sayPolite("Search history cleared");break;
    case "gs-profile":closeSearch(()=>push({v:"profile",id}));break;
-   case "tile":{const k=el.dataset.k;if(k==="find")switchTab("find",true);else if(k==="locations")switchTab("locations",true);else openMyChart(el.dataset.l);break}
+   case "tile":{const k=el.dataset.k;if(k==="find")switchTab("find",true);else if(k==="locations")push({v:"locations"});else if(k==="wayfinding")push({v:"wayfinding"});else openMyChart(el.dataset.l);break}
    case "near-me":S.fcText="";runSearch("",{});if(!S.loc)setTimeout(useMyLocation,rm()?0:350);break;
    case "run":{const go=()=>{S.fcText="";runSearch(el.dataset.q)};if(!$("#layer").hidden)closeSheet(go);else go();break}
    case "run-accepting":S.fcText="";runSearch(el.dataset.q);S.filters.accepting=true;render();load();break;
@@ -1067,20 +1119,19 @@ screen.addEventListener("click",e=>{
    case "widen":S.filters.dist="50";render();load();break;
    case "retry":if(S.data==="error"||S.data==="offline"){S.data="live";syncControls()}load();break;
    case "profile":push({v:"profile",id});break;
-   case "push":push({v:el.dataset.v});break;
+   case "push":push(el.dataset.to?{v:el.dataset.v,to:el.dataset.to}:{v:el.dataset.v});break;
    case "blog-cat":S.blogCat=el.dataset.c;rerenderKeep(true);{const c=$(`[data-action="blog-cat"][data-c="${el.dataset.c}"]`);if(c){c.focus({preventScroll:true});c.scrollIntoView({inline:"center",block:"nearest",behavior:rm()?"auto":"smooth"})}}sayPolite(`${BLOG.filter(b=>S.blogCat==="All"||b.cat===S.blogCat).length} stories`);break;
    case "blog-more":{const n=$$(".blog-row").length;S.blogMore=true;rerenderKeep(true);$$(".blog-row")[n]?.focus();break}
    case "inbox-open":{const m=INBOX.find(x=>x.id===id);S.inboxRead.add(id);rerenderKeep();$(`[data-action="inbox-open"][data-id="${id}"]`)?.focus();toast("Opens: "+m.t,"go");break}
+   case "fav-loc":toggleLocFav(id);break;
    case "fav":toggleFav(id,el.dataset.style==="hero"?"hero":"card");break;
    case "share":openShare(id);break;
    case "request":openRequest(id);break;
    case "bio":{const b=$("#bio");const open=!b.classList.contains("open");const h0=b.offsetHeight;b.classList.toggle("open",open);if(canMove())b.animate([{height:h0+"px"},{height:b.offsetHeight+"px"}],{duration:440,easing:EASE_IOS});el.setAttribute("aria-expanded",String(open));el.firstElementChild.textContent=open?"Show less":"Read more";break}
    case "mychart":if(!$("#layer").hidden)closeSheet(()=>openMyChart());else openMyChart();break;
    case "open-menu":openDrawer();break;
-   case "ob-next":if(obIdx>=OB.length-1)obWelcome();else obGo(obIdx+1);break;
-   case "ob-skip":obWelcome();break;
-   case "ob-guest":finishOnboarding("home");break;
-   case "ob-patient":finishOnboarding("mychart");break;
+   case "ob-next":if(obIdx>=OB.length-1)finishOnboarding("home");else obGo(obIdx+1);break;
+   case "ob-skip":finishOnboarding("home");break;
    case "close-drawer":closeDrawer();break;
    case "pw-toggle":{const i=$("#mc-pw"),on=i.type==="password";i.type=on?"text":"password";el.setAttribute("aria-pressed",String(on));el.setAttribute("aria-label",on?"Hide password":"Show password");el.innerHTML=ic(on?"visibility_off":"visibility",20);break}
    case "close-sheet":closeSheet();break;
@@ -1095,12 +1146,12 @@ screen.addEventListener("keydown",e=>{
     if(!$("#drawer").hidden){closeDrawer();e.stopPropagation();return}
     if(!$("#layer").hidden){closeSheet();e.stopPropagation()}else if(!$("#search").hidden)closeSearch();
   }
-  if(!$("#ob").hidden)trap(e,$("#ob-welcome")||$("#ob"));else if(!$("#drawer").hidden)trap(e,$("#drawer .drawer"));else if(!$("#sys").hidden)trap(e,$("#sys"));else if(!$("#layer").hidden)trap(e,$("#sheet"));else if(!$("#search").hidden)trap(e,$("#search"));
+  if(!$("#ob").hidden)trap(e,$("#ob"));else if(!$("#drawer").hidden)trap(e,$("#drawer .drawer"));else if(!$("#sys").hidden)trap(e,$("#sys"));else if(!$("#layer").hidden)trap(e,$("#sheet"));else if(!$("#search").hidden)trap(e,$("#search"));
 });
 
 /* ---------- Page controls ---------- */
 function syncControls(){
-  const v={alerts:String(S.alerts),fw:String(S.fw),ts:String(S.ts),rm:S.rm?"1":"0",perm:S.perm,data:S.data,theme:S.theme};
+  const v={wf:S.wf,alerts:String(S.alerts),fw:String(S.fw),ts:String(S.ts),rm:S.rm?"1":"0",perm:S.perm,data:S.data,theme:S.theme};
   $$(".seg").forEach(g=>$$("button",g).forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===v[g.dataset.ctl]))));
   screen.style.setProperty("--fw",S.fw+"px");screen.classList.toggle("large",S.ts===2);screen.classList.toggle("rm",S.rm);screen.classList.toggle("narrow",S.fw<380);
   screen.classList.toggle("offline",S.data==="offline");setTimeout(placeInd,320);$("#sb-off").innerHTML=S.data==="offline"?"No connection":"";
@@ -1109,18 +1160,21 @@ function setMotion(reduced){S.rm=reduced;S.playing=!rm();syncControls();updatePa
 $$(".seg").forEach(g=>g.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;const k=g.dataset.ctl,v=b.dataset.v;
   if(k==="alerts"){S.alerts=+v;S.dismissed.clear();if(top().v==="home")rerenderKeep();const l=activeAlerts();if(l.length)sayAssert(`${l[0].label} alert: ${l[0].title}`)}
+  else if(k==="wf"){S.wf=v;if(v==="facility"&&S.perm!=="granted"){S.perm="granted";S.osAnswer="granted"}const t=top().v;if(t==="home"||t==="wayfinding")rerenderKeep();
+    if(v!=="none")sayPolite(v==="facility"?"Showing: at a UTSW facility":"Showing: upcoming visit")}
   else if(k==="theme")setTheme(v);else if(k==="fw")S.fw=+v;else if(k==="ts")S.ts=+v;else if(k==="rm")setMotion(v==="1");
   else if(k==="perm"){S.perm=v;S.osAnswer=v==="denied"?"denied":null;if(v!=="granted"&&S.loc&&S.loc.kind==="gps")S.loc=null;rerenderAfterLoc()}
   else if(k==="data"){S.data=v;if(top().v==="results")load()}
   syncControls();
 }));
-$("#reset-local").addEventListener("click",()=>{S.saved=[];S.recent=[];store.set("saved",[]);store.set("recent",[]);renderTabbar();rerenderKeep();toast("Saved providers and recent searches cleared")});
+$("#reset-local").addEventListener("click",()=>{S.saved=[];S.savedLocs=[];S.recent=[];store.set("saved",[]);store.set("saved-locs",[]);store.set("recent",[]);renderTabbar();rerenderKeep();toast("Favorites and recent searches cleared")});
 
 /* Module layout (CMS) */
 function renderCMS(){
   const L=S.layout;
   $("#cms").innerHTML=`<li class="cms-row"><span class="pos" aria-hidden="true">–</span><span class="nm"><b>Emergency alerts</b><span>Pinned to top while active · Emergency before advisory, then newest</span></span></li>
-   <li class="cms-row"><span class="pos" aria-hidden="true">–</span><span class="nm"><b>Welcome, search, and top searches</b><span>Pinned below alerts</span></span></li>`+
+   <li class="cms-row"><span class="pos" aria-hidden="true">–</span><span class="nm"><b>Find Care search</b><span>Pinned below alerts · one field for doctors, locations, and more</span></span></li>
+   <li class="cms-row"><span class="pos" aria-hidden="true">–</span><span class="nm"><b>Wayfinding card</b><span>Pinned below search · only at a UTSW facility (location on) or before a visit</span></span></li>`+
    L.map((m,i)=>{const d=MODS[m.id];return `<li class="cms-row${m.on&&!d.expired?"":" off"}"><span class="pos">${i+1}</span><span class="nm"><b>${d.name}</b><span>${d.meta}</span></span>
     <span class="mv"><button data-cms="up" data-id="${m.id}" aria-label="Move ${d.name} up" ${i===0?"disabled":""}>${ic("expand_less",20)}</button><button data-cms="down" data-id="${m.id}" aria-label="Move ${d.name} down" ${i===L.length-1?"disabled":""}>${ic("expand_more",20)}</button></span>
     <label class="switch"><input type="checkbox" id="vis-${m.id}" data-cms="vis" data-id="${m.id}" ${m.on&&!d.expired?"checked":""} ${d.expired?"disabled":""} aria-label="Show ${d.name}"><span></span></label></li>`}).join("");
@@ -1138,7 +1192,7 @@ function reset(){
   if(!$("#sys").hidden){$("#sys").hidden=true;$("#sys").innerHTML="";$("#layer").removeAttribute("inert")}
   const Dr=$("#drawer");Dr.hidden=true;Dr.classList.remove("open");const Ob=$("#ob");Ob.hidden=true;Ob.innerHTML="";clearTimeout(spT);const Sp=$("#splash");Sp.hidden=true;Sp.innerHTML="";
   const L=$("#layer");L.hidden=true;L.classList.remove("open");sheetKind=null;const s=$("#search");s.hidden=true;s.classList.remove("open");setInert(false);
-  S.stacks={home:[{v:"home"}],find:[{v:"find"}],wayfinding:[{v:"wayfinding"}],locations:[{v:"locations"}],saved:[{v:"saved"}],mychart:[{v:"mychart"}]};
+  S.stacks={home:[{v:"home"}],find:[{v:"find"}],saved:[{v:"saved"}],mychart:[{v:"mychart"}]};
   S.filters=blankFilters();S.sort="relevance";S.fcText="";clearTimeout(loadT);S.loading=false;view.scrollTop=0;
 }
 const goTab=t=>{S.tab=t;markTab()};
@@ -1146,9 +1200,12 @@ const setResults=(q,cb)=>{goTab("find");S.q=q;S.pq=parse(q);const pq=S.pq;pq.lan
   S.stacks.find.push({v:"results"});cb&&cb();render("fade");load()};
 const JUMPS=[
  ["splash","Splash","App launch animation",()=>{goTab("home");render();playSplash()}],
- ["onboarding","Onboarding","Four slides, swipe or Next",()=>{goTab("home");render();openOnboarding()}],
- ["welcome","Welcome","Sign in as a patient or guest",()=>{goTab("home");render();openOnboarding("welcome")}],
- ["home","Guest home","Alerts, search, modules",()=>{goTab("home");render("fade")}],
+ ["onboarding","Onboarding","Four slides, then Home as a guest",()=>{goTab("home");render();openOnboarding()}],
+ ["home","Guest home","Alerts, search, modules",()=>{S.wf="none";goTab("home");render("fade")}],
+ ["wf-here","Home at a facility","Contextual wayfinding card",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";goTab("home");render("fade")}],
+ ["wf-visit","Home before a visit","Upcoming visit with directions",()=>{S.wf="visit";goTab("home");render("fade")}],
+ ["wayfinding","Wayfinding","In-app page, no account needed",()=>{goTab("home");S.stacks.home.push({v:"wayfinding"});render("fade")}],
+ ["locations","Locations","Save a location with the heart",()=>{goTab("home");S.stacks.home.push({v:"locations"});render("fade")}],
  ["gsearch","Global search","Top searches and grouped results",()=>{goTab("home");render("fade");setTimeout(()=>openSearch("knee"),50)}],
  ["find","Find Care","Recent, popular, specialties",()=>{goTab("find");render("fade")}],
  ["suggest","Auto-suggestions","Typing “derm”",()=>{goTab("find");S.fcText="derm";render("fade")}],
@@ -1168,7 +1225,8 @@ const JUMPS=[
  ["menu","Menu","Drawer from the top-left button",()=>{goTab("home");render("fade");setTimeout(openDrawer,rm()?0:200)}],
  ["mychart","MyChart","Sign-in screen and guest options",()=>{goTab("mychart");render("fade")}],
  ["medblog","MedBlog, see all","Topic filter and story list",()=>{S.blogCat="All";S.blogMore=false;goTab("home");S.stacks.home.push({v:"medblog"});render("fade")}],
- ["saved","Saved providers","Stored on this device",()=>{if(!S.saved.length){S.saved=["avery-morgan","priya-shah"];store.set("saved",S.saved);renderTabbar()}goTab("saved");render("fade")}]
+ ["saved","Favorites · Providers","Stored on this device",()=>{if(!S.saved.length){S.saved=["avery-morgan","priya-shah"];store.set("saved",S.saved);renderTabbar()}S.favSeg="providers";goTab("saved");render("fade")}],
+ ["saved-locs","Favorites · Locations","Saved clinics and hospitals",()=>{if(!S.savedLocs.length){S.savedLocs=["L6","L1"];store.set("saved-locs",S.savedLocs);renderTabbar()}S.favSeg="locations";goTab("saved");render("fade")}]
 ];
 $("#jumps").innerHTML=JUMPS.map(([k,t,s])=>`<button class="page-btn" data-jump="${k}">${t}<span>${s}</span></button>`).join("");
 $("#jumps").addEventListener("click",e=>{const b=e.target.closest("[data-jump]");if(!b)return;const j=JUMPS.find(x=>x[0]===b.dataset.jump);reset();j[3]();syncControls();view.scrollTop=0;
@@ -1178,7 +1236,8 @@ $("#jumps").addEventListener("click",e=>{const b=e.target.closest("[data-jump]")
 const REQ=[
  ["Home layout","Guest composition from CMS modules, configured order, visibility rules, expiry","home"],
  ["Emergency alert banner","Banner, details sheet, emergency-first priority, dismiss where allowed","home"],
- ["Search and quick access","Search entry, top searches, Quick links tiles routing to MyChart tasks","gsearch"],
+ ["Search and quick access","One Find Care search field on Home (no repeated text, no top searches); Quick links with Wayfinding and locations, then MyChart tasks","gsearch"],
+ ["Wayfinding (Nov 19)","No tab; contextual Home card at a facility or before a visit, Quick link, Locations, menu; in-app page that works without an account","wf-here"],
  ["Featured content and services","MedBlog carousel, flu shot campaign, UTSW resources, announcements","home"],
  ["Provider search","Keyword, plain-language mapping, auto-suggestions, recent and popular searches, spelling","plain"],
  ["Location-based search","Near me with OS prompt, ZIP or city entry, denied and can’t-locate fallbacks","denied"],
@@ -1186,9 +1245,9 @@ const REQ=[
  ["Sorting and ranking","Best match, distance, name A–Z, featured (marked)","sort"],
  ["Results and states","Result cards, no results with alternatives, loading, service error, offline, retry","empty"],
  ["Provider profile","Credentials, bio, specialties, conditions, languages, locations, contact, research and media, related","profile"],
- ["Favorites","Save and remove with Undo, saved list, stored on the device","saved"],
+ ["Favorites","Providers and Locations segments, each with its own empty state; save and remove with Undo; Favorites tab; stored on the device","saved-locs"],
  ["Share","Native share sheet with public link only","share"],
- ["Onboarding and welcome (old app’s intro)","Four slides (provider, MyChart, location, wayfinding) with swipe-linked motion; welcome with Sign in as a patient or Continue as guest","onboarding"],
+ ["Onboarding (old app’s intro)","Splash and four slides (provider, MyChart, location, wayfinding) with swipe-linked motion; Get started or Skip goes straight to Home as a guest; Sign in stays on Home","onboarding"],
  ["MyChart (old app’s MyChart login)","Tab with sign-in form, show password, forgot link, create account, and guest options","mychart"],
  ["Menu (old app’s More options)","Inbox, MedBlog, patient resources, shuttle, COVID-19, about UTSW, physicians, full website, social, privacy","menu"],
  ["MedBlog see all (old app)","Latest story, topic filter, dated list with read times, show more","medblog"]
@@ -1396,7 +1455,7 @@ function endSplash(){
   Sp.classList.add("out");setTimeout(done,520);
 }
 
-/* ---------- Onboarding and welcome ---------- */
+/* ---------- Onboarding: splash, four slides, then Home as a guest (no separate welcome screen; Sign in stays on Home) ---------- */
 const OB=[
  {t:"Find the right doctor",p:"Search by name, specialty, or condition, and read full profiles to choose the provider who fits your care.",scene:()=>`
   <div class="sc sc-pill in" data-z="1.6" style="--d:0;left:24px;top:8px;width:248px">${ic("search",20)}<span>Knee pain doctor</span></div>
@@ -1431,7 +1490,7 @@ const OB=[
   <div class="sc sc-card in" data-z="1.4" style="--d:3;left:32px;top:248px;width:232px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><b style="font-size:14px;line-height:20px;color:var(--c-blue)">Lakeview Transplant Clinic</b><span style="font-size:12px;line-height:16px;color:var(--c-text-2)">125 ft · Arrive 4:25 p.m.</span></div>`}
 ];
 let obIdx=0;
-function openOnboarding(at){
+function openOnboarding(){
   const O=$("#ob");$$(".ghost-wrap,.flyer",screen).forEach(n=>n.remove());$("#drawer").hidden=true;$("#layer").hidden=true;
   O.innerHTML=`<div class="ob-stage" aria-hidden="true"></div>
    <div class="ob-bar on-blue"><span class="logo" role="img" aria-label="UTSW MyCare"><!--LOGO_REVERSED--></span><button class="ob-skip" data-action="ob-skip">Skip</button></div>
@@ -1444,7 +1503,7 @@ function openOnboarding(at){
   const tr=$("#ob-track");tr.addEventListener("scroll",obScroll,{passive:true});
   tr.addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();obGo(obIdx+1)}else if(e.key==="ArrowLeft"){e.preventDefault();obGo(obIdx-1)}});
   $(".ob-slide",O).classList.add("intro");obSet(0);obScroll();
-  if(at==="welcome")obWelcome(true);else setTimeout(()=>$(".ob-slide.on h2",O)?.setAttribute("tabindex","-1")||$(".ob-slide.on h2",O)?.focus(),60);
+  setTimeout(()=>$(".ob-slide.on h2",O)?.setAttribute("tabindex","-1")||$(".ob-slide.on h2",O)?.focus(),60);
 }
 function obSet(i){
   if(i===obIdx)return;obIdx=i;const sl=$$(".ob-slide",$("#ob"));
@@ -1462,33 +1521,9 @@ function obScroll(){cancelAnimationFrame(obRaf);obRaf=requestAnimationFrame(()=>
   obSet(Math.max(0,Math.min(OB.length-1,Math.round(x/w))));
 })}
 function obGo(i){const tr=$("#ob-track");if(!tr)return;i=Math.max(0,Math.min(OB.length-1,i));tr.scrollTo({left:i*tr.clientWidth,behavior:rm()?"auto":"smooth"})}
-function obWelcome(instant){
-  const O=$("#ob");let W=$("#ob-welcome");
-  if(!W){O.insertAdjacentHTML("beforeend",`<div class="ob-welcome" id="ob-welcome" role="region" aria-labelledby="ob-wel-h">
-    <div class="ob-stage" aria-hidden="true"></div>
-    <div class="ob-bar on-blue"><span class="logo" role="img" aria-label="UTSW MyCare"><!--LOGO_REVERSED--></span></div>
-    <div class="ob-wel-art" aria-hidden="true"><span class="ob-wel-ring r2"></span><span class="ob-wel-ring"></span><span class="ob-wel-icon"><!--APP_ICON--></span></div>
-    <div class="ob-wel-body"><h2 id="ob-wel-h" tabindex="-1">Welcome to UTSW MyCare</h2>
-      <p>Sign in to see your care, or continue as a guest to find doctors, locations, and health information.</p>
-      <div class="ob-choices">
-        <button class="ob-choice primary press" data-action="ob-patient"><span class="ob-ic">${ic("lock")}</span><span class="rt"><b>Sign in as a patient</b><span>Use your MyChart account</span></span>${ic("chevron_right")}</button>
-        <button class="ob-choice secondary press" data-action="ob-guest"><span class="ob-ic">${ic("person")}</span><span class="rt"><b>Continue as guest</b><span>No account needed</span></span>${ic("chevron_right")}</button>
-      </div>
-      <button class="ob-wel-link" data-action="toast" data-kind="go" data-msg="Opens MyChart sign-up">New to MyChart? <u>Create an account</u></button>
-    </div></div>`);W=$("#ob-welcome");}
-  $$(".ob-bar,.ob-track,.ob-foot",O).forEach(e=>{if(!e.closest("#ob-welcome"))e.setAttribute("inert","")});
-  if(canMove()&&!instant){
-    W.animate(ZOOM_IN_KF,{duration:ZOOM_IN,easing:EASE_IOS});
-    $(".ob-wel-icon",W).animate([{opacity:0,transform:"scale(.6) rotate(-8deg)"},{opacity:1,transform:"none"}],{duration:760,delay:120,easing:EASE_IOS,fill:"backwards"});
-    $$(".ob-wel-ring",W).forEach((r,i)=>r.animate([{opacity:0,transform:"scale(.5)"},{opacity:i?.6:1,transform:"none"}],{duration:900,delay:200+i*120,easing:EASE_IOS,fill:"backwards"}));
-    stagger($$(".ob-wel-body>*,.ob-choice",W),260,70,8);
-  }
-  sayPolite("Welcome to UTSW MyCare");setTimeout(()=>$("#ob-wel-h")?.focus(),instant||rm()?0:120);
-}
 function finishOnboarding(dest){
   store.set("onboarded",true);const O=$("#ob");
-  const done=()=>{O.hidden=true;O.innerHTML="";setInert(false);if(dest==="mychart"){S.tab="home";S.stacks.home=[{v:"home"},{v:"mychart"}]}else{S.tab=dest;S.stacks[dest].splice(1)}markTab();S.heroDone=false;render("fade",{scroll:0});
-    if(dest==="mychart")setTimeout(()=>$("#mc-user")?.focus(),rm()?0:300);};
+  const done=()=>{O.hidden=true;O.innerHTML="";setInert(false);S.tab=dest;S.stacks[dest].splice(1);markTab();S.heroDone=false;render("fade",{scroll:0});sayPolite("Home. You’re exploring as a guest. Sign in any time from the top of Home.")};
   if(!canMove())return done();
   O.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(1.04)"}],{duration:420,easing:EASE_IOS,fill:"forwards"}).onfinish=done;
 }
@@ -1510,6 +1545,8 @@ function closeDrawer(keepFocus){
 /* ---------- Boot ---------- */
 S.theme=store.get("theme","light");applyTheme();
 $("#drawer-body").addEventListener("change",e=>{if(e.target.name==="theme")setTheme(e.target.value)});
+view.addEventListener("change",e=>{if(e.target.name!=="favseg")return;S.favSeg=e.target.value;rerenderKeep(true);$(`#view input[name="favseg"][value="${S.favSeg}"]`)?.focus();
+  sayPolite(S.favSeg==="locations"?`Saved locations, ${S.savedLocs.length}`:`Saved providers, ${S.saved.length}`)});
 $("#search-back").innerHTML=ico("arrow_back");syncSearchFilters();
 $("#search-ic").outerHTML=ic("search");
 $("#q-clear").innerHTML=ic("close",20);
