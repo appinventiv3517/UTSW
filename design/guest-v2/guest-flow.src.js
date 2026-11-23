@@ -344,7 +344,7 @@ function focusTitle(){setTimeout(()=>{const h=$("#appbar .ttl")||$("#view h1");i
 
 /* ---------- App bar + tab bar ---------- */
 const TABS=[["home","Home","home"],["find","Find Care","stethoscope"],["search","Search","search"],["saved","Favorites","favorite"]];
-const TITLES={wayfinding:"Wayfinding",find:"Find Care",results:"Doctors",profile:"Doctor profile",saved:"Favorites",locations:"Locations",menu:"Menu",mychart:"MyChart",medblog:"MedBlog",inbox:"Inbox"};
+const TITLES={nav3d:"Directions",place:"Place",wayfinding:"Wayfinding",find:"Find Care",results:"Doctors",profile:"Doctor profile",saved:"Favorites",locations:"Locations",menu:"Menu",mychart:"MyChart",medblog:"MedBlog",inbox:"Inbox"};
 function renderAppbar(){
   const t=top(),depth=S.stacks[S.tab].length;
   const n0=unread(),menuBtn=`<button class="icon-btn ab-menu" data-action="open-menu" aria-label="${n0?`Menu, ${n0} new in Inbox`:"Menu"}">${ico("menu")}${n0?`<i class="ab-dot" aria-hidden="true"></i>`:""}</button>`;
@@ -352,7 +352,7 @@ function renderAppbar(){
   if(t.v==="home"){const n=unread();$("#appbar").innerHTML=`<span class="logo" role="img" aria-label="UTSW MyCare"><!--LOGO_REVERSED--></span><span class="spacer"></span>
     <button class="ab-sign" data-action="mychart" aria-label="Sign in to MyChart">${ic("login",20)}<span>Sign in</span></button>
     <button class="icon-btn ab-menu" data-action="open-menu" aria-label="${n?`Menu, ${n} new in Inbox`:"Menu"}">${ico("menu")}${n?`<i class="ab-dot" aria-hidden="true"></i>`:""}</button>`;return}
-  $("#appbar").innerHTML=`${back}<h1 class="ttl${back?" with-back":""}"><span class="t1">${TITLES[t.v]}</span>${t.v==="profile"?`<span class="t2" aria-hidden="true">${esc(name(PBY[t.id]))}</span>`:""}</h1>${menuBtn}`;
+  $("#appbar").innerHTML=`${back}<h1 class="ttl${back?" with-back":""}"><span class="t1">${t.v==="place"?ROOMS[t.room].name:TITLES[t.v]}</span>${t.v==="profile"?`<span class="t2" aria-hidden="true">${esc(name(PBY[t.id]))}</span>`:""}</h1>${menuBtn}`;
 }
 function renderTabbar(){
   $("#tabbar").innerHTML=TABS.map(([k,l,g])=>`<button class="tab" ${k==="search"?`data-action="open-search" aria-haspopup="dialog"`:`data-action="tab" data-tab="${k}"`}${k==="mychart"?` aria-label="Sign in to MyChart"`:""}${k==="saved"&&favTotal()?` aria-label="${l}, ${favTotal()} saved"`:""}><span class="pill">${ict(g)}</span><span>${l}</span></button>`).join("")+`<span class="tab-ind" id="tab-ind" aria-hidden="true"></span>`;
@@ -418,7 +418,7 @@ function viewHome(){
       <div class="hero-copy"><h1 class="sr-only">UTSW MyCare home</h1><h2 class="fc-kick" id="h-hero">${ic("stethoscope",20)}Find Care</h2></div>
       <button class="search-entry" id="hero-search" data-action="open-search" aria-haspopup="dialog" aria-label="Search doctors, locations, and more">${ic("search")}<span aria-hidden="true">Doctors, locations, and more</span></button>
     </section></div>
-    ${wfContextCard()}
+    ${wfContextCard()}${geoHome()}
     ${visibleModules().map((m,i)=>`<section class="mod rise" style="--i:${i+1}" aria-labelledby="h-${m.id}">${M[m.id]()}</section>`).join("")}</div>`;
 }
 
@@ -613,6 +613,7 @@ function locRow(l,act){const d=locDist(l);
 /* Wayfinding: an in-app page (push), reached from the Wayfinding quick link, the contextual card on Home, Locations, saved locations, and the menu.
    Works for any visitor: no appointment or MyChart account needed. Indoor routes hand off to the wayfinding provider (simulated). */
 const WF_DEST=[["local_parking","Parking"],["door_front","Main entrance"],["local_pharmacy","Pharmacy"],["restaurant","Cafeteria"],["wc","Restrooms"],["elevator","Elevators"]];
+const WF_ROOM={Pharmacy:"lv1-pharm",Cafeteria:"lv1-cafe",Restrooms:"lv1-wc",Elevators:"lv1-elev"};
 const WF_FAC="L6",WF_VISIT={when:"Today, 2:30 p.m.",what:"Primary care visit",loc:"L1",room:"Suite 200, Floor 2"};
 /* Which contextual state applies: at a facility needs location permission; an upcoming visit comes from MyChart (mocked) */
 function wfCtx(){if(S.wf==="facility"&&S.perm==="granted")return "facility";if(S.wf==="visit")return "visit";return null}
@@ -644,7 +645,8 @@ function viewWayfinding(){
    <button class="card wf-go press" data-action="toast" data-kind="go" data-msg="Opens indoor wayfinding: choose a destination">
      <span class="wf-go-ic">${ic("directions_walk")}</span><span class="rt"><b>Where are you going?</b><span>${place?`Clinics, rooms, and services at ${esc(place.n)}`:"Turn-by-turn directions to and inside our buildings"}</span></span>${ic("chevron_right",20)}</button>
    <section class="grp" aria-labelledby="wf-q"><h2 class="lbl-h" id="wf-q">${place?"Nearby inside":"Quick destinations"}</h2>
-     <div class="wf-grid">${WF_DEST.map(([g,l])=>`<button class="card wf-dest press" data-action="toast" data-kind="go" data-msg="Shows the route to the nearest ${l.toLowerCase()}">${well(g)}<span>${l}</span></button>`).join("")}</div></section>
+     <div class="wf-grid">${WF_DEST.map(([g,l])=>here&&WF_ROOM[l]?`<button class="card wf-dest press" data-action="geo-nav" data-room="${WF_ROOM[l]}">${well(g)}<span>${l}</span></button>`:`<button class="card wf-dest press" data-action="toast" data-kind="go" data-msg="Shows the route to the nearest ${l.toLowerCase()}">${well(g)}<span>${l}</span></button>`).join("")}</div></section>
+   ${here&&(!to||to===here)?wayMapHTML():""}
    <section class="grp" aria-labelledby="wf-c"><h2 class="lbl-h" id="wf-c">Campuses and buildings</h2>
      <div class="card list">${ls.map(l=>locRow(l,`data-action="toast" data-kind="go" data-msg="Opens indoor maps for ${esc(l.n)}"`)).join("")}</div></section>
    <p class="fine">No appointment or MyChart account needed. Sample campuses; indoor maps and live directions come from the wayfinding provider in the real app.</p></div>`;
@@ -743,15 +745,652 @@ function viewMedblog(){
 }
 
 /* ---------- Render ---------- */
+/* ---------- Geolocation for guests at a facility (all sample): why you’re here, nearby care and facilities, 3D wayfinding ----------
+   Applies only when location puts a guest at a facility (wfCtx()==="facility"). Floor plans share one 320 × 200 unit space. */
+const GEO={fac:"L6",plans:["lv1","lv2","lv7"],you:[28,100],elev:156,phone:"214-555-0100"};
+const PLACES={lv:{short:"Lakeview University Hospital"}};
+const PLAN_META={lv1:{b:"lv",floor:1,elev:156},lv2:{b:"lv",floor:2,elev:156},lv7:{b:"lv",floor:7,elev:156}};
+const CAT_MATCH={};
+// [id, plan, side, x0, x1, kind, name, suite, glyph]
+const ROOM_ROWS=[
+ ["lv1-info","lv1","n",12,64,"amen","Information desk","","support_agent"],["lv1-cafe","lv1","n",64,136,"amen","Café","","restaurant"],
+ ["lv1-elev","lv1","n",136,176,"core","Elevator B","","elevator"],["lv1-pharm","lv1","n",176,236,"amen","Pharmacy","","local_pharmacy"],
+ ["lv1-wc","lv1","n",236,308,"amen","Restrooms","","wc"],["lv1-chapel","lv1","s",12,64,"amen","Chapel","","self_improvement"],
+ ["lv1-lobby","lv1","s",64,196,"other","Lobby","",""],["lv1-img","lv1","s",196,308,"dept","Imaging","1300",""],
+ ["lv2-lab","lv2","n",12,100,"dept","Lab","2100",""],["lv2-wc","lv2","n",100,136,"amen","Restrooms","","wc"],
+ ["lv2-elev","lv2","n",136,176,"core","Elevator B","","elevator"],["lv2-wait","lv2","n",176,308,"other","Waiting","",""],
+ ["lv2-quiet","lv2","s",12,64,"amen","Quiet room","","self_improvement"],["lv2-snack","lv2","s",64,100,"amen","Snacks","","restaurant"],
+ ["lv2-rehab","lv2","s",100,308,"dept","Rehab","2400",""],
+ ["lv7-wait","lv7","n",12,100,"other","Waiting","",""],["lv7-wc","lv7","n",100,136,"amen","Restrooms","","wc"],
+ ["lv7-elev","lv7","n",136,176,"core","Elevator B","","elevator"],["lv7-staff","lv7","n",176,308,"other","Staff only","",""],
+ ["lv7-heart","lv7","s",12,196,"dept","Heart clinic","7200",""],["lv7-off","lv7","s",196,308,"other","Offices","",""]
+];
+const ROOMS={};
+ROOM_ROWS.forEach(([id,plan,side,x0,x1,kind,n,suite,g])=>{ROOMS[id]={id,plan,side,x0,x1,kind,name:n,suite,ic:g,cx:(x0+x1)/2,b:"lv",floor:PLAN_META[plan].floor}});
+const roomsOn=plan=>ROOM_ROWS.filter(r=>r[1]===plan).map(r=>ROOMS[r[0]]);
+const walkMin=r=>{const d=r.floor===1?Math.abs(r.cx-GEO.you[0]):Math.abs(GEO.you[0]-GEO.elev)+Math.abs(r.cx-GEO.elev)+120;return Math.max(1,Math.round(d/80))};
+const whereL=r=>`Floor ${r.floor} · ${walkMin(r)} min walk`;
+const plen=pts=>pts.reduce((a,p,i,arr)=>i?a+Math.hypot(p[0]-arr[i-1][0],p[1]-arr[i-1][1]):0,0);
+const gft=u=>`${Math.max(10,Math.round(u*2/10)*10)} ft`;
+/* What each place shows: menus and prices are to look at – nothing is ordered or booked in the app */
+const PINFO={
+ "lv1-cafe":{hours:"6:30 a.m. – 7 p.m.",k:"Menu",note:"To look, not to order in the app.",items:[["Breakfast",[["Egg and cheese sandwich","$4.50"],["Oatmeal with fruit","$3.25","Vegetarian"]]],["Lunch",[["Grilled chicken salad","$8.75","Gluten-free"],["Turkey wrap","$7.50"],["Vegetable soup","$4.25","Vegetarian"]]],["Drinks",[["Coffee","$2.25"],["Fruit smoothie","$4.75"]]]]},
+ "lv2-snack":{hours:"Open 24 hours",k:"Menu",note:"Grab and go, next to the lab.",items:[["Grab and go",[["Granola bar","$1.75"],["Fresh fruit cup","$3.50","Vegetarian"],["Bottled water","$1.50"]]]]},
+ "lv1-pharm":{hours:"8 a.m. – 8 p.m.",k:"Services and items",note:"Prescription status is in MyChart.",items:[["Services",[["Flu shot","$0 with most insurance"],["Prescription pickup","Bring a photo ID"]]],["Common items",[["Pain reliever, 100 tablets","$6.99"],["Bandages, 30 count","$4.49"]]]]},
+ "lv2-lab":{hours:"6:30 a.m. – 6 p.m.",wait:"Walk-in wait about 15 min",k:"Common tests and self-pay prices",note:"Self-pay prices before insurance.",items:[["Blood tests",[["Complete blood count","$28"],["Basic metabolic panel","$32","Fasting"],["Lipid panel","$35","Fasting"],["Hemoglobin A1C","$30"]]]]},
+ "lv1-img":{hours:"7 a.m. – 7 p.m.",wait:"Walk-in wait about 20 min",k:"Exams and self-pay prices",note:"Self-pay prices before insurance.",items:[["Exams",[["Chest X-ray","$95"],["Ultrasound","$240"],["CT scan, head","$450"]]]]},
+ "lv1-chapel":{hours:"Open 24 hours",k:"Gathering times",note:"All faiths welcome.",items:[["Today",[["Morning reflection","8 a.m."],["Evening prayer","6 p.m."]]]]},
+ "lv2-rehab":{hours:"7 a.m. – 6 p.m.",k:"Services",note:"Ask your doctor for a referral.",items:[["Therapy",[["Physical therapy","Floor 2"],["Occupational therapy","Floor 2"]]]]},
+ "lv7-heart":{hours:"7 a.m. – 6 p.m.",k:"Care here",note:"Bring a list of your medicines.",items:[["Conditions we treat",[["High blood pressure",""],["Heart rhythm problems",""],["Heart failure",""]]]]}
+};
+const CARE_HERE=["lv1-img","lv2-lab","lv2-rehab","lv7-heart"];
+const FAC_TILES=[["lv1-cafe","Café"],["lv1-pharm","Pharmacy"],["lv1-wc","Restrooms"],["lv1-info","Information"],["lv1-chapel","Chapel"],["lv2-snack","Snacks"]];
+const OPEN_TODAY=[["9:30 a.m.","11 a.m."],["1:15 p.m."],["10 a.m.","3:45 p.m."]];
+/* Why you’re here: asked once on arrival; the answer stays on this phone and reshapes the top of Home */
+const WHY=[["appt","calendar_month","An appointment","Sign in to see it, or pick the clinic"],["visit","person","Visiting someone","Visiting hours, the information desk"],
+ ["lab","science","Lab or imaging","Walk-in waits and prices"],["pharm","local_pharmacy","Pharmacy","Floor 1 · 2 min walk"],
+ ["care","medical_services","I need care","What to do now"],["look","map","Just looking around","Everything near you"]];
+
+function whyCard(){
+  if(S.why===undefined||S.why===null)return `<section class="mod rise" style="--i:0" aria-labelledby="h-why"><div class="card why">
+    <div class="why-head on-blue"><span class="eyebrow">Welcome to ${esc(LOCS[GEO.fac].n)}</span><h2 id="h-why">What brings you here today?</h2></div>
+    <div class="list">${WHY.map(([k,g,t,s])=>`<button class="row" data-action="geo-why" data-k="${k}">${well(g)}<span class="rt"><b>${t}</b><span>${s}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div>
+    <div class="why-foot"><span class="fine">Your answer stays on this phone.</span><button class="btn btn-ghost btn-sm" data-action="geo-why" data-k="skip">Not now</button></div></div></section>`;
+  if(S.why==="skip"||S.why==="look")return S.why==="look"?whyBar():"";
+  return whyBar()+`<section class="mod rise" style="--i:0" aria-label="For your visit">${whyFocus()}</section>`;
+}
+function whyBar(){const w=WHY.find(x=>x[0]===S.why);
+  return `<section class="mod" aria-label="Why you’re here"><div class="card why-bar">${ic(w[1],20)}<span>Here for: <b>${w[2]}</b></span><button class="btn btn-ghost btn-sm" data-action="geo-why" data-k="change">Change</button></div></section>`}
+const goBtn=(id,label="Start 3D directions")=>`<button class="btn btn-primary btn-sm" data-action="geo-nav" data-room="${id}">${ic("directions",20)}<span>${label}</span></button>`;
+const placeBtn=(id,label)=>`<button class="btn btn-secondary btn-sm" data-action="geo-place" data-room="${id}">${label}</button>`;
+function whyFocus(){
+  const R=ROOMS;
+  if(S.why==="appt")return `<div class="card wf-here"><span class="eyebrow">Your appointment</span><h2>Where is your visit?</h2><p>Sign in to MyChart to see it, or pick the clinic for directions.</p>
+    <div class="chips" style="margin-top:var(--sp-12)">${["lv7-heart","lv1-img","lv2-rehab","lv2-lab"].map(id=>`<button class="chip" data-action="geo-nav" data-room="${id}">${ic("directions",20)}${R[id].name}</button>`).join("")}</div>
+    <div class="row-btns"><button class="btn btn-secondary btn-sm" data-action="mychart">${ic("login",20)}<span>Sign in to MyChart</span></button></div></div>`;
+  if(S.why==="visit")return `<div class="card wf-here"><span class="eyebrow">Visiting someone</span><h2>Visiting hours: 8 a.m. – 9 p.m.</h2><p>The information desk can tell you a patient’s room. ${esc(whereL(R["lv1-info"]))}.</p>
+    <div class="row-btns">${goBtn("lv1-info","Directions to the desk")}${placeBtn("lv1-cafe","Café menu")}</div></div>`;
+  if(S.why==="lab")return `<div class="card wf-here"><span class="eyebrow">Lab or imaging</span><h2>Which one?</h2>
+    <div class="card list" style="margin-top:var(--sp-8)">${["lv2-lab","lv1-img"].map(id=>`<button class="row" data-action="geo-place" data-room="${id}">${well(id==="lv2-lab"?"science":"medical_information")}<span class="rt"><b>${R[id].name}, Suite ${R[id].suite}</b><span>${whereL(R[id])} · ${PINFO[id].wait}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div></div>`;
+  if(S.why==="pharm")return `<div class="card wf-here"><span class="eyebrow">Pharmacy</span><h2>Floor 1, past the elevators</h2><p>Open ${PINFO["lv1-pharm"].hours}. ${esc(whereL(R["lv1-pharm"]))}.</p>
+    <div class="row-btns">${goBtn("lv1-pharm")}${placeBtn("lv1-pharm","Items and services")}</div></div>`;
+  return `<div class="notice warn"><span class="lead">${ic("warning",20)}</span><span class="nb"><b>If this is an emergency, call 911.</b><span>Or go to the Emergency Department. For other care today, see the doctors open today below – open times are for information.</span></span></div>`;
+}
+function nearHTML(){
+  const R=ROOMS,docs=PROV.filter(p=>p.locs.includes(GEO.fac)).concat(PROV).filter((p,i,a)=>a.indexOf(p)===i).slice(0,3);
+  const care=CARE_HERE.map(id=>R[id]).sort((a,b)=>walkMin(a)-walkMin(b));
+  return `<section class="mod rise" style="--i:1" aria-labelledby="h-near"><div class="mod-head"><h2 class="sec-h" id="h-near">Near you</h2><span class="fine">Floor 1 · Sample</span></div>
+    <div class="card geo-map"><div class="m3-box" id="home-m3">${m3Fallback()}</div>
+      <div class="geo-map-foot"><span class="tag-s">Sample 3D map · Floor 1</span><button class="btn btn-ghost btn-sm" data-action="push" data-v="wayfinding" data-to="${GEO.fac}">${ic("map",20)}<span>Open map</span></button></div></div>
+    <h3 class="lbl-h">Care near you</h3>
+    <div class="card list">${care.map(r=>`<button class="row" data-action="geo-place" data-room="${r.id}">${well(r.id==="lv2-lab"?"science":r.id==="lv1-img"?"medical_information":r.id==="lv7-heart"?"cardiology":"accessibility_new")}<span class="rt"><b>${r.name}</b><span>${whereL(r)} · Suite ${r.suite}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div>
+    <h3 class="lbl-h">Doctors open today</h3>
+    <div class="card list">${docs.map((p,i)=>`<button class="row" data-action="push" data-v="profile" data-id="${p.id}"><span class="avatar av-40 a${i%3+1}" aria-hidden="true">${p.first[0]}${p.last[0]}</span><span class="rt"><b>${esc(name(p))}</b><span>${esc(p.spec)}</span><span class="chips">${OPEN_TODAY[i].map(t=>`<span class="chip static">${t}</span>`).join("")}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div>
+    <p class="fine">Open times are for information. To schedule, call ${GEO.phone}.</p>
+    <h3 class="lbl-h">Facilities</h3>
+    <div class="wf-grid">${FAC_TILES.map(([id,l])=>`<button class="card wf-dest press" data-action="${PINFO[id]?"geo-place":"geo-nav"}" data-room="${id}">${well(ROOMS[id].ic)}<span>${l}</span><span class="fine">${walkMin(ROOMS[id])} min</span></button>`).join("")}</div></section>`;
+}
+function geoHome(){return wfCtx()==="facility"?whyCard()+nearHTML():""}
+/* Place page: hours, walk, the catalog, and Start 3D directions */
+function viewPlace(id){const r=ROOMS[id],I=PINFO[id]||{};
+  return `<div class="res-body"><div class="card wf-here"><span class="eyebrow">${esc(LOCS[GEO.fac].n)}</span><h2>${r.name}${r.suite?`, Suite ${r.suite}`:""}</h2><p>${whereL(r)}${I.hours?` · Open ${I.hours}`:""}</p>
+    ${I.wait?`<p class="geo-wait">${ic("schedule",20)}<span>${I.wait} (sample)</span></p>`:""}<div class="row-btns">${goBtn(id)}</div></div>
+    ${I.items?`<section class="grp" aria-labelledby="pl-k"><div class="grp-h"><h2 class="lbl-h" id="pl-k">${I.k}</h2><span class="sug-type">Sample</span></div>
+      ${I.items.map(([h,rows])=>`<div class="card geo-cat"><h3>${h}</h3><ul>${rows.map(([t,p,tag])=>`<li><span>${t}${tag?` <span class="sug-type">${tag}</span>`:""}</span><b>${p}</b></li>`).join("")}</ul></div>`).join("")}
+      <p class="fine">${I.note}</p></section>`:""}</div>`}
+
+/* ---------- 3D turn-by-turn ---------- */
+function geoSteps(id){
+  const r=ROOMS[id],e=GEO.elev,E=GEO.you,north=r.side==="n",side=east=>east?(north?"left":"right"):(north?"right":"left");
+  const arrive=(east,from)=>({k:"arrive",ic:"flag",t:`${r.name} is on your ${side(east)}`,sub:r.suite?`Suite ${r.suite} · Floor ${r.floor}`:`Floor ${r.floor}`,plan:r.plan,you:[r.cx,100],head:[r.cx+(east?10:-10),100],dest:r.id,flag:[r.cx,100],routes:[[[from,[r.cx,100]],"done"]],last:true,u:0});
+  if(r.floor===1){const east=r.cx>E[0];
+    return [{k:"hall",ic:"straight",t:"Go straight down the main hall",sub:gft(Math.abs(r.cx-E[0])),plan:"lv1",routes:[[[E,[r.cx,100]]]],you:E,head:[E[0]+10,100],flag:[r.cx,100],dest:r.id,u:Math.abs(r.cx-E[0]),walk:[E,[r.cx,100]]},arrive(east,E)]}
+  const east=r.cx>e;
+  return [{k:"hall",ic:"straight",t:"Go straight down the main hall",sub:gft(e-E[0]),plan:"lv1",routes:[[[E,[e,100]]]],you:E,head:[e,100],flag:[e,100],u:e-E[0],walk:[E,[e-2,100]]},
+   {k:"tolift",ic:"turn_left",t:"Turn left to Elevator B",sub:"Elevators on your left",plan:"lv1",routes:[[[E,[e,100]],"done"]],you:[e-2,100],head:[e,88],flag:[e,100],u:6,walk:[[e-2,100],[e,96],[e,90]]},
+   {k:"ride",ic:"elevator",t:`Take Elevator B to Floor ${r.floor}`,sub:`Floor 1 to Floor ${r.floor}`,plan:r.plan,lift:r.floor,u:60},
+   {k:"exit",ic:east?"turn_left":"turn_right",t:`Turn ${east?"left":"right"} out of the elevator`,sub:gft(Math.abs(r.cx-e)),plan:r.plan,routes:[[[[e,100],[r.cx,100]]]],you:[e,100],head:[e+(east?10:-10),100],flag:[r.cx,100],dest:r.id,u:Math.abs(r.cx-e),walk:[[e,92],[e,100],[r.cx,100]]},
+   arrive(east,[e,100])]
+}
+function xraySpec(youPlan,you,t,extra={}){
+  const stack=GEO.plans,s={plan:stack[0],stack,gap:110,xray:true,youPlan,you,head:null,mode:"xray",stackRoutes:{},labelsTab:false,...extra};
+  if(t){const e=GEO.elev;Object.assign(s,{dest:t.id,stackDest:t.plan,stackFlag:{plan:t.plan,p:[t.cx,100]}});
+    if(t.plan===youPlan)s.stackRoutes[youPlan]=[[[you,[t.cx,100]]]];
+    else{s.stackRoutes[youPlan]=[[[you,[e,100]]]];s.stackRoutes[t.plan]=[[[[e,100],[t.cx,100]]]];s.riser={p:[e,100],from:youPlan,to:t.plan}}
+    s.head=s.stackRoutes[youPlan][0][0][1]}
+  return s}
+function navSpec(N){const s=N.steps[N.i],t=ROOMS[N.room];
+  if(s.k==="ride")return xraySpec("lv1",[GEO.elev,100],t,{mode:"stack"});
+  if(N.all)return xraySpec(s.plan,s.you||[GEO.elev,100],t);
+  return {plan:s.plan,routes:s.routes||[],you:s.you||null,head:s.head||null,flag:s.flag||null,dest:s.dest||null,mode:N.live?"live":"follow",labelsTab:false}}
+function m3Fallback(){return `<div class="m3-host" role="img" aria-label="Sample 3D map"></div>`}
+function viewNav3d(){const N=top();
+  return `<div class="res-body n3">
+    <div class="n3-banner on-blue" id="n3-banner" aria-live="polite"></div>
+    <div class="card n3-map"><div class="m3-box tall" id="nav-m3">${m3Fallback()}</div><span class="tag-s n3-tag" id="n3-tag"></span>
+      <div class="n3-side"><button class="icon-btn n3-b" data-action="geo-all" aria-label="Route overview, all floors">${ic("layers",20)}</button><button class="icon-btn n3-b" data-action="geo-live" aria-label="Live view – simulated">${ic("view_in_ar",20)}</button></div></div>
+    <div class="card n3-card" id="n3-card"></div>
+    <ol class="sr-only" aria-label="All steps">${N.steps.map(s=>`<li>${s.t}. ${s.sub||""}</li>`).join("")}</ol></div>`}
+function n3Paint(anim){const N=top();if(N.v!=="nav3d")return;const s=N.steps[N.i],r=ROOMS[N.room],last=N.i===N.steps.length-1;
+  const left=N.steps.slice(N.i).reduce((a,x)=>a+(x.u||0),0),min=Math.max(1,Math.round(left/80));
+  $("#n3-banner").innerHTML=`<span class="n3-arrow">${ic(s.ic)}</span><span class="n3-txt"><b id="n3-t">${s.t}</b><span id="n3-s">${s.sub||""}</span></span>`;
+  $("#n3-banner").classList.toggle("arrived",!!s.last);
+  $$("#n3-side .n3-b,.n3-side .n3-b").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.action==="geo-all"?!!N.all:!!N.live))});
+  $("#n3-tag").textContent=`Sample 3D map · ${s.k==="ride"?"Elevator":N.all?"Route overview":"Floor "+PLAN_META[s.plan].floor}${N.live&&!N.all&&s.k!=="ride"?" · Live view, simulated":""}`;
+  $("#n3-card").innerHTML=`<div class="n3-eta"><b>${last?"Arrived":`${min} min`}</b><span>${last?(r.suite?`Suite ${r.suite}`:"You are here"):`${gft(left)} · Step ${N.i+1} of ${N.steps.length}`}</span></div>
+    <p class="n3-dest">${ic("flag",20)}<span>${r.name}${r.suite?`, Suite ${r.suite}`:""} · Floor ${r.floor}</span></p>
+    <div class="n3-dots" aria-hidden="true">${N.steps.map((_,k)=>`<i class="${k<N.i?"on":k===N.i?"here":""}"></i>`).join("")}</div>
+    ${s.lift?`<p class="n3-lift"><b id="n3-fl">1</b><span>Floor 1 to Floor ${s.lift} · Elevator B</span></p>`:""}
+    <div class="n3-btns"><button class="btn btn-secondary" data-action="geo-step" data-d="-1" ${N.i===0?"disabled":""}>${ic("arrow_back",20)}<span>Back</span></button>
+    ${last?`<button class="btn btn-primary" data-action="back">${ic("check_circle",20)}<span>Done</span></button>`:`<button class="btn btn-primary" data-action="geo-step" data-d="1">Next${ic("arrow_forward",20)}</button>`}</div>`;
+  if(M3.ok()){const host=$("#nav-m3 .m3-host"),b=$("#nav-m3");M3.mount(host,navSpec(N),{top:8,bottom:8,animate:anim,avoid:[[b.clientWidth-60,0,b.clientWidth,112]]})}
+  else $("#nav-m3").innerHTML=`<div class="n3-nogl"><b>${s.t}</b><span>The 3D map needs WebGL; the steps are read aloud by your screen reader and listed here as you go.</span></div>`;
+  if(anim)sayPolite(`Step ${N.i+1} of ${N.steps.length}: ${s.t}. ${s.sub||""}`)}
+let n3Busy=false;
+async function n3Step(d){const N=top();if(n3Busy||N.v!=="nav3d")return;const s=N.steps[N.i];
+  if(d>0&&N.i<N.steps.length-1&&M3.ok()&&!S.rm){n3Busy=true;$$("#n3-card button").forEach(b=>b.disabled=true);
+    if(s.k==="ride")await M3.ride(s.plan,2200,t=>{const f=$("#n3-fl");if(f)f.textContent=Math.max(1,Math.round(1+(s.lift-1)*t))});
+    else if(s.walk&&!N.all){const L=s.walk.reduce((a,p,i,arr)=>i?a+Math.hypot(p[0]-arr[i-1][0],p[1]-arr[i-1][1]):0,0);await M3.walk(s.walk,Math.min(3200,Math.max(900,L*14)),t=>{const x=$("#n3-s");if(x)x.textContent=gft(L*(1-t))})}
+    n3Busy=false;if(top()!==N)return}
+  N.i=Math.max(0,Math.min(N.steps.length-1,N.i+d));n3Paint(true);const f=$('#n3-card [data-d="1"]')||$('#n3-card [data-action="back"]');if(f)f.focus({preventScroll:true})}
+function geoNav(id){push({v:"nav3d",room:id,steps:geoSteps(id),i:0})}
+/* After a view renders: mount the live 3D map where the view has one */
+function geoMount(){const t=top();
+  if(t.v==="nav3d"){n3Paint(false);return}
+  const h=$("#home-m3 .m3-host")||$("#way-m3 .m3-host");if(!h||!M3.ok())return;
+  const fl=t.v==="wayfinding"?(S.geoFloor||1):1,plan="lv"+fl,dest=S.why==="pharm"?ROOMS["lv1-pharm"]:null;
+  M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{top:8,bottom:8,animate:true})}
+function wayMapHTML(){const f=S.geoFloor||1;
+  return `<section class="grp" aria-labelledby="wf-3d"><div class="grp-h"><h2 class="lbl-h" id="wf-3d">Inside · 3D map</h2><span class="sug-type">Sample</span></div>
+    <div class="card geo-map"><div class="m3-box" id="way-m3">${m3Fallback()}</div>
+      <div class="geo-map-foot"><div class="chips" role="group" aria-label="Floor">${[1,2,7].map(n=>`<button class="tchip" data-action="geo-floor" data-f="${n}" aria-pressed="${f===n}">Floor ${n}</button>`).join("")}</div></div></div>
+    <div class="card list">${roomsOn("lv"+f).filter(r=>r.kind!=="other"&&r.kind!=="core").map(r=>`<button class="row" data-action="geo-nav" data-room="${r.id}">${well(r.ic||(r.id==="lv2-lab"?"science":r.id==="lv7-heart"?"cardiology":r.id==="lv1-img"?"medical_information":"accessibility_new"))}<span class="rt"><b>${r.name}${r.suite?`, Suite ${r.suite}`:""}</b><span>${whereL(r)}</span></span>${ic("directions",20)}</button>`).join("")}</div></section>`}
+
+/* Live 3D map: three.js r128 (cdnjs), the same engine as the MyCare Today line concept */
+const m3i=n=>ic({parking:"local_parking"}[n]||n,24);
+const M3 = (() => {
+  let THREE = null, ok = false, renderer, scene, camera, canvas, host = null, labelsEl = null, raf = 0, lastT = 0, visibleTick = 0;
+  const groups = {};                       // static scene per plan and theme
+  let cur = { key: null, plan: null, group: null }, prevGroup = null, dyn = null, spec = null, specKey = '';
+  const cam = { tx: 0, ty: 0, tz: 0, th: -0.3, ph: 0.95, d: 330, fov: 38 }, want = { ...cam };
+  let insets = { top: 0, bottom: 0, avoid: [] }, user = { th: 0, ph: 0, d: 1 }, labels = [], tweens = [], anims = {}, flyUntil = 0;
+  let youObj = null, carObj = null, pal = null, palKey = '';
+  const W = (x, y) => [x - 160, y - 100], STK = 34;
+  const levelOf = (s, pl) => s.stack && s.stack.includes(pl) ? (s.stack.indexOf(pl) - s.stack.indexOf(s.plan)) * (s.gap || STK) : 0;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const slow = () => navigator.webdriver;   // automated tests: fewer frames
+
+  const PAL = {
+    light: { ground: '#DCE4EC', grid: '#C5D2DE', slab: '#E6ECF2', corr: '#FFFFFF', room: '#EEF3F8', dept: '#E2ECF6', destFloor: '#BFD8EE', wall: '#FFFFFF', wallTop: '#9CB0C4', outer: '#F7F9FB', outerTop: '#7F95AB', door: '#C8B29A', glass: '#9ACAE8', furn: '#D5DEE7', seat: '#7BAFD4', metal: '#B7C3CF', lawn: '#CFE1C3', road: '#B6C2CE', line: '#FFFFFF', walkway: '#E9EEF2', tree: '#79B064', trunk: '#8A6E54', facade: '#EEF2F6', win: '#6F9CC4', roof: '#D4DCE4', garage: '#E3E8ED', car: ['#004278', '#E87722', '#8246AF', '#43B02A', '#7B6469', '#CBA052'], route: '#004278', glow: '#00A9E0', you: '#0A84D6', pin: '#E0004D', fog: '#DCE4EC', sky: '#F4F7FA', label: '#333333' },
+    dark: { ground: '#0B141D', grid: '#18293B', slab: '#132131', corr: '#1C2E40', room: '#172738', dept: '#1A3249', destFloor: '#24537C', wall: '#2B425A', wallTop: '#5F7C99', outer: '#30475F', outerTop: '#7D97B0', door: '#7A6754', glass: '#3F7BA6', furn: '#30465C', seat: '#3E7CAF', metal: '#5B6F82', lawn: '#15281C', road: '#26384A', line: '#8094A8', walkway: '#2A3D51', tree: '#2F6340', trunk: '#5A4636', facade: '#26394D', win: '#4C88BC', roof: '#2A3E53', garage: '#24364A', car: ['#8CC0EA', '#E87722', '#B07DDB', '#5CC23F', '#9C8489', '#CBA052'], route: '#4FA8EE', glow: '#00A9E0', you: '#3AB4F2', pin: '#FF4D7D', fog: '#0B141D', sky: '#0B141D', label: '#E6EDF3' }
+  };
+
+  function init() {
+    if (ok) return true;
+    THREE = window.THREE;
+    if (!THREE) return false;
+    try {
+      canvas = document.createElement('canvas');
+      canvas.className = 'm3-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(cam.fov, 1, 1, 4000);
+      const hemi = new THREE.HemisphereLight('#FFFFFF', '#A9B9C9', 0.85); scene.add(hemi);
+      const sun = new THREE.DirectionalLight('#FFFFFF', 0.75); sun.position.set(-160, 320, 140); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -260, right: 260, top: 200, bottom: -200, near: 10, far: 900 }); sun.shadow.bias = -0.0008;
+      scene.add(sun); scene.add(sun.target);
+      labelsEl = document.createElement('div'); labelsEl.className = 'm3-labels';
+      bindPointer();
+      ok = true;
+    } catch (e) { ok = false; }
+    return ok;
+  }
+
+  /* ---------- materials and helpers ---------- */
+  function palette() {
+    const dark = screen.classList.contains('dark'), k = dark ? 'dark' : 'light';
+    if (k !== palKey) { palKey = k; pal = PAL[k]; Object.keys(groups).forEach(key => { disposeTree(groups[key]); delete groups[key]; }); cur = { key: null, plan: null, group: null }; }
+    scene.background = new THREE.Color(pal.sky);
+    scene.fog = new THREE.Fog(pal.fog, 520, 1500);
+    return pal;
+  }
+  const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: .82, metalness: 0, ...o });
+  function tex(w, h, draw) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
+  function gridTex(base, line) { const t = tex(128, 128, (c, w, h) => { c.fillStyle = base; c.fillRect(0, 0, w, h); c.strokeStyle = line; c.lineWidth = 1; c.globalAlpha = .7; for (let i = 0; i <= w; i += 32) { c.beginPath(); c.moveTo(i + .5, 0); c.lineTo(i + .5, h); c.stroke(); c.beginPath(); c.moveTo(0, i + .5); c.lineTo(w, i + .5); c.stroke(); } }); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; }
+  function box(g, w, h, d, x, y, z, m, cast = true) { const me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); me.position.set(x, y, z); me.castShadow = cast; me.receiveShadow = true; g.add(me); return me; }
+  function flat(g, w, d, x, y, z, m) { const me = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); me.rotation.x = -Math.PI / 2; me.position.set(x, y, z); me.receiveShadow = true; g.add(me); return me; }
+  function disposeTree(o) { o.traverse(n => { if (n.geometry) n.geometry.dispose(); if (n.material) [].concat(n.material).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); }); if (o.parent) o.parent.remove(o); }
+
+  /* ---------- a floor: slab, corridor, rooms with walls and door gaps, doors, furniture ---------- */
+  function buildPlan(plan) {
+    const P = pal, g = new THREE.Group(), m = PLAN_META[plan], rooms = roomsOn(plan), H = 9, T = 1.2;
+    const wallM = [mat(P.wall), mat(P.wall), mat(P.wallTop), mat(P.wall), mat(P.wall), mat(P.wall)];
+    const outM = [mat(P.outer), mat(P.outer), mat(P.outerTop), mat(P.outer), mat(P.outer), mat(P.outer)];
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), new THREE.MeshStandardMaterial({ map: (() => { const t = gridTex(P.ground, P.grid); t.repeat.set(75, 75); return t; })(), roughness: 1 }));
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -3.2; ground.receiveShadow = true; g.add(ground);
+    box(g, 300, 3, 180, 0, -1.6, 0, mat(P.slab), false);
+    flat(g, 296, 22, 0, 0.05, 0, mat(P.corr));
+    const wall = (x0, z0, x1, z1, h = H, ms = wallM, t = T) => { const len = Math.hypot(x1 - x0, z1 - z0); if (len < .5) return; const me = box(g, len + t, h, t, (x0 + x1) / 2, h / 2, (z0 + z1) / 2, ms); me.rotation.y = -Math.atan2(z1 - z0, x1 - x0); };
+    rooms.forEach(r => {
+      const north = r.side === 'n', y0 = north ? 12 : 112, y1 = north ? 88 : 188;
+      const [ax, az] = W(r.x0, y0), [bx, bz] = W(r.x1, y1), cx = (ax + bx) / 2, cz = (az + bz) / 2, w = bx - ax, d = bz - az;
+      flat(g, w - 1, d - 1, cx, 0.06, cz, mat(r.kind === 'dept' ? P.dept : P.room));
+      const farZ = north ? az : bz, corZ = north ? bz : az;
+      wall(ax, farZ, bx, farZ); wall(ax, az, ax, bz); wall(bx, az, bx, bz);
+      const [dx] = W(r.cx, 0), gap = Math.min(7, w / 2 - 2);
+      wall(ax, corZ, dx - gap, corZ); wall(dx + gap, corZ, bx, corZ);
+      if (r.kind === 'dept' || r.ic === 'food' || r.kind === 'other' && /Lobby|Waiting/.test(r.name) === false) { const dr = box(g, gap * 1.6, 7, .8, dx - gap * 0.4, 3.5, corZ + (north ? -gap * 0.55 : gap * 0.55), mat(P.door)); dr.rotation.y = north ? 0.75 : -0.75; }
+      furnish(g, r, ax, az, bx, bz, north);
+    });
+    // outer walls, with the glass entrance on Floor 1
+    const [L, Tz] = W(12, 12), [R, B] = W(308, 188), [, ez0] = W(0, 91), [, ez1] = W(0, 109);
+    wall(L, Tz, R, Tz, H + 2, outM, 2); wall(L, B, R, B, H + 2, outM, 2); wall(R, Tz, R, B, H + 2, outM, 2);
+    if (m.floor === 1) { wall(L, Tz, L, ez0, H + 2, outM, 2); wall(L, ez1, L, B, H + 2, outM, 2); const gl = mat(P.glass, { transparent: true, opacity: .45, roughness: .1, metalness: .2 }); box(g, 1, H, 8, L - 3, H / 2, -4.5, gl).rotation.y = .5; box(g, 1, H, 8, L - 3, H / 2, 4.5, gl).rotation.y = -.5; const can = box(g, 16, 1, 26, L - 6, H + 2, 0, mat(P.outerTop)); can.castShadow = true; }
+    else wall(L, Tz, L, B, H + 2, outM, 2);
+    return g;
+  }
+  function furnish(g, r, ax, az, bx, bz, north) {
+    const P = pal, cx = (ax + bx) / 2, cz = (az + bz) / 2, w = bx - ax, d = bz - az, F = mat(P.furn), S = mat(P.seat), farZ = north ? az + 8 : bz - 8;
+    const seats = (rows, cols, sx, sz) => { for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) { const x = cx - (cols - 1) * sx / 2 + j * sx, z = cz - (rows - 1) * sz / 2 + i * sz; box(g, 4, 2.4, 3.6, x, 1.2, z, S); box(g, 4, 3.6, 0.8, x, 2.6, z + (north ? -1.6 : 1.6), S); } };
+    if (r.kind === 'core') { const M = mat(P.metal, { metalness: .5, roughness: .35 }); box(g, w / 2 - 3, 9, d / 2, cx - w / 4, 4.5, cz - (north ? 6 : -6), M); box(g, w / 2 - 3, 9, d / 2, cx + w / 4, 4.5, cz - (north ? 6 : -6), M); return; }
+    if (r.ic === 'food') { const n = Math.max(1, Math.floor(w / 24)); for (let i = 0; i < n; i++) { const t = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.4, 4, 18), F); t.position.set(ax + 12 + i * 22, 2, cz + (north ? 8 : -8)); t.castShadow = true; g.add(t); } box(g, w - 10, 4, 4, cx, 2, farZ, mat(P.outerTop)); return; }
+    if (r.ic === 'restroom') { for (let i = 0; i < 3; i++) box(g, 0.8, 6, 12, ax + 6 + i * (w - 12) / 2, 3, farZ + (north ? 4 : -4), F); return; }
+    if (r.ic === 'chapel') { for (let i = 0; i < 3; i++) box(g, Math.min(w - 12, 26), 2.6, 3, cx, 1.3, cz - 10 + i * 10, mat(P.door)); return; }
+    if (r.ic === 'infoDesk' || r.ic === 'pharmacy') { box(g, w - 14, 4.5, 4, cx, 2.25, cz + (north ? 10 : -10), mat(P.outerTop)); box(g, w - 10, 7, 3, cx, 3.5, farZ, F); return; }
+    if (r.ic === 'atm') { box(g, 5, 7, 4, cx, 3.5, farZ, mat(P.metal, { metalness: .4 })); return; }
+    if (/Lobby|Waiting/.test(r.name)) { seats(2, Math.max(2, Math.floor(w / 9)), 7, 10); const pl = new THREE.Mesh(new THREE.SphereGeometry(3.4, 14, 10), mat(P.tree)); pl.position.set(ax + 6, 5, farZ); pl.castShadow = true; g.add(pl); return; }
+    if (r.kind === 'dept') { const bays = Math.max(2, Math.floor(w / 30)); for (let i = 1; i < bays; i++) box(g, 0.8, 6, d * 0.45, ax + i * w / bays, 3, farZ + (north ? d * 0.2 : -d * 0.2), F); for (let i = 0; i < bays; i++) box(g, 9, 2.6, 5, ax + (i + .5) * w / bays, 1.3, farZ + (north ? 3 : -3), mat(P.outer)); return; }
+    for (let i = 0; i < Math.max(1, Math.floor(w / 26)); i++) box(g, 10, 3, 6, ax + 10 + i * 24, 1.5, cz, F);
+  }
+
+  /* ---------- the campus: towers with glass facades and a helipad, layered garages, covered walkways, roads, trees ---------- */
+  function buildCampus() {
+    const P = pal, g = new THREE.Group();
+    const lawnT = gridTex(P.lawn, P.grid); lawnT.repeat.set(60, 60);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), new THREE.MeshStandardMaterial({ map: lawnT, roughness: 1 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
+    const road = mat(P.road, { roughness: .95 });
+    flat(g, 1200, 18, 0, 0.1, 0, road); flat(g, 18, 1200, -4, 0.12, 0, road);
+    const lineM = new THREE.MeshBasicMaterial({ color: P.line });
+    for (let x = -560; x < 560; x += 18) if (Math.abs(x + 4) > 12) flat(g, 8, 0.8, x, 0.2, 0, lineM);
+    for (let z = -560; z < 560; z += 18) if (Math.abs(z) > 12) flat(g, 0.8, 8, -4, 0.22, z, lineM);
+    // garages: open decks on columns, with parked cars
+    const garage = (y0) => {
+      const [ax, az] = W(12, y0), deck = mat(P.garage), col = mat(P.outerTop);
+      for (let lv = 0; lv < 4; lv++) box(g, 128, 1.6, 76, ax + 64, lv * 7 + 0.8, az + 38, deck);
+      for (let i = 0; i <= 4; i++) for (let j = 0; j <= 2; j++) box(g, 2, 28, 2, ax + 2 + i * 31, 14, az + 2 + j * 36, col);
+      let k = 0; for (let lv = 1; lv < 4; lv++) for (let i = 0; i < 9; i++) if ((i * 7 + lv * 3) % 4 !== 0) { const c = box(g, 8, 3.2, 4.4, ax + 10 + i * 13, lv * 7 + 3.2, az + (i % 2 ? 14 : 62), mat(P.car[k++ % P.car.length], { metalness: .3, roughness: .5 })); }
+    };
+    garage(12); garage(112);
+    // towers
+    const facade = (cols, rows, band) => { const t = tex(256, 256, (c, w, h) => { c.fillStyle = P.facade; c.fillRect(0, 0, w, h); c.fillStyle = P.win; const cw = w / cols, rh = h / rows; for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { if (band) c.fillRect(0, j * rh + rh * .25, w, rh * .5); else c.fillRect(i * cw + cw * .18, j * rh + rh * .2, cw * .64, rh * .6); } }); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; };
+    const tower = (y0, h, band, heli) => {
+      const [ax, az] = W(172, y0), cx = ax + 68, cz = az + 38;
+      const f1 = facade(8, 6, band); f1.repeat.set(2, h / 24); const f2 = facade(8, 6, band); f2.repeat.set(1.2, h / 24);
+      const side = new THREE.MeshStandardMaterial({ map: f1, roughness: .35, metalness: .15 }), end = new THREE.MeshStandardMaterial({ map: f2, roughness: .35, metalness: .15 }), roof = mat(P.roof);
+      box(g, 140, 6, 80, cx, 3, cz, mat(P.outer));
+      const t = box(g, 136, h, 76, cx, h / 2, cz, [end, end, roof, roof, side, side]);
+      box(g, 22, 6, 18, cx + 40, h + 3, cz - 18, mat(P.metal));
+      if (heli) { const pad = new THREE.Mesh(new THREE.CylinderGeometry(16, 16, 1, 32), new THREE.MeshStandardMaterial({ map: tex(128, 128, (c, w, hh) => { c.fillStyle = '#5D6B78'; c.fillRect(0, 0, w, hh); c.strokeStyle = '#FFFFFF'; c.lineWidth = 6; c.beginPath(); c.arc(64, 64, 52, 0, 7); c.stroke(); c.fillStyle = '#FFFFFF'; c.font = '700 64px Inter, Arial'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('H', 64, 68); }) })); pad.position.set(cx - 28, h + 0.5, cz + 4); g.add(pad); }
+      // covered walkway from the garage and the lit entrance
+      const [wx, wz] = W(140, y0 + 38);
+      box(g, 32, 1, 12, wx + 16, 10, wz, mat(P.glass, { transparent: true, opacity: .55, roughness: .1 }));
+      for (let i = 0; i < 3; i++) { box(g, 1, 10, 1, wx + 2 + i * 14, 5, wz - 5.5, mat(P.outerTop)); box(g, 1, 10, 1, wx + 2 + i * 14, 5, wz + 5.5, mat(P.outerTop)); }
+      box(g, 1.2, 10, 12, ax - 0.4, 5, wz, new THREE.MeshStandardMaterial({ color: P.glow, emissive: P.glow, emissiveIntensity: .6 }));
+    };
+    tower(12, 62, false, true); tower(112, 46, true, false);
+    // trees along the streets
+    const leaf = mat(P.tree), trunk = mat(P.trunk);
+    [[-130, -13], [-90, -13], [-50, -13], [40, -13], [110, -13], [160, -13], [-130, 13], [-70, 13], [40, 13], [100, 13], [150, 13], [-15, -60], [-15, 60], [7, -120], [7, 120]].forEach(([x, z]) => { box(g, 1.2, 5, 1.2, x, 2.5, z, trunk); const s = new THREE.Mesh(new THREE.SphereGeometry(4.6, 14, 10), leaf); s.position.set(x, 8, z); s.castShadow = true; g.add(s); });
+    return g;
+  }
+  function staticGroup(plan) {
+    const key = plan + palKey;
+    if (!groups[key]) groups[key] = plan === 'campus' ? buildCampus() : buildPlan(plan);
+    return groups[key];
+  }
+
+  /* ---------- dynamic layer: route ribbons with flowing arrows, you, the destination beacon, highlights, the car ---------- */
+  let arrowTex = null, beamTex = null;
+  function routeLayer(g, list, lift, xray, k = 1) {
+    const P = pal;
+    if (!arrowTex) { arrowTex = tex(64, 64, (c) => { c.clearRect(0, 0, 64, 64); c.strokeStyle = '#FFFFFF'; c.lineWidth = 9; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(20, 14); c.lineTo(40, 32); c.lineTo(20, 50); c.stroke(); }); arrowTex.wrapS = THREE.RepeatWrapping; }
+    (list || []).forEach(([pts, cls = '']) => {
+      if (!pts || pts.length < 2) return;
+      const done = cls === 'done', plan = cls === 'plan', y = lift + 0.4;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, z0] = W(...pts[i - 1]), [x1, z1] = W(...pts[i]), len = Math.hypot(x1 - x0, z1 - z0); if (len < .5) continue;
+        const ang = Math.atan2(z1 - z0, x1 - x0), mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+        const seg = (w, m, yy) => { const me = new THREE.Mesh(new THREE.PlaneGeometry(len + w * 0.9, w), m); me.rotation.x = -Math.PI / 2; me.rotation.z = -ang; me.position.set(mx, yy, mz); g.add(me); return me; };
+        if (!done && !plan) seg(13 * k, new THREE.MeshBasicMaterial({ color: P.glow, transparent: true, opacity: .22, depthWrite: false }), y);
+        seg(6.5 * k, new THREE.MeshBasicMaterial({ color: plan ? P.glow : P.route, transparent: done || plan, opacity: done ? .3 : plan ? .7 : 1 }), y + 0.05);
+        if (xray && !done && !plan) { const ghost = seg(6.5 * k, new THREE.MeshBasicMaterial({ color: P.route, transparent: true, opacity: .4, depthTest: false, depthWrite: false }), y + 0.05); ghost.renderOrder = 4; }
+        if (!done && !plan) { const t = arrowTex.clone(); t.needsUpdate = true; t.repeat.set(len / (7 * k), 1); const a = seg(5.5 * k, new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }), y + 0.1); a.userData.flow = t; }
+      }
+    });
+  }
+  function youMarker(g, p, head, lift, k = 1) {
+    const P = pal, me = new THREE.Group(), [x, z] = W(...p);
+    const halo = new THREE.Mesh(new THREE.RingGeometry(4.5, 9, 40), new THREE.MeshBasicMaterial({ color: P.you, transparent: true, opacity: .35, depthWrite: false })); halo.rotation.x = -Math.PI / 2; halo.userData.pulse = true; me.add(halo);
+    if (head) { const cone = new THREE.Mesh(new THREE.CircleGeometry(24, 24, -0.42, 0.84), new THREE.MeshBasicMaterial({ color: P.you, transparent: true, opacity: .28, depthWrite: false, side: THREE.DoubleSide })); cone.rotation.x = -Math.PI / 2; cone.position.y = 0.1; me.add(cone); me.userData.cone = cone; }
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 1.6, 32), mat('#FFFFFF', { roughness: .4 })); ring.position.y = 0.8; ring.castShadow = true; me.add(ring);
+    const dotM = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 1.8, 32), new THREE.MeshStandardMaterial({ color: P.you, emissive: P.you, emissiveIntensity: .35, roughness: .3 })); dotM.position.y = 0.9; me.add(dotM);
+    me.scale.setScalar(k); me.position.set(x, lift + 0.5, z); g.add(me); youObj = me;
+    me.traverse(n => { if (n.material) { n.material.transparent = true; n.material.depthTest = false; n.renderOrder = n === dotM ? 12 : n === ring ? 11 : 10; } });
+    if (head) setHeading(head, p);
+  }
+  function setHeading(head, p) { if (!youObj || !youObj.userData.cone) return; const [x0, z0] = W(...p), [x1, z1] = W(...head); youObj.userData.cone.rotation.z = -Math.atan2(z1 - z0, x1 - x0); }
+  function beamTexture() { if (!beamTex) beamTex = tex(4, 128, (c) => { const gr = c.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(255,255,255,.9)'); c.fillStyle = gr; c.fillRect(0, 0, 4, 128); }); return beamTex; }
+  function beacon(g, p, lift, k = 1) {
+    const P = pal, [x, z] = W(...p);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 70, 24, 1, true), new THREE.MeshBasicMaterial({ color: P.glow, map: beamTexture(), transparent: true, opacity: .55, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    beam.position.set(x, lift + 35, z); g.add(beam);
+    const pin = new THREE.Group(), pm = new THREE.MeshStandardMaterial({ color: P.pin, emissive: P.pin, emissiveIntensity: .25, roughness: .35 });
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 16), pm); ball.position.y = 7; pin.add(ball);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(2.6, 6, 16), pm); tip.rotation.x = Math.PI; tip.position.y = 2.6; pin.add(tip);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(1.5, 12, 10), mat('#FFFFFF')); core.position.set(0, 7, 3.2); pin.add(core);
+    pin.scale.setScalar(k); pin.position.set(x, lift + 8 * k, z); pin.userData.bob = lift + 8 * k; pin.traverse(n => { n.castShadow = true; }); g.add(pin);
+  }
+  /* the section you are in: a tinted floor and walls of light that rise around it */
+  function zoneLayer(g, z, lift) {
+    const dark = palKey === 'dark', col = dark ? z.glow : z.tone, [ax, az] = W(z.x0 + 1, 13), [bx, bz] = W(z.x1 - 1, 187), w = bx - ax, d = bz - az, cx = (ax + bx) / 2, cz = (az + bz) / 2;
+    const fill = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: dark ? .16 : .1, depthWrite: false }));
+    fill.rotation.x = -Math.PI / 2; fill.position.set(cx, lift + 0.2, cz); g.add(fill);
+    const wallM = new THREE.MeshBasicMaterial({ color: col, map: beamTexture(), transparent: true, opacity: dark ? .6 : .32, depthWrite: false, side: THREE.DoubleSide, blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending });
+    const H = 16, walls = new THREE.Group();
+    [[w, cx, az, 0], [w, cx, bz, 0], [d, ax, cz, Math.PI / 2], [d, bx, cz, Math.PI / 2]].forEach(([len, x, zz, r]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(len, H), wallM); m.position.set(x, H / 2, zz); m.rotation.y = r; walls.add(m); });
+    walls.position.y = lift; g.add(walls);
+    if (!S.rm) { walls.scale.y = 0.01; tweens.push({ dur: 900, f: t => { walls.scale.y = Math.max(.01, ease(t)); } }); }
+  }
+  let upTex = null;
+  function riser(g, p, y0, y1) {
+    const P = pal, [x, z] = W(...p), h = Math.abs(y1 - y0); if (h < 1) return;
+    if (!upTex) { upTex = tex(64, 64, (c) => { c.clearRect(0, 0, 64, 64); c.strokeStyle = '#FFFFFF'; c.lineWidth = 9; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(14, 42); c.lineTo(32, 22); c.lineTo(50, 42); c.stroke(); }); upTex.wrapS = upTex.wrapT = THREE.RepeatWrapping; }
+    const y = Math.min(y0, y1) + h / 2;
+    const glow = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, h, 28, 1, true), new THREE.MeshBasicMaterial({ color: P.glow, transparent: true, opacity: .24, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })); glow.position.set(x, y, z); g.add(glow);
+    const core = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, h, 20, 1, true), new THREE.MeshBasicMaterial({ color: P.route, transparent: true, opacity: .95, depthTest: false })); core.position.set(x, y, z); core.renderOrder = 5; g.add(core);
+    const t = upTex.clone(); t.needsUpdate = true; t.repeat.set(3, h / 9);
+    const arrows = new THREE.Mesh(new THREE.CylinderGeometry(3.3, 3.3, h, 20, 1, true), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, depthTest: false })); arrows.position.set(x, y, z); arrows.renderOrder = 6; if (y1 < y0) arrows.rotation.z = Math.PI; arrows.userData.flowY = t; g.add(arrows);
+    [y0, y1].forEach(yy => { const d = new THREE.Mesh(new THREE.RingGeometry(5, 8, 32), new THREE.MeshBasicMaterial({ color: P.glow, transparent: true, opacity: .7, depthWrite: false, side: THREE.DoubleSide })); d.rotation.x = -Math.PI / 2; d.position.set(x, yy + 0.6, z); d.userData.pulse = true; g.add(d); });
+  }
+  function rings(g, pts, lift) { pts.forEach(([x, y]) => { const [wx, wz] = W(x, y); const r = new THREE.Mesh(new THREE.RingGeometry(7, 9.5, 36), new THREE.MeshBasicMaterial({ color: pal.glow, transparent: true, opacity: .8, depthWrite: false })); r.rotation.x = -Math.PI / 2; r.position.set(wx, lift + 0.5, wz); r.userData.pulse = true; g.add(r); }); }
+  function car(g, p) { const P = pal, c = new THREE.Group(); const body = mat(P.you, { metalness: .4, roughness: .35 }); const b = new THREE.Mesh(new THREE.BoxGeometry(10, 3.4, 5.4), body); b.position.y = 2.2; b.castShadow = true; c.add(b); const cab = new THREE.Mesh(new THREE.BoxGeometry(5.6, 2.6, 4.8), mat(P.glass, { roughness: .1 })); cab.position.set(-0.6, 5, 0); c.add(cab); const [x, z] = W(...p); c.position.set(x, 0, z); g.add(c); carObj = c; }
+
+  /* ---------- labels: Gozio-style callouts and badges, projected each frame, never overlapping ---------- */
+  function labelList(s) {
+    const out = [];
+    if (s.zoneG && (s.plan === s.zoneG.plan || (s.stack && s.stack.includes(s.zoneG.plan)))) out.push({ p: [(s.zoneG.x0 + s.zoneG.x1) / 2, 100], y: levelOf(s, s.zoneG.plan) + 20, html: `<span>${s.zoneG.name}</span>`, cls: 'm3-zone', style: `--g:${s.zoneG.tone}`, pri: 2.5 });
+    if (s.xray) {
+      s.stack.forEach(pl => out.push({ p: [-24, 100], y: levelOf(s, pl) + 2, html: `<span>Floor ${PLAN_META[pl].floor}</span>`, cls: 'm3-fl' + (pl === s.youPlan ? ' you' : '') + (s.stackFlag && pl === s.stackFlag.plan ? ' dest' : ''), pri: 3 }));
+      if (s.dest) { const r = ROOMS[s.dest]; out.push({ p: [r.cx, r.side === 'n' ? 50 : 150], y: levelOf(s, r.plan) + 16, html: `<span class="m3-dot"></span><span><b>${r.name}</b><small>${r.suite ? `Suite ${r.suite} · ` : ''}Floor ${r.floor}</small></span>`, cls: 'm3-call dest', aria: `${r.name}, Floor ${r.floor}`, room: r.id, pri: 4 }); }
+      return out;
+    }
+    if (s.plan === 'campus') {
+      out.push({ p: [240, 50], y: 70, html: `<span class="m3-dot"></span><span><b>Lakeview</b><small>University Hospital</small></span>`, cls: 'm3-call' + (s.destB === 'clem' ? ' dest' : ''), pri: 2 });
+      out.push({ p: [240, 150], y: 54, html: `<span class="m3-dot"></span><span><b>Lakeview</b><small>Pavilion</small></span>`, cls: 'm3-call' + (s.destB === 'simm' ? ' dest' : ''), pri: 2 });
+      out.push({ p: [76, 50], y: 32, html: `<span class="m3-b">${m3i('parking', 20)}</span>`, cls: 'm3-badge', aria: 'Garage A', pri: 1 });
+      out.push({ p: [76, 150], y: 32, html: `<span class="m3-b">${m3i('parking', 20)}</span>`, cls: 'm3-badge', aria: 'Simmons garage', pri: 1 });
+      return out;
+    }
+    const hi = s.cat ? CAT_MATCH[s.cat] : null;
+    roomsOn(s.plan).forEach(r => {
+      const cy = r.side === 'n' ? 50 : 150, isDest = s.dest === r.id;
+      if (r.ic || r.kind === 'core') out.push({ p: [r.cx, cy], y: 12, html: `<span class="m3-b">${m3i(r.ic || 'elevator', 20)}</span>`, cls: 'm3-badge' + (hi && hi(r) ? ' hi' : ''), aria: `${r.name}, ${PLACES[r.b].short}, Floor ${r.floor}`, room: r.id, pri: hi && hi(r) ? 3 : 1 });
+      else if (r.kind === 'dept') out.push({ p: [r.cx, cy], y: 14, html: `<span class="m3-dot"></span><span><b>${r.name}</b><small>Suite ${r.suite}</small></span>`, cls: 'm3-call' + (isDest ? ' dest' : '') + (hi && hi(r) ? ' hi' : ''), aria: `${r.name}, Suite ${r.suite}, Floor ${r.floor}`, room: r.id, pri: isDest ? 4 : 2 });
+    });
+    return out;
+  }
+  function makeLabels(s) {
+    labelsEl.innerHTML = ''; labels = [];
+    if (s.mode === 'live') return;
+    labelList(s).forEach(L => {
+      const el = document.createElement(L.room && s.labelsTab !== false ? 'button' : 'span');
+      if (L.style) el.setAttribute('style', L.style);
+      el.className = L.cls; el.innerHTML = L.html; el.style.visibility = 'hidden';
+      if (L.room && s.labelsTab !== false) { el.dataset.action = 'geo-label'; el.dataset.room = L.room; el.setAttribute('aria-label', `${L.aria}. Show options`); el.tabIndex = s.labelsTab === false ? -1 : 0; }
+      else el.setAttribute('aria-hidden', 'true');
+      labelsEl.appendChild(el);
+      const [x, z] = W(...L.p); labels.push({ el, v: new THREE.Vector3(x, (s.lift || 0) + L.y, z), pri: L.pri, call: L.cls.startsWith('m3-call') });
+    });
+  }
+  function placeLabels(w, h) {
+    const placed = (insets.avoid || []).slice(), order = labels.slice().sort((a, b) => b.pri - a.pri), v = new THREE.Vector3();
+    order.forEach(L => {
+      v.copy(L.v).project(camera);
+      const lw = L.el.offsetWidth, lh = L.el.offsetHeight, x = (v.x + 1) / 2 * w, y = (1 - v.y) / 2 * h;
+      const bad = r => v.z > 1 || r[0] < 4 || r[2] > w - 4 || r[1] < insets.top || r[3] > h - insets.bottom || placed.some(q => !(r[2] + 4 < q[0] || r[0] - 4 > q[2] || r[3] + 4 < q[1] || r[1] - 4 > q[3]));
+      let r = L.call ? [x - lw / 2, y - lh - 6, x + lw / 2, y - 6] : [x - lw / 2, y - lh / 2, x + lw / 2, y + lh / 2], below = false;
+      // a callout with no room above its place hangs below it instead
+      if (bad(r) && L.call) { const r2 = [x - lw / 2, y + 6, x + lw / 2, y + lh + 6]; if (!bad(r2)) { r = r2; below = true; } }
+      if (bad(r)) { L.el.style.visibility = 'hidden'; return; }
+      L.el.classList.toggle('below', below);
+      placed.push(r); L.el.style.visibility = ''; L.el.style.transform = `translate(${Math.round(r[0])}px, ${Math.round(r[1])}px)`;
+    });
+  }
+
+  /* ---------- scene composition per spec ---------- */
+  const floorOf = plan => plan === 'campus' ? 0 : PLAN_META[plan].floor;
+  function compose(s, animate) {
+    palette();
+    const sg = staticGroup(s.plan);
+    if (cur.group !== sg) {
+      if (cur.group && animate && !S.rm && cur.plan !== 'campus' && s.plan !== 'campus' && PLAN_META[cur.plan].b === PLAN_META[s.plan].b) {
+        // floor change: the old floor drops away, the new one settles in – like an elevator
+        const up = floorOf(s.plan) > floorOf(cur.plan), old = cur.group;
+        tweens.push({ dur: 650, f: t => { old.position.y = (up ? -60 : 60) * ease(t); }, done: () => scene.remove(old) });
+        sg.position.y = up ? 60 : -60; tweens.push({ dur: 650, f: t => { sg.position.y = (up ? 60 : -60) * (1 - ease(t)); } });
+      } else if (cur.group) { scene.remove(cur.group); sg.position.y = 0; if (animate && !S.rm) { canvas.classList.remove('m3-in'); void canvas.offsetWidth; canvas.classList.add('m3-in'); } }
+      else sg.position.y = 0;
+      scene.add(sg); cur = { key: s.plan + palKey, plan: s.plan, group: sg };
+    }
+    // stacked floors: the elevator ride, and the x-ray view of the whole route through the building
+    Object.values(anims.stack || {}).forEach(o => { o.traverse(n => { if (n.isLineSegments) n.geometry.dispose(); if (n.material) [].concat(n.material).forEach(m => m.dispose()); }); scene.remove(o); }); anims.stack = null;
+    if (dyn) { disposeTree(dyn); dyn = null; } youObj = null; carObj = null;
+    dyn = new THREE.Group(); scene.add(dyn);
+    const lv = pl => levelOf(s, pl);
+    if (s.stack) {
+      anims.stack = {};
+      const keep = [s.stackDest, s.youPlan].filter(Boolean);
+      s.stack.forEach(pl => { if (pl === s.plan) return; const gg = staticGroup(pl).clone(); gg.position.y = lv(pl);
+        const key = keep.includes(pl), fill = new THREE.MeshBasicMaterial({ color: pal.glow, transparent: true, opacity: key ? .1 : .04, depthWrite: false }), edge = new THREE.LineBasicMaterial({ color: pal.glow, transparent: true, opacity: key ? .85 : .4, depthWrite: false });
+        gg.traverse(n => {
+          if (!n.isMesh) return;
+          if (n.geometry.type === 'PlaneGeometry' && n.geometry.parameters.width > 1000) { n.visible = false; return; }
+          // the floors above are drawn as light, so nothing hides your floor or the route
+          n.material = fill.clone(); n.castShadow = false; n.receiveShadow = false;
+          if (n.geometry.type === 'BoxGeometry' && n.geometry.parameters.height >= 2.5 && n.geometry.parameters.width + n.geometry.parameters.depth > 14) n.add(new THREE.LineSegments(new THREE.EdgesGeometry(n.geometry), edge.clone()));
+        });
+        fill.dispose(); edge.dispose();
+        scene.add(gg); anims.stack[pl] = gg; });
+      if (!s.xray && s.you) { const [sx, sz] = W(s.you[0], s.you[1]), top = lv(s.stack[s.stack.length - 1]);
+        const shaft = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, top + 12, 24, 1, true), new THREE.MeshBasicMaterial({ color: pal.glow, transparent: true, opacity: .28, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+        shaft.position.set(sx, (top + 12) / 2, sz - 6); dyn.add(shaft); }
+    }
+    if (s.zoneG && (s.plan === s.zoneG.plan || (s.stack && s.stack.includes(s.zoneG.plan)))) zoneLayer(dyn, s.zoneG, lv(s.zoneG.plan));
+    if (s.xray) {
+      Object.entries(s.stackRoutes || {}).forEach(([pl, rs]) => routeLayer(dyn, rs, lv(pl), true, 1.7));
+      if (s.riser) riser(dyn, s.riser.p, lv(s.riser.from), lv(s.riser.to));
+      if (s.stackFlag) beacon(dyn, s.stackFlag.p, lv(s.stackFlag.plan), 1.6);
+    } else {
+      routeLayer(dyn, s.routes, 0, s.plan === 'campus');
+      if (s.flag) beacon(dyn, s.flag, 0, s.mode === 'live' ? .4 : 1);
+      if (s.cat && s.plan !== 'campus') rings(dyn, roomsOn(s.plan).filter(CAT_MATCH[s.cat]).map(r => [r.cx, r.side === 'n' ? 50 : 150]), 0);
+    }
+    if (s.drive) { car(dyn, s.you); }
+    else if (s.you) youMarker(dyn, s.you, s.head, s.xray ? lv(s.youPlan || s.plan) : 0, s.xray ? 2.2 : s.mode === 'overview' || s.mode === '2d' ? 1.3 : 1);
+    makeLabels(s);
+    frameCamera(s, !animate || S.rm);
+    if (s.drive && animate && !S.rm) driveAlong(DRIVE[s.drive]);
+    else if (s.drive) { const e = DRIVE[s.drive][DRIVE[s.drive].length - 1], [x, z] = W(...e); carObj.position.set(x, 0, z); carObj.rotation.y = Math.PI / 2; }
+  }
+  function frameCamera(s, snap) {
+    const aspect = Math.max(.3, (host ? host.clientWidth : 390) / (host ? host.clientHeight : 500));
+    const rad = THREE.MathUtils.degToRad, span = (u, fov) => (u / 2) / (Math.tan(rad(fov) / 2) * aspect);
+    if (s.mode === 'live' && s.you) {
+      const [x, z] = W(...s.you), hd = s.head ? W(...s.head) : [x + 10, z], a = Math.atan2(hd[1] - z, hd[0] - x);
+      Object.assign(want, { live: true, ex: x - Math.cos(a) * 6, ey: s.plan === 'campus' ? 7 : 6, ez: z - Math.sin(a) * 6, lx: x + Math.cos(a) * 80, ly: 4, lz: z + Math.sin(a) * 80, fov: 64 });
+    } else if (s.mode === 'follow' && s.you) {
+      const [x, z] = W(...s.you), hd = s.head ? W(...s.head) : [x + 10, z], a = Math.atan2(hd[1] - z, hd[0] - x);
+      const campus = s.plan === 'campus', ahead = campus ? 34 : 24;
+      Object.assign(want, { live: false, ahead, tx: x + Math.cos(a) * ahead, ty: 0, tz: z + Math.sin(a) * ahead, th: Math.atan2(-Math.cos(a), -Math.sin(a)), ph: campus ? 0.96 : 0.9, d: span(campus ? 300 : 190, 40), fov: 40 });
+    } else if (s.mode === 'xray' || s.mode === 'stack') {
+      const top = levelOf(s, s.stack[s.stack.length - 1]);
+      Object.assign(want, { live: false, tx: 4, ty: top * 0.47, tz: 0, th: -0.36, ph: 1.15, d: span(510, 38), fov: 38 });
+    } else {
+      const flat2d = s.mode === '2d', campus = s.plan === 'campus';
+      const fitW = campus ? 360 : 320, hf = 2 * Math.atan(Math.tan(rad(38) / 2) * aspect);
+      let d = (fitW / 2) / Math.tan(hf / 2) * (flat2d ? 1.0 : 1.08);
+      d = Math.max(d, (campus ? 230 : 200) / (2 * Math.tan(rad(19))) * 0.9);
+      Object.assign(want, { live: false, tx: campus ? 20 : 0, ty: 0, tz: campus ? 0 : 6, th: flat2d ? 0 : campus ? -0.5 : -0.32, ph: flat2d ? 0.001 : 0.92, d, fov: 38 });
+      if (s.focus) { const [fx, fz] = W(...s.focus); Object.assign(want, { tx: fx * 0.75, tz: fz * 0.6, d: d * 0.66, th: flat2d ? 0 : -0.42 }); }
+    }
+    if (snap) Object.assign(cam, want);
+  }
+  function driveAlong(pts) {
+    const total = plen(pts), t0 = performance.now();
+    anims.drive = { t0, dur: 1800, pts, total };
+  }
+  const along = (pts, d) => { let acc = 0; for (let i = 1; i < pts.length; i++) { const seg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (acc + seg >= d) { const k = (d - acc) / seg; return { p: [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k], a: Math.atan2(pts[i][1] - pts[i - 1][1], pts[i][0] - pts[i - 1][0]) }; } acc += seg; } const n = pts.length; return { p: pts[n - 1], a: Math.atan2(pts[n - 1][1] - pts[n - 2][1], pts[n - 1][0] - pts[n - 2][0]) }; };
+
+  /* ---------- the frame loop ---------- */
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    if (!host || !host.isConnected || !host.offsetParent) return;
+    if (slow() && now - lastT < 90) return;
+    const dt = Math.min(64, now - (lastT || now)); lastT = now;
+    if (spec && (screen.classList.contains('dark') ? 'dark' : 'light') !== palKey) compose(spec, false);
+    const w = host.clientWidth, h = host.clientHeight;
+    if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) renderer.setSize(w, h, false);
+    // tweens
+    tweens = tweens.filter(tw => { tw.t0 = tw.t0 || now; const t = Math.min(1, (now - tw.t0) / tw.dur); tw.f(t); if (t >= 1) { tw.done && tw.done(); return false; } return true; });
+    // drive and walk animations
+    if (anims.drive && carObj) { const A = anims.drive, t = Math.min(1, (now - A.t0) / A.dur), q = along(A.pts, A.total * ease(t)); const [x, z] = W(...q.p); carObj.position.set(x, 0, z); carObj.rotation.y = -q.a; if (t >= 1) anims.drive = null; }
+    if (anims.walk && youObj) { const A = anims.walk, t = Math.min(1, (now - A.t0) / A.dur), q = along(A.pts, A.total * t); const [x, z] = W(...q.p); youObj.position.x = x; youObj.position.z = z; if (youObj.userData.cone) youObj.userData.cone.rotation.z = -q.a; if (A.follow) { const a = q.a, k = want.ahead || 22; want.tx = x + Math.cos(a) * k; want.tz = z + Math.sin(a) * k; want.th = Math.atan2(-Math.cos(a), -Math.sin(a)); if (want.live) { want.ex = x - Math.cos(a) * 6; want.ez = z - Math.sin(a) * 6; want.lx = x + Math.cos(a) * 80; want.lz = z + Math.sin(a) * 80; } } A.onT && A.onT(t); if (t >= 1) { anims.walk = null; A.done && A.done(); } }
+    if (anims.ride && youObj) { const A = anims.ride, t = Math.min(1, (now - A.t0) / A.dur), e = ease(t); youObj.position.y = A.y0 + A.dy * e; A.onT && A.onT(t); if (t >= 1) { anims.ride = null; A.done && A.done(); } }
+    // idle motion: pulse, flowing arrows, the pin bobbing (still under reduced motion)
+    if (!S.rm) {
+      const k = (now % 1600) / 1600;
+      if (dyn) dyn.traverse(n => { if (n.userData.pulse) { n.scale.setScalar(1 + k * 0.9); n.material.opacity = .45 * (1 - k); } if (n.userData.flow) n.userData.flow.offset.x -= dt * 0.0016; if (n.userData.flowY) n.userData.flowY.offset.y -= dt * 0.0012; if (n.userData.bob !== undefined) { n.position.y = n.userData.bob + Math.sin(now / 420) * 1.6; n.rotation.y += dt * 0.0012; } });
+    }
+    // camera: ease toward the wanted view (plus the viewer's own drag and zoom)
+    const f = S.rm ? 1 : 1 - Math.pow(now < flyUntil ? 0.12 : 0.0025, dt / 1000);
+    ['tx', 'ty', 'tz', 'ph', 'd', 'fov'].forEach(k => { if (want[k] !== undefined) cam[k] = lerp(cam[k], want[k], f); });
+    let dth = want.th - cam.th; dth = Math.atan2(Math.sin(dth), Math.cos(dth)); cam.th += dth * f;
+    camera.fov = cam.fov; camera.aspect = w / h;
+    const dd = want.live ? 60 : cam.d * user.d; scene.fog.near = dd * 0.8; scene.fog.far = dd * 2.8;
+    if (want.live) {
+      ['ex', 'ey', 'ez', 'lx', 'ly', 'lz'].forEach(k => { cam[k] = cam[k] === undefined ? want[k] : lerp(cam[k], want[k], f); });
+      camera.position.set(cam.ex, cam.ey, cam.ez); camera.lookAt(cam.lx, cam.ly, cam.lz); camera.clearViewOffset();
+    } else {
+      const th = cam.th + user.th, ph = Math.min(1.35, Math.max(0.001, cam.ph + user.ph)), d = cam.d * user.d;
+      camera.position.set(cam.tx + Math.sin(ph) * Math.sin(th) * d, cam.ty + Math.cos(ph) * d, cam.tz + Math.sin(ph) * Math.cos(th) * d);
+      camera.up.set(0, 1, 0); if (ph < 0.01) camera.up.set(-Math.sin(th), 0, -Math.cos(th));
+      camera.lookAt(cam.tx, cam.ty, cam.tz);
+      const off = ((insets.top + (h - insets.bottom)) / 2) - h / 2;
+      camera.setViewOffset(w, h, 0, -off, w, h);
+    }
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    placeLabels(w, h);
+  }
+
+  /* ---------- pointer: drag to turn, wheel or pinch to zoom; vertical swipes still scroll the sheet on touch ---------- */
+  function bindPointer() {
+    let drag = null;
+    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, th: user.th, ph: user.ph, touch: e.pointerType === 'touch' }; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', e => { if (!drag) return; user.th = drag.th - (e.clientX - drag.x) * 0.008; if (!drag.touch) user.ph = Math.max(-0.9, Math.min(0.4, drag.ph - (e.clientY - drag.y) * 0.005)); });
+    const end = () => { drag = null; };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+    canvas.addEventListener('wheel', e => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); user.d = Math.max(0.45, Math.min(1.8, user.d * (1 + e.deltaY * 0.001))); }, { passive: false });
+  }
+
+  /* ---------- public API ---------- */
+  function mount(el, s, opt = {}) {
+    if (!init()) return false;
+    insets = { top: opt.top || 0, bottom: opt.bottom || 0, avoid: opt.avoid || [] };
+    if (canvas.parentNode !== el) { el.appendChild(canvas); el.appendChild(labelsEl); }
+    host = el;
+    const key = JSON.stringify(s);
+    if (key !== specKey || opt.force) {
+      const animate = !!spec && opt.animate !== false;
+      if (opt.keepView !== true && (!spec || spec.plan !== s.plan || spec.mode !== s.mode)) user = { th: 0, ph: 0, d: 1 };
+      spec = s; specKey = key; anims.walk = null; anims.ride = null; compose(s, animate);
+      // arriving at a place: the camera swoops down from above the campus
+      if (opt.intro && !S.rm) { Object.assign(cam, want, { d: want.d * 2.4, ph: 0.2, th: want.th + 1.2 }); flyUntil = performance.now() + 2400; }
+    }
+    if (!raf) raf = requestAnimationFrame(frame);
+    return true;
+  }
+  function walk(pts, dur, onT) { return new Promise(res => { if (!youObj || S.rm || !pts || pts.length < 2) return res(); anims.walk = { t0: performance.now(), dur, pts, total: plen(pts), follow: spec && (spec.mode === 'follow' || spec.mode === 'live'), onT, done: res }; }); }
+  function ride(toPlan, dur, onT) { return new Promise(res => { if (!youObj || S.rm || !spec) return res(); anims.ride = { t0: performance.now(), dur, y0: youObj.position.y, dy: levelOf(spec, toPlan) - youObj.position.y + 0.5, onT, done: res }; }); }
+  function reset() { user = { th: 0, ph: 0, d: 1 }; }
+  /* A still picture of a spec, for static cards (same renderer, same scene) */
+  function snapshot(s, w, h) {
+    if (!init()) return null;
+    const keep = { host, spec, specKey, insets: { ...insets }, cam: { ...cam }, want: { ...want }, user: { ...user }, youObj, carObj };
+    const fake = { clientWidth: w, clientHeight: h };
+    host = null; insets = { top: 0, bottom: 0 }; user = { th: 0, ph: 0, d: 1 };
+    palette();
+    const sg = staticGroup(s.plan), was = cur.group, wasDyn = dyn, stack = anims.stack;
+    if (was) scene.remove(was); if (wasDyn) scene.remove(wasDyn); if (stack) Object.values(stack).forEach(o => scene.remove(o));
+    sg.position.y = 0; scene.add(sg);
+    const d0 = new THREE.Group(); scene.add(d0); dyn = d0;
+    routeLayer(d0, s.routes, 0); if (s.flag) beacon(d0, s.flag, 0); if (s.you) youMarker(d0, s.you, s.head, 0);
+    host = fake; frameCamera({ ...s, mode: 'overview' }, true); host = null;
+    const pr = renderer.getPixelRatio(); renderer.setPixelRatio(2); renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.fov = cam.fov;
+    const th = cam.th, ph = cam.ph, d = cam.d;
+    camera.position.set(cam.tx + Math.sin(ph) * Math.sin(th) * d, cam.ty + Math.cos(ph) * d, cam.tz + Math.sin(ph) * Math.cos(th) * d); camera.up.set(0, 1, 0); camera.lookAt(cam.tx, cam.ty, cam.tz); camera.clearViewOffset(); camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    // labels drawn onto a 2D copy
+    const out = document.createElement('canvas'); out.width = w * 2; out.height = h * 2; const c = out.getContext('2d'); c.drawImage(canvas, 0, 0, w * 2, h * 2); c.scale(2, 2);
+    const v = new THREE.Vector3(), placed = [];
+    labelList(s).sort((a, b) => b.pri - a.pri).forEach(L => {
+      const [x, z] = W(...L.p); v.set(x, L.y, z).project(camera); const sx = (v.x + 1) / 2 * w, sy = (1 - v.y) / 2 * h;
+      if (L.cls.startsWith('m3-call')) {
+        const t1 = L.html.match(/<b>(.*?)<\/b>/)[1], t2 = (L.html.match(/<small>(.*?)<\/small>/) || [])[1] || '';
+        c.font = '700 12px Inter, system-ui, sans-serif'; const tw1 = c.measureText(t1).width; c.font = '600 11px Inter, system-ui, sans-serif'; const tw2 = c.measureText(t2).width;
+        const bw = Math.max(tw1, tw2) + 26, bh = t2 ? 34 : 22, r = [sx - bw / 2, sy - bh - 6, sx + bw / 2, sy - 6];
+        if (r[0] < 2 || r[2] > w - 2 || r[1] < 2 || placed.some(q => !(r[2] < q[0] || r[0] > q[2] || r[3] < q[1] || r[1] > q[3]))) return; placed.push(r);
+        c.shadowColor = 'rgba(16,38,60,.25)'; c.shadowBlur = 6; c.fillStyle = pal === PAL.dark ? '#16222E' : '#FFFFFF'; c.beginPath(); c.roundRect ? c.roundRect(r[0], r[1], bw, bh, 7) : c.rect(r[0], r[1], bw, bh); c.fill(); c.shadowBlur = 0;
+        c.fillStyle = PAL.light.pin; c.beginPath(); c.arc(r[0] + 10, r[1] + 11, 3.5, 0, 7); c.fill();
+        c.fillStyle = pal.label; c.font = '700 12px Inter, system-ui, sans-serif'; c.textBaseline = 'middle'; c.fillText(t1, r[0] + 18, r[1] + 11);
+        if (t2) { c.font = '600 11px Inter, system-ui, sans-serif'; c.fillStyle = pal === PAL.dark ? '#A6B4C0' : '#5B6770'; c.fillText(t2, r[0] + 18, r[1] + 25); }
+      } else {
+        const r = [sx - 11, sy - 11, sx + 11, sy + 11]; if (placed.some(q => !(r[2] < q[0] || r[0] > q[2] || r[3] < q[1] || r[1] > q[3]))) return; placed.push(r);
+        c.fillStyle = pal === PAL.dark ? '#2D6CA6' : '#004278'; c.beginPath(); c.arc(sx, sy, 11, 0, 7); c.fill(); c.strokeStyle = '#FFFFFF'; c.lineWidth = 2; c.stroke();
+        const glyph = (L.html.match(/aria-hidden="true">([a-z_]+)</) || [])[1];
+        if (glyph && document.documentElement.classList.contains('ms-ready')) { c.fillStyle = '#FFFFFF'; c.font = '14px "Material Symbols Rounded"'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(glyph, sx, sy + 0.5); c.textAlign = 'start'; }
+      }
+    });
+    const url = out.toDataURL('image/png');
+    // restore the live view
+    scene.remove(sg); disposeTree(d0); dyn = wasDyn;
+    if (was) scene.add(was); if (wasDyn) scene.add(wasDyn); if (stack) Object.values(stack).forEach(o => scene.add(o));
+    renderer.setPixelRatio(pr); host = keep.host; insets = keep.insets; Object.assign(cam, keep.cam); Object.assign(want, keep.want); user = keep.user; youObj = keep.youObj; carObj = keep.carObj;
+    if (host) renderer.setSize(host.clientWidth, host.clientHeight, false);
+    return url;
+  }
+  return { init, ok: () => ok || init(), mount, walk, ride, reset, snapshot, setHeading, view: () => ({ ...user }) };
+})();
+
+window.__m3=()=>{if(M3.ok()){const v=top().v;if(v==="home"||v==="wayfinding"||v==="nav3d")rerenderKeep()}};
+
 function render(anim,opts={}){
   const t=top();
   screenTransition(anim,opts,()=>{
     renderAppbar();
     view.setAttribute("aria-label",t.v==="home"?"Home":TITLES[t.v]);
-    view.innerHTML=t.v==="home"?viewHome():t.v==="find"?viewFind():t.v==="results"?viewResults():t.v==="profile"?viewProfile(t.id):t.v==="saved"?viewSaved():t.v==="wayfinding"?viewWayfinding():t.v==="locations"?viewLocations():t.v==="medblog"?viewMedblog():t.v==="inbox"?viewInbox():t.v==="mychart"?viewMyChart():viewMenu();
+    view.innerHTML=t.v==="home"?viewHome():t.v==="find"?viewFind():t.v==="results"?viewResults():t.v==="profile"?viewProfile(t.id):t.v==="saved"?viewSaved():t.v==="wayfinding"?viewWayfinding():t.v==="locations"?viewLocations():t.v==="medblog"?viewMedblog():t.v==="inbox"?viewInbox():t.v==="mychart"?viewMyChart():t.v==="place"?viewPlace(t.room):t.v==="nav3d"?viewNav3d():viewMenu();
     if(t.v==="results")renderResultsBody();
     if(t.v==="home"){initCarousel();ptrInit()}
     if(opts.scroll!=null)view.scrollTop=opts.scroll;
+    geoMount();
   });
   animateAppbar(anim);
   markScroll(view,!opts.instant&&anim!=="pop",anim?(anim==="fade"?120:200):0);onScroll();
@@ -1119,6 +1758,14 @@ screen.addEventListener("click",e=>{
    case "widen":S.filters.dist="50";render();load();break;
    case "retry":if(S.data==="error"||S.data==="offline"){S.data="live";syncControls()}load();break;
    case "profile":push({v:"profile",id});break;
+   case "geo-why":S.why=el.dataset.k==="change"?null:el.dataset.k;rerenderKeep(true);sayPolite(S.why?"Home updated for your visit":"What brings you here today?");break;
+   case "geo-nav":geoNav(el.dataset.room);break;
+   case "geo-place":push({v:"place",room:el.dataset.room});break;
+   case "geo-label":PINFO[el.dataset.room]?push({v:"place",room:el.dataset.room}):geoNav(el.dataset.room);break;
+   case "geo-step":n3Step(+el.dataset.d);break;
+   case "geo-all":{const N=top();N.all=!N.all;if(N.all)N.live=false;n3Paint(false);sayPolite(N.all?"Route overview, all floors":"Following you");break}
+   case "geo-live":{const N=top();N.live=!N.live;if(N.live)N.all=false;n3Paint(false);sayPolite(N.live?"Live view, simulated":"Live view off");break}
+   case "geo-floor":S.geoFloor=+el.dataset.f;rerenderKeep();break;
    case "push":push(el.dataset.to?{v:el.dataset.v,to:el.dataset.to}:{v:el.dataset.v});break;
    case "blog-cat":S.blogCat=el.dataset.c;rerenderKeep(true);{const c=$(`[data-action="blog-cat"][data-c="${el.dataset.c}"]`);if(c){c.focus({preventScroll:true});c.scrollIntoView({inline:"center",block:"nearest",behavior:rm()?"auto":"smooth"})}}sayPolite(`${BLOG.filter(b=>S.blogCat==="All"||b.cat===S.blogCat).length} stories`);break;
    case "blog-more":{const n=$$(".blog-row").length;S.blogMore=true;rerenderKeep(true);$$(".blog-row")[n]?.focus();break}
@@ -1203,6 +1850,10 @@ const JUMPS=[
  ["onboarding","Onboarding","Four slides, then Home as a guest",()=>{goTab("home");render();openOnboarding()}],
  ["home","Guest home","Alerts, search, modules",()=>{S.wf="none";goTab("home");render("fade")}],
  ["wf-here","Home at a facility","Contextual wayfinding card",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";goTab("home");render("fade")}],
+ ["geo-why","Why you’re here","Guest at a facility: asked once on arrival",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";S.why=null;goTab("home");S.stacks.home.splice(1);render("fade")}],
+ ["geo-near","Guest nearby","Care, doctors open today, facilities",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";S.why="look";goTab("home");S.stacks.home.splice(1);render("fade");setTimeout(()=>{const n=$("#h-near");if(n)view.scrollTo({top:layoutTop(n)-16,behavior:rm()?"auto":"smooth"})},300)}],
+ ["geo-place","Café menu","A facility near you, with Start 3D directions",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";goTab("home");S.stacks.home.splice(1);S.stacks.home.push({v:"place",room:"lv1-cafe"});render("fade")}],
+ ["geo-nav","3D wayfinding","Turn-by-turn to the Heart clinic, Floor 7",()=>{S.wf="facility";S.perm="granted";S.osAnswer="granted";goTab("home");S.stacks.home.splice(1);S.stacks.home.push({v:"nav3d",room:"lv7-heart",steps:geoSteps("lv7-heart"),i:0});render("fade")}],
  ["wf-visit","Home before a visit","Upcoming visit with directions",()=>{S.wf="visit";goTab("home");render("fade")}],
  ["wayfinding","Wayfinding","In-app page, no account needed",()=>{goTab("home");S.stacks.home.push({v:"wayfinding"});render("fade")}],
  ["locations","Locations","Save a location with the heart",()=>{goTab("home");S.stacks.home.push({v:"locations"});render("fade")}],
