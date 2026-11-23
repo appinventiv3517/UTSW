@@ -253,6 +253,8 @@ window.__alWalk = function (opts) {
       }
     }
     if (lift) { overlays.push(node); return null; }
+    if (node && cs) { const zi = cs.zIndex === 'auto' ? null : +cs.zIndex, positioned = cs.position !== 'static';
+      node.zk = !positioned ? 0 : zi == null ? 1 : zi < 0 ? zi - 1 : 1 + zi; }
     return node;
   }
   const flat = k => k.k === 'contents' ? k.ch.flatMap(flat) : [k];

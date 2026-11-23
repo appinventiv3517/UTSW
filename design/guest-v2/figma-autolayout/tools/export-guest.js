@@ -73,7 +73,7 @@ const SCREENS = [
   const screens = [], report = [];
   let failed = 0;
   for (const sc of list) {
-    const ctx = await browser.newContext({ viewport: { width: 1300, height: 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+    const ctx = await browser.newContext({ viewport: { width: 1300, height: 1000 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
     const p = await ctx.newPage();
     if (THREE) await p.route('**/three.js/r128/three.min.js', r => r.fulfill({ status: 200, body: THREE, contentType: 'application/javascript' }));
     const errs = []; p.on('pageerror', e => errs.push(e.message));

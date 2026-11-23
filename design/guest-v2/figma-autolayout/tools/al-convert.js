@@ -14,7 +14,7 @@ let seq = 0;
 function convert(src) { seq = 0; const out = conv(src, null); out.sh = 'FIXED'; out.sv = 'FIXED'; return out; }
 
 function conv(n, parentHints) {
-  const o = conv0(n, parentHints); o._hints = n.h || {}; return o;
+  const o = conv0(n, parentHints); o._hints = n.h || {}; o._zk = n.zk || 0; return o;
 }
 function conv0(n, parentHints) {
   if (n.k === 'T') {
@@ -44,7 +44,13 @@ function conv0(n, parentHints) {
   const flow = kids.filter(c => !c.abs), abs = kids.filter(c => c.abs);
   layout(f, flow, n.pad || [0, 0, 0, 0], n.h || {});
   abs.forEach(a => { a.x = r2(a._b.x - f._b.x); a.y = r2(a._b.y - f._b.y); a.sh = 'FIXED'; a.sv = 'FIXED'; fixInside(a); });
-  f.ch = [...(f.ch || []), ...abs];
+  /* Layer order: floating layers sit where the app's stacking puts them (z-index); in-flow layers keep their order */
+  const res = [...(f.ch || [])], zk = c => c._zk != null ? c._zk : Math.max(0, ...(c.ch || []).map(zk));
+  [...abs].map((a, i) => [a, i]).sort((p, q) => p[0]._zk - q[0]._zk || p[1] - q[1]).forEach(([a]) => {
+    let at = res.length; for (let i = 0; i < res.length; i++) if (!res[i].abs && zk(res[i]) > a._zk) { at = i; break; }
+    if (at === res.length) { /* after any earlier floating layers with a higher stack */ for (let i = 0; i < res.length; i++) if (res[i].abs && res[i]._zk > a._zk) { at = i; break; } }
+    res.splice(at, 0, a); });
+  f.ch = res;
   return f;
 }
 /* Absolutely placed layers keep fixed sizes; their own children still get auto layout */
