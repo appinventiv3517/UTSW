@@ -1091,6 +1091,35 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .n3-lift{display:flex;align-items:center;gap:var(--sp-12);padding:var(--sp-8) var(--sp-12);border-radius:var(--r-12);background:var(--c-tint);font-size:var(--fs-14);line-height:var(--lh-14);color:var(--c-text)}
 .n3-lift b{width:48px;height:48px;border-radius:var(--r-8);display:grid;place-items:center;background:var(--c-text);color:var(--c-bg);font-size:var(--fs-24);font-variant-numeric:tabular-nums}
 .n3-btns{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-12)}
+
+/* Home at a facility: the live 3D map is the first fold */
+.geo-hero{position:relative;height:460px;background:#DCE4EC;overflow:hidden;border-radius:0 0 var(--r-24) var(--r-24)}
+.screen.dark .geo-hero{background:#0B141D}
+.geo-hero .m3-box{position:absolute;inset:0;height:auto}
+.gh-top{position:absolute;left:var(--sp-12);right:72px;top:var(--sp-12);z-index:2}
+.gh-chip{display:inline-flex;align-items:center;gap:var(--sp-12);max-width:100%;padding:var(--sp-8) var(--sp-16) var(--sp-8) var(--sp-12);border-radius:var(--r-16);background:var(--glass-light);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:0 4px 16px rgba(0,20,40,.16)}
+.gh-chip h2{font-size:var(--fs-16);line-height:var(--lh-16);font-weight:700;color:var(--c-text)}
+.gh-chip .eyebrow{display:block;color:var(--c-blue)}
+.gh-live{width:10px;height:10px;border-radius:50%;background:var(--c-green);box-shadow:0 0 0 4px rgba(67,176,42,.22);flex:none}
+.gh-side{position:absolute;right:var(--sp-12);top:var(--sp-12);z-index:2;display:grid;border-radius:var(--r-12);overflow:hidden;background:var(--c-surface);box-shadow:0 4px 12px rgba(0,20,40,.18)}
+.gh-fl{position:relative;width:44px;height:44px;border:0;background:var(--c-surface);color:var(--c-text);font:inherit;font-size:var(--fs-16);font-weight:700;cursor:pointer}
+.gh-fl+.gh-fl{box-shadow:inset 0 1px 0 var(--c-border)}
+.gh-fl[aria-pressed="true"]{background:var(--c-ctl);color:var(--c-on-blue)}
+.gh-fl i{position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--c-cyan);box-shadow:0 0 0 2px var(--c-surface)}
+.gh-foot{position:absolute;left:var(--sp-12);right:var(--sp-12);bottom:var(--sp-16);z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-8);flex-wrap:wrap}
+.gh-foot .tag-s{background:var(--c-surface)}
+.gh-foot .btn{box-shadow:0 4px 12px rgba(0,20,40,.24)}
+.hero-low{margin-inline:var(--sp-16);border-radius:var(--r-16);padding-top:var(--sp-16)}
+/* Directions fill the screen above the tab bar; nothing scrolls */
+.view:has(.n3){overflow:hidden}
+.view:has(.n3)::after{display:none}
+.n3{position:absolute;inset:0 0 calc(var(--tabbar-h) - var(--sp-8)) 0;display:block}
+.n3 .n3-map{position:absolute;inset:0;border-radius:0;box-shadow:none}
+.n3 .m3-box.tall{position:absolute;inset:0;height:auto}
+.n3 .n3-banner{position:absolute;left:var(--sp-12);right:var(--sp-12);top:var(--sp-12);z-index:2;box-shadow:0 6px 20px rgba(0,20,40,.24)}
+.n3 .n3-tag{top:auto;bottom:auto;left:var(--sp-12);z-index:2}
+.n3 .n3-side{top:auto;z-index:2}
+.n3 .n3-card{position:absolute;left:var(--sp-12);right:var(--sp-12);bottom:var(--sp-8);z-index:2;gap:var(--sp-8);padding:var(--sp-12) var(--sp-16);box-shadow:0 8px 24px rgba(0,20,40,.22)}
 </style>
 
 <div class="page">

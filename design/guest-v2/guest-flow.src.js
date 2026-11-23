@@ -413,12 +413,19 @@ M.announcements=()=>`<div class="mod-head"><h2 class="sec-h" id="h-announcements
 M.summer=()=>"";
 function visibleModules(){return S.layout.filter(m=>m.on&&!MODS[m.id].expired)}
 function viewHome(){
+  if(wfCtx()==="facility")return `<div class="ptr" id="ptr" aria-hidden="true"></div><div class="v-inner geo-home"><div class="top">${renderAlerts()}${geoHero()}</div>
+    ${whyCard()}${nearLists()}
+    <section class="hero on-blue hero-low" aria-labelledby="h-hero"><span class="aurora" aria-hidden="true"><i></i></span>
+      <div class="hero-copy"><h1 class="sr-only">UTSW MyCare home</h1><h2 class="fc-kick" id="h-hero">${ic("stethoscope",20)}Find Care</h2></div>
+      <button class="search-entry" id="hero-search" data-action="open-search" aria-haspopup="dialog" aria-label="Search doctors, locations, and more">${ic("search")}<span aria-hidden="true">Doctors, locations, and more</span></button>
+    </section>
+    ${visibleModules().map((m,i)=>`<section class="mod rise" style="--i:${i+1}" aria-labelledby="h-${m.id}">${M[m.id]()}</section>`).join("")}</div>`;
   return `<div class="ptr" id="ptr" aria-hidden="true"></div><div class="v-inner"><div class="top">${renderAlerts()}
     <section class="hero on-blue" aria-labelledby="h-hero"><span class="aurora" aria-hidden="true"><i></i></span>
       <div class="hero-copy"><h1 class="sr-only">UTSW MyCare home</h1><h2 class="fc-kick" id="h-hero">${ic("stethoscope",20)}Find Care</h2></div>
       <button class="search-entry" id="hero-search" data-action="open-search" aria-haspopup="dialog" aria-label="Search doctors, locations, and more">${ic("search")}<span aria-hidden="true">Doctors, locations, and more</span></button>
     </section></div>
-    ${wfContextCard()}${geoHome()}
+    ${wfContextCard()}
     ${visibleModules().map((m,i)=>`<section class="mod rise" style="--i:${i+1}" aria-labelledby="h-${m.id}">${M[m.id]()}</section>`).join("")}</div>`;
 }
 
@@ -816,21 +823,22 @@ function whyFocus(){
     <div class="row-btns">${goBtn("lv1-pharm")}${placeBtn("lv1-pharm","Items and services")}</div></div>`;
   return `<div class="notice warn"><span class="lead">${ic("warning",20)}</span><span class="nb"><b>If this is an emergency, call 911.</b><span>Or go to the Emergency Department. For other care today, see the doctors open today below – open times are for information.</span></span></div>`;
 }
-function nearHTML(){
+function geoHero(){const f=S.geoFloor||1,l=LOCS[GEO.fac];
+  return `<section class="geo-hero" aria-labelledby="h-geo"><div class="m3-box" id="home-m3"><div class="m3-host" role="img" aria-label="Interactive 3D sample map of ${esc(l.n)}, Floor ${f}${f===1?", with where you are":""}. Drag sideways to turn it."></div></div>
+    <div class="gh-top"><span class="gh-chip"><i class="gh-live" aria-hidden="true"></i><span><span class="eyebrow">You’re here</span><h2 id="h-geo">${esc(l.n)}</h2></span></span></div>
+    <div class="gh-side" role="group" aria-label="Floor">${[7,2,1].map(n=>`<button class="gh-fl" data-action="geo-floor" data-f="${n}" aria-pressed="${f===n}" aria-label="Floor ${n}${n===1?", you are here":""}">${n}${n===1?'<i aria-hidden="true"></i>':""}</button>`).join("")}</div>
+    <div class="gh-foot"><span class="tag-s">Sample 3D map · Floor ${f}</span><button class="btn btn-primary btn-sm" data-action="push" data-v="wayfinding" data-to="${GEO.fac}">${ic("directions",20)}<span>Get directions</span></button></div></section>`}
+function nearLists(){
   const R=ROOMS,docs=PROV.filter(p=>p.locs.includes(GEO.fac)).concat(PROV).filter((p,i,a)=>a.indexOf(p)===i).slice(0,3);
   const care=CARE_HERE.map(id=>R[id]).sort((a,b)=>walkMin(a)-walkMin(b));
-  return `<section class="mod rise" style="--i:1" aria-labelledby="h-near"><div class="mod-head"><h2 class="sec-h" id="h-near">Near you</h2><span class="fine">Floor 1 · Sample</span></div>
-    <div class="card geo-map"><div class="m3-box" id="home-m3">${m3Fallback()}</div>
-      <div class="geo-map-foot"><span class="tag-s">Sample 3D map · Floor 1</span><button class="btn btn-ghost btn-sm" data-action="push" data-v="wayfinding" data-to="${GEO.fac}">${ic("map",20)}<span>Open map</span></button></div></div>
-    <h3 class="lbl-h">Care near you</h3>
-    <div class="card list">${care.map(r=>`<button class="row" data-action="geo-place" data-room="${r.id}">${well(r.id==="lv2-lab"?"science":r.id==="lv1-img"?"medical_information":r.id==="lv7-heart"?"cardiology":"accessibility_new")}<span class="rt"><b>${r.name}</b><span>${whereL(r)} · Suite ${r.suite}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div>
-    <h3 class="lbl-h">Doctors open today</h3>
+  return `<section class="mod rise" style="--i:1" aria-labelledby="h-near"><div class="mod-head"><h2 class="sec-h" id="h-near">Care near you</h2><span class="fine">Sample</span></div>
+    <div class="card list">${care.map(r=>`<button class="row" data-action="geo-place" data-room="${r.id}">${well(r.id==="lv2-lab"?"science":r.id==="lv1-img"?"medical_information":r.id==="lv7-heart"?"cardiology":"accessibility_new")}<span class="rt"><b>${r.name}</b><span>${whereL(r)} · Suite ${r.suite}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div></section>
+  <section class="mod rise" style="--i:2" aria-labelledby="h-open"><div class="mod-head"><h2 class="sec-h" id="h-open">Doctors open today</h2></div>
     <div class="card list">${docs.map((p,i)=>`<button class="row" data-action="push" data-v="profile" data-id="${p.id}"><span class="avatar av-40 a${i%3+1}" aria-hidden="true">${p.first[0]}${p.last[0]}</span><span class="rt"><b>${esc(name(p))}</b><span>${esc(p.spec)}</span><span class="chips">${OPEN_TODAY[i].map(t=>`<span class="chip static">${t}</span>`).join("")}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div>
-    <p class="fine">Open times are for information. To schedule, call ${GEO.phone}.</p>
-    <h3 class="lbl-h">Facilities</h3>
-    <div class="wf-grid">${FAC_TILES.map(([id,l])=>`<button class="card wf-dest press" data-action="${PINFO[id]?"geo-place":"geo-nav"}" data-room="${id}">${well(ROOMS[id].ic)}<span>${l}</span><span class="fine">${walkMin(ROOMS[id])} min</span></button>`).join("")}</div></section>`;
-}
-function geoHome(){return wfCtx()==="facility"?whyCard()+nearHTML():""}
+    <p class="fine">Open times are for information. To schedule, call ${GEO.phone}.</p></section>
+  <section class="mod rise" style="--i:3" aria-labelledby="h-fac"><div class="mod-head"><h2 class="sec-h" id="h-fac">Facilities</h2></div>
+    <div class="wf-grid">${FAC_TILES.map(([id,l])=>`<button class="card wf-dest press" data-action="${PINFO[id]?"geo-place":"geo-nav"}" data-room="${id}">${well(ROOMS[id].ic)}<span>${l}</span><span class="fine">${walkMin(ROOMS[id])} min</span></button>`).join("")}</div></section>`}
+
 /* Place page: hours, walk, the catalog, and Start 3D directions */
 function viewPlace(id){const r=ROOMS[id],I=PINFO[id]||{};
   return `<div class="res-body"><div class="card wf-here"><span class="eyebrow">${esc(LOCS[GEO.fac].n)}</span><h2>${r.name}${r.suite?`, Suite ${r.suite}`:""}</h2><p>${whereL(r)}${I.hours?` · Open ${I.hours}`:""}</p>
@@ -865,7 +873,7 @@ function navSpec(N){const s=N.steps[N.i],t=ROOMS[N.room];
   return {plan:s.plan,routes:s.routes||[],you:s.you||null,head:s.head||null,flag:s.flag||null,dest:s.dest||null,mode:N.live?"live":"follow",labelsTab:false}}
 function m3Fallback(){return `<div class="m3-host" role="img" aria-label="Sample 3D map"></div>`}
 function viewNav3d(){const N=top();
-  return `<div class="res-body n3">
+  return `<div class="n3">
     <div class="n3-banner on-blue" id="n3-banner" aria-live="polite"></div>
     <div class="card n3-map"><div class="m3-box tall" id="nav-m3">${m3Fallback()}</div><span class="tag-s n3-tag" id="n3-tag"></span>
       <div class="n3-side"><button class="icon-btn n3-b" data-action="geo-all" aria-label="Route overview, all floors">${ic("layers",20)}</button><button class="icon-btn n3-b" data-action="geo-live" aria-label="Live view – simulated">${ic("view_in_ar",20)}</button></div></div>
@@ -883,7 +891,8 @@ function n3Paint(anim){const N=top();if(N.v!=="nav3d")return;const s=N.steps[N.i
     ${s.lift?`<p class="n3-lift"><b id="n3-fl">1</b><span>Floor 1 to Floor ${s.lift} · Elevator B</span></p>`:""}
     <div class="n3-btns"><button class="btn btn-secondary" data-action="geo-step" data-d="-1" ${N.i===0?"disabled":""}>${ic("arrow_back",20)}<span>Back</span></button>
     ${last?`<button class="btn btn-primary" data-action="back">${ic("check_circle",20)}<span>Done</span></button>`:`<button class="btn btn-primary" data-action="geo-step" data-d="1">Next${ic("arrow_forward",20)}</button>`}</div>`;
-  if(M3.ok()){const host=$("#nav-m3 .m3-host"),b=$("#nav-m3");M3.mount(host,navSpec(N),{top:8,bottom:8,animate:anim,avoid:[[b.clientWidth-60,0,b.clientWidth,112]]})}
+  {const bn=$("#n3-banner"),bb=bn.offsetTop+bn.offsetHeight;$("#n3-tag").style.top=(bb+8)+"px";$(".n3-side").style.top=(bb+8)+"px"}
+  if(M3.ok()){const host=$("#nav-m3 .m3-host"),b=$("#nav-m3"),bn=$("#n3-banner"),cd=$("#n3-card");M3.mount(host,navSpec(N),{top:bn.offsetTop+bn.offsetHeight+40,bottom:b.clientHeight-cd.offsetTop+8,animate:anim,avoid:[[b.clientWidth-64,0,b.clientWidth,b.clientHeight]]})}
   else $("#nav-m3").innerHTML=`<div class="n3-nogl"><b>${s.t}</b><span>The 3D map needs WebGL; the steps are read aloud by your screen reader and listed here as you go.</span></div>`;
   if(anim)sayPolite(`Step ${N.i+1} of ${N.steps.length}: ${s.t}. ${s.sub||""}`)}
 let n3Busy=false;
@@ -892,14 +901,16 @@ async function n3Step(d){const N=top();if(n3Busy||N.v!=="nav3d")return;const s=N
     if(s.k==="ride")await M3.ride(s.plan,2200,t=>{const f=$("#n3-fl");if(f)f.textContent=Math.max(1,Math.round(1+(s.lift-1)*t))});
     else if(s.walk&&!N.all){const L=s.walk.reduce((a,p,i,arr)=>i?a+Math.hypot(p[0]-arr[i-1][0],p[1]-arr[i-1][1]):0,0);await M3.walk(s.walk,Math.min(3200,Math.max(900,L*14)),t=>{const x=$("#n3-s");if(x)x.textContent=gft(L*(1-t))})}
     n3Busy=false;if(top()!==N)return}
-  N.i=Math.max(0,Math.min(N.steps.length-1,N.i+d));n3Paint(true);const f=$('#n3-card [data-d="1"]')||$('#n3-card [data-action="back"]');if(f)f.focus({preventScroll:true})}
+  N.i=Math.max(0,Math.min(N.steps.length-1,N.i+d));n3Paint(true);const f=$('#n3-card [data-d="1"]')||$('#n3-card [data-action="back"]');if(f)f.focus({preventScroll:true});view.scrollTop=0}
 function geoNav(id){push({v:"nav3d",room:id,steps:geoSteps(id),i:0})}
 /* After a view renders: mount the live 3D map where the view has one */
 function geoMount(){const t=top();
   if(t.v==="nav3d"){n3Paint(false);return}
   const h=$("#home-m3 .m3-host")||$("#way-m3 .m3-host");if(!h||!M3.ok())return;
-  const fl=t.v==="wayfinding"?(S.geoFloor||1):1,plan="lv"+fl,dest=S.why==="pharm"?ROOMS["lv1-pharm"]:null;
-  M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{top:8,bottom:8,animate:true})}
+  const fl=S.geoFloor||1,plan="lv"+fl,dest=S.why==="pharm"?ROOMS["lv1-pharm"]:null;
+  const box=h.parentElement,side=$(".gh-side",view),hTop=$(".gh-top",view),hFoot=$(".gh-foot",view);
+  const ins=t.v==="home"&&hTop?{top:hTop.offsetTop+hTop.offsetHeight+8,bottom:box.clientHeight-hFoot.offsetTop+8,avoid:side?[[side.offsetLeft-6,side.offsetTop-6,box.clientWidth,side.offsetTop+side.offsetHeight+6]]:[]}:{top:8,bottom:8};
+  M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{...ins,animate:true})}
 function wayMapHTML(){const f=S.geoFloor||1;
   return `<section class="grp" aria-labelledby="wf-3d"><div class="grp-h"><h2 class="lbl-h" id="wf-3d">Inside · 3D map</h2><span class="sug-type">Sample</span></div>
     <div class="card geo-map"><div class="m3-box" id="way-m3">${m3Fallback()}</div>
@@ -1765,7 +1776,7 @@ screen.addEventListener("click",e=>{
    case "geo-step":n3Step(+el.dataset.d);break;
    case "geo-all":{const N=top();N.all=!N.all;if(N.all)N.live=false;n3Paint(false);sayPolite(N.all?"Route overview, all floors":"Following you");break}
    case "geo-live":{const N=top();N.live=!N.live;if(N.live)N.all=false;n3Paint(false);sayPolite(N.live?"Live view, simulated":"Live view off");break}
-   case "geo-floor":S.geoFloor=+el.dataset.f;rerenderKeep();break;
+   case "geo-floor":S.geoFloor=+el.dataset.f;rerenderKeep();{const b=$(`[data-action="geo-floor"][data-f="${el.dataset.f}"]`,view);if(b)b.focus({preventScroll:true})}sayPolite(`Showing Floor ${el.dataset.f}`);break;
    case "push":push(el.dataset.to?{v:el.dataset.v,to:el.dataset.to}:{v:el.dataset.v});break;
    case "blog-cat":S.blogCat=el.dataset.c;rerenderKeep(true);{const c=$(`[data-action="blog-cat"][data-c="${el.dataset.c}"]`);if(c){c.focus({preventScroll:true});c.scrollIntoView({inline:"center",block:"nearest",behavior:rm()?"auto":"smooth"})}}sayPolite(`${BLOG.filter(b=>S.blogCat==="All"||b.cat===S.blogCat).length} stories`);break;
    case "blog-more":{const n=$$(".blog-row").length;S.blogMore=true;rerenderKeep(true);$$(".blog-row")[n]?.focus();break}
