@@ -38,7 +38,9 @@ const iconFont = (dashboard: boolean): Plugin => ({
   name: 'icon-font-subset',
   transformIndexHtml(html) {
     const url = iconFontUrl();
-    const out = html.replace('__ICON_FONT_URL__', url.replace(/&/g, '&amp;'));
+    /* Browser-tab icon: the MyCare app icon */
+    const fav = 'data:image/svg+xml;base64,' + Buffer.from(fs.readFileSync(path.resolve(__dirname, '..', 'mycare-logo', 'app-icon.svg'))).toString('base64');
+    const out = html.replace('__ICON_FONT_URL__', url.replace(/&/g, '&amp;')).replace('__FAVICON__', fav);
     return dashboard ? out.replace('<title>MyCare Admin</title>', '<title>MyCare Admin Dashboard</title>') : out;
   }
 });

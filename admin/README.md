@@ -15,7 +15,7 @@ npm run build      # typecheck, then admin-portal.html and dashboard.html
 npm run dev        # local dev server with hot reload
 ```
 
-Both files are committed beside the source. `vite-plugin-singlefile` inlines the script and styles; `vite.config.ts` inlines the `mycare-logo/` SVGs unaltered and requests a Material Symbols Rounded subset made of every glyph the code names (`<Icon name="…">`, `icon: '…'`, `glyph: '…'`, the phone app's `ICONS` map and `EXTRA_GLYPHS` comments). At run time the page loads Inter and that icon subset from Google Fonts; everything else is inline.
+Both files are committed beside the source. `vite-plugin-singlefile` inlines the script and styles; `vite.config.ts` inlines the `mycare-logo/` SVGs unaltered (the UTSW MyCare header logo, `utsw-mycare-reversed.svg`, on the blue header, the sign-in panel and the preview's app bar; the MyCare app icon, `app-icon.svg`, in the preview and as the browser-tab icon) and requests a Material Symbols Rounded subset made of every glyph the code names (`<Icon name="…">`, `icon: '…'`, `glyph: '…'`, the phone app's `ICONS` map and `EXTRA_GLYPHS` comments). At run time the page loads Inter and that icon subset from Google Fonts; everything else is inline.
 
 ## What each module does
 
@@ -146,7 +146,7 @@ Campaign tags such as "Flu season" (white on 14% white over the campaign gradien
 17. **Environments:** what "Demo" is (a separate environment or a build), and who can promote to production. Which config types support versioning and rollback (all flags here are assumptions).
 18. **Admin device support:** built for desktop (1280 and 1440, usable at 1024). It also works at phone width, but that is not a supported target until confirmed.
 19. **Spelling:** the UI uses US English ("Global colors") per UT Southwestern style, while the brief uses UK spelling. The one exception is the app's own label "Personalise My Homepage".
-20. **Logo:** `mycare-logo/` is a proposal pending CMPA approval and is used unaltered.
+20. **Logo:** the UTSW MyCare header logo and app icon (`mycare-logo/utsw-mycare*.svg`, `app-icon.svg`, outlined from the supplied UTSWMyCareLogo_App_Header artwork) are used unaltered. Confirm they are the approved final versions.
 21. **Passwords:** the Login design replaces SSO with email and password. Pending: the final password policy (the design's four rules are used: 8+ characters, an uppercase letter, a number and a special character), reset link lifetime (30 minutes assumed), lockout after failed attempts, password expiry and reuse, and whether MFA is needed for admins.
 
 Also pending: the session timeout (30 minutes is a placeholder) and the final permission matrix.
