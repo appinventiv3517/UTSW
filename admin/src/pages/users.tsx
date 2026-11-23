@@ -1,5 +1,5 @@
 /* ---------- Admin management (admin users): list, create, details ----------
-   Invitation and activation follow the approved identity provider (§10.16); here an invite is simulated. */
+   Invitations are simulated: a new user would get an email link to set their own password. */
 /* EXTRA_GLYPHS: person_add info group send how_to_reg person_off delete save */
 import { useState } from 'react';
 import type { Page, PageProps } from '../app/App';
@@ -25,7 +25,7 @@ const ROLE_OPTS = Object.entries(ROLES).map(([k, r]) => [k, r.label] as [string,
 const USER_FIELDS: FieldDef[] = [
   { key: 'first', label: 'First name', required: true, max: 40, wide: false },
   { key: 'last', label: 'Last name', required: true, max: 40, wide: false },
-  { key: 'email', label: 'Email address', required: true, max: 80, hint: 'Their UT Southwestern email. They sign in with UTSW SSO – there is no Admin password.' },
+  { key: 'email', label: 'Email address', required: true, max: 80, hint: 'Their UT Southwestern email. They get an email invitation to set their own password.' },
   { key: 'role', label: 'Role', type: 'radio', options: ROLE_OPTS }
 ];
 const userValidate = (d: Data, selfId?: string): Errors => {
@@ -88,7 +88,7 @@ function NewUserPage(_: PageProps) {
   };
   return (
     <div className="page">
-      <PageHead crumbs={crumbs} title="Create user" lede="The person gets an invitation (simulated) and signs in with UTSW SSO and MFA." />
+      <PageHead crumbs={crumbs} title="Create user" lede="The person gets an email invitation (simulated) to set a password, then logs in with their email address and password." />
       <div className="ed-grid"><section className="card"><div className="card-head"><h2>New user</h2></div>
         <form className="card-body form" id="un" noValidate onSubmit={e => { e.preventDefault(); submit(); }}>
           <Form sections={[{ fields: USER_FIELDS }]} data={d} errors={errors} prefix="f" onChange={setD} />
@@ -152,7 +152,7 @@ function UserBody({ u }: { u: User }) {
         </div>
         <aside className="ed-side"><section className="card"><div className="card-body">
           <h2 className="side-h">Account</h2>
-          <dl className="facts"><dt>Status</dt><dd><UserBadge s={u.status} /></dd><dt>Created</dt><dd>{fmtDateTime(u.created)}</dd><dt>Last sign-in</dt><dd>{u.lastSignIn ? fmtDateTime(u.lastSignIn) : 'Never'}</dd><dt>Sign-in</dt><dd>UTSW SSO with MFA (simulated)</dd></dl>
+          <dl className="facts"><dt>Status</dt><dd><UserBadge s={u.status} /></dd><dt>Created</dt><dd>{fmtDateTime(u.created)}</dd><dt>Last sign-in</dt><dd>{u.lastSignIn ? fmtDateTime(u.lastSignIn) : 'Never'}</dd><dt>Sign-in</dt><dd>Email address and password</dd></dl>
           {manage && <div className="stack-acts">
             {u.status === 'invited' && <Btn {...B} label="Resend invitation" icon="send" data-u="resend" busy={busy === 'resend'} busyLabel="Sending" onClick={() => act('resend')} />}
             {u.status === 'deactivated' ? <Btn {...B} label="Reactivate account" icon="how_to_reg" data-u="reactivate" busy={busy === 'reactivate'} busyLabel="Reactivating" onClick={() => act('reactivate')} />

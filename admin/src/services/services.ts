@@ -4,11 +4,12 @@
 import { clone, uid, store } from '../app/util';
 import { ROLES, can, canAct, type Area, type Level, type Action, type Role } from '../app/permissions';
 import { seedDb } from '../mock/seed';
+import { SAMPLE_PASSWORD, pwOk } from '../app/password';
 import type { ConfigRecord, ConfigType, Data, Db, Env, Store, User, Notification, Wayfinding, Metric, Point, Settings, ZeroResult, Integration } from '../app/types';
 export const MockSettings = { latency: [160, 380] as [number, number], simulateErrors: false };
 export class ServiceError extends Error {}
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
-export const SCHEMA = 7;
+export const SCHEMA = 8;
 export let DB: Store = null as unknown as Store;
 export function loadDb(): void {
   const saved = store.read<Store>();
@@ -452,6 +453,75 @@ export const AnalyticsService = {
     const pv = m.unit === 'count' && m.key === 'mau' ? prev[prev.length - 1].y : avg(prev);
     return { ...m, series: cur, value, change: pv ? (value - pv) / pv : 0 };
   }))
+};
+
+/* ---------- Sign-in: email and password (MOCK) ----------
+   No identity service is connected. Passwords are checked against salted SHA-256 hashes kept in this browser's mock data;
+   every sample account starts with SAMPLE_PASSWORD. Reset links are tokens kept in the mock data, single use, valid for
+   30 minutes. No email is sent: the prototype shows the link on screen. A real backend replaces these bodies. */
+export const RESET_TTL_MS = 30 * 60 * 1000;
+async function hashPw(userId: string, pw: string): Promise<string> {
+  const data = new TextEncoder().encode(`utsw-admin-mock:${userId}:${pw}`);
+  if (globalThis.crypto && crypto.subtle) return [...new Uint8Array(await crypto.subtle.digest('SHA-256', data))].map(b => b.toString(16).padStart(2, '0')).join('');
+  let h = 2166136261; for (const b of data) h = Math.imul(h ^ b, 16777619); return `fnv-${(h >>> 0).toString(16)}`;   /* no Web Crypto (insecure context) */
+}
+const authData = () => (DB.db.auth = DB.db.auth || { pw: {}, resets: {} });
+const userByEmail = (email: string) => DB.db.users.find(u => u.email.toLowerCase() === email.trim().toLowerCase()) || null;
+async function pwMatches(userId: string, pw: string): Promise<boolean> {
+  const stored = authData().pw[userId];
+  return stored ? stored === await hashPw(userId, pw) : pw === SAMPLE_PASSWORD;
+}
+const newToken = () => [...(globalThis.crypto && crypto.getRandomValues ? crypto.getRandomValues(new Uint8Array(16)) : Array.from({ length: 16 }, () => Math.floor(Math.random() * 256)))].map(b => b.toString(16).padStart(2, '0')).join('');
+export const AuthService = {
+  /* Resolves the user id, or rejects with one message whatever was wrong, so the page never says which part failed */
+  login: async (email: string, pw: string): Promise<string> => {
+    const u = userByEmail(email);
+    const ok = !!u && u.status === 'active' && await pwMatches(u.id, pw);
+    return mockCall('sign-in', () => {
+      if (!ok || !u) throw new ServiceError('Invalid credentials. Please try again.');
+      u.lastSignIn = nowIso();
+      audit('Signed in', `${u.first} ${u.last}`, { targetId: u.id, targetType: 'user' });
+      return u.id;
+    });
+  },
+  /* Always succeeds for a well-formed address. Returns the simulated email's link token, or null when no active account uses it */
+  requestReset: (email: string) => mockCall('password reset', () => {
+    const u = userByEmail(email);
+    if (!u || u.status !== 'active') return null;
+    const token = newToken();
+    authData().resets[token] = { userId: u.id, at: Date.now(), used: false };
+    audit('Password reset requested', `${u.first} ${u.last}`, { targetId: u.id, targetType: 'user' });
+    return token;
+  }),
+  /* 'ok' with the account's email, or 'expired' (unknown, used or older than 30 minutes) */
+  checkReset: (token: string): { state: 'ok' | 'expired'; email: string | null } => {
+    const r = authData().resets[token], u = r ? DB.db.users.find(x => x.id === r.userId) : null;
+    if (!r || !u) return { state: 'expired', email: null };
+    return { state: r.used || Date.now() - r.at > RESET_TTL_MS ? 'expired' : 'ok', email: u.email };
+  },
+  resetPassword: async (token: string, pw: string) => {
+    const r = authData().resets[token];
+    const hash = r ? await hashPw(r.userId, pw) : '';
+    return mockCall('password reset', () => {
+      if (!r || r.used || Date.now() - r.at > RESET_TTL_MS) throw new ServiceError('This password reset link has expired. Request a new link.');
+      if (!pwOk(pw)) throw new ServiceError('The new password doesn’t meet the requirements.');
+      authData().pw[r.userId] = hash; r.used = true;
+      const u = DB.db.users.find(x => x.id === r.userId)!;
+      audit('Password reset', `${u.first} ${u.last}`, { targetId: u.id, targetType: 'user' });
+      return true;
+    });
+  },
+  changeOwnPassword: async (current: string, next: string) => {
+    const id = actor(), ok = await pwMatches(id, current), hash = await hashPw(id, next);
+    return mockCall('password change', () => {
+      if (!ok) throw new ServiceError('Your current password isn’t right.');
+      if (!pwOk(next)) throw new ServiceError('The new password doesn’t meet the requirements.');
+      authData().pw[id] = hash;
+      const u = DB.db.users.find(x => x.id === id)!;
+      audit('Password changed', `${u.first} ${u.last}`, { targetId: id, targetType: 'user' });
+      return true;
+    });
+  }
 };
 
 export const AuditService = { list: () => mockCall('audit', () => DB.db.audit) };

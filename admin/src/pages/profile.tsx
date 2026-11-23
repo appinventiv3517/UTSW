@@ -1,23 +1,23 @@
 /* ---------- My profile ----------
    The signed-in person can change their own first and last name. Everything else on the account (email, role,
    status, dates) is shown read only: role and status are changed by a Super Admin in Admin management, and the
-   email comes from the UTSW identity provider.
-   PASSWORD – SIMULATED. Sign-in is UTSW SSO, so the real password lives with the identity provider (pending, §10.1).
-   This form only checks what is typed against the sample rules; nothing is sent or stored, and the fields are
-   cleared as soon as the check finishes. */
+   email is the sign-in address.
+   PASSWORD: checked and changed through AuthService (MOCK: a salted hash in this browser's mock data), with the same
+   requirements as Create new password. The fields are cleared once the change is saved. */
 /* EXTRA_GLYPHS: person lock badge visibility visibility_off info save error */
 import { useState } from 'react';
 import type { PageProps } from '../app/App';
 import { PageHead, initials } from '../app/Shell';
 import { Session } from '../app/session';
 import { ROLES } from '../app/permissions';
-import { UserService } from '../services/services';
+import { AuthService, UserService } from '../services/services';
+import { pwOk } from '../app/password';
+import { Requirements } from './Auth';
 import { Badge, Btn, Icon } from '../ui/kit';
 import { toast } from '../ui/overlays';
 import { focusSoon } from './collection';
 import { announce, cx, fmtDate, fmtDateTime } from '../app/util';
 
-const PW_MIN = 12;
 const Err = ({ id, msg }: { id: string; msg: string }) => <p className="err" id={id} hidden={!msg}>{msg && <><Icon name="error" size={16} /><span>{msg}</span></>}</p>;
 
 export function ProfilePage(_: PageProps) {
@@ -40,27 +40,32 @@ export function ProfilePage(_: PageProps) {
     try { await UserService.updateOwnName(v.first, v.last); setSaved(v); setBusy(false); toast('Your name is saved.', { kind: 'success' }); announce('Your name is saved.'); }
     catch (err) { setBusy(false); toast((err as Error).message, { kind: 'error', ms: 8000 }); }
   };
-  /* ---- Password (simulated) ---- */
+  /* ---- Password ---- */
   const [pw, setPw] = useState({ cur: '', new: '', cnf: '' });
   const [show, setShow] = useState({ cur: false, new: false, cnf: false });
   const [pwErr, setPwErr] = useState<Record<string, string>>({});
   const [pwBusy, setPwBusy] = useState(false);
-  const rules = { len: pw.new.length >= PW_MIN, mix: /[a-z]/i.test(pw.new) && /\d/.test(pw.new), diff: !!pw.new && pw.new !== pw.cur };
   const changePw = async () => {
     const m: Record<string, string> = {
       cur: !pw.cur ? 'Enter your current password.' : '',
-      new: !pw.new ? 'Enter a new password.' : !rules.len ? `Use at least ${PW_MIN} characters.` : !rules.mix ? 'Use letters and at least one number.' : !rules.diff ? 'Choose a password different from your current one.' : '',
+      new: !pw.new ? 'Enter a new password.' : !pwOk(pw.new) ? 'The new password doesn’t meet every requirement below.' : pw.new === pw.cur ? 'Choose a password different from your current one.' : '',
       cnf: !pw.cnf ? 'Enter the new password again.' : pw.cnf !== pw.new ? 'The passwords don’t match.' : ''
     };
     setPwErr(m);
     const bad = ['cur', 'new', 'cnf'].find(k => m[k]);
     if (bad) { focusSoon(`pw-${bad}`); return; }
     setPwBusy(true);
-    await new Promise(res => setTimeout(res, 500));
-    setPw({ cur: '', new: '', cnf: '' }); setShow({ cur: false, new: false, cnf: false }); setPwBusy(false);
-    toast('Password change simulated. Nothing was sent or stored; your real password is managed by your UTSW account.', { kind: 'success', ms: 7000 });
-    announce('Password change simulated.');
-    focusSoon('pw-h');
+    try {
+      await AuthService.changeOwnPassword(pw.cur, pw.new);
+      setPw({ cur: '', new: '', cnf: '' }); setShow({ cur: false, new: false, cnf: false }); setPwBusy(false);
+      toast('Your password is changed. Use it the next time you log in.', { kind: 'success', ms: 7000 });
+      announce('Your password is changed.');
+      focusSoon('pw-h');
+    } catch (err) {
+      setPwBusy(false);
+      const msg = (err as Error).message;
+      if (/current password/.test(msg)) { setPwErr({ cur: msg }); focusSoon('pw-cur'); } else toast(msg, { kind: 'error', ms: 8000 });
+    }
   };
   const PW_FIELDS: ['cur' | 'new' | 'cnf', string, string][] = [['cur', 'Current password', 'current-password'], ['new', 'New password', 'new-password'], ['cnf', 'Confirm new password', 'new-password']];
   return (
@@ -90,9 +95,9 @@ export function ProfilePage(_: PageProps) {
           </form>
         </section>
         <section className="card" aria-labelledby="pw-h">
-          <div className="card-head"><h2 id="pw-h" tabIndex={-1}>Password</h2><div className="card-actions"><Badge kind="simulated" text="Simulated" /></div></div>
+          <div className="card-head"><h2 id="pw-h" tabIndex={-1}>Password</h2><div className="card-actions"><Badge kind="mock" text="Mock data" /></div></div>
           <form className="card-body form" id="pw-form" noValidate onSubmit={e => { e.preventDefault(); changePw(); }}>
-            <p className="note-line"><Icon name="lock" size={20} /><span>You sign in with UTSW SSO, so your real password belongs to your UTSW account. This prototype only checks the form: nothing is sent or stored.</span></p>
+            <p className="note-line"><Icon name="lock" size={20} /><span>You log in with your email address and this password. In the prototype it’s kept, hashed, in this browser’s mock data only.</span></p>
             {PW_FIELDS.map(([k, l, ac]) => (
               <div key={k} className={cx('field', pwErr[k] && 'has-error')} id={`pw-${k}-w`}><label htmlFor={`pw-${k}`}>{l} <span className="req">(required)</span></label>
                 <div className="pw-wrap"><input className="input" type={show[k] ? 'text' : 'password'} id={`pw-${k}`} autoComplete={ac} required aria-describedby={`${k === 'new' ? 'pw-rules ' : ''}pw-${k}-err`}
@@ -100,10 +105,7 @@ export function ProfilePage(_: PageProps) {
                   <button type="button" className="pw-eye btn btn-text btn-icon" data-eye={`pw-${k}`} aria-label={`${show[k] ? 'Hide' : 'Show'} ${l.toLowerCase()}`} aria-pressed={show[k]}
                     onClick={() => setShow(s => ({ ...s, [k]: !s[k] }))}><Icon name={show[k] ? 'visibility_off' : 'visibility'} size={20} /></button></div>
                 <Err id={`pw-${k}-err`} msg={pwErr[k] || ''} /></div>))}
-            <ul className="pw-rules" id="pw-rules" aria-label="Password rules">
-              <li data-rule="len" className={cx(rules.len && 'met')}>At least {PW_MIN} characters</li>
-              <li data-rule="mix" className={cx(rules.mix && 'met')}>Letters and at least one number</li>
-              <li data-rule="diff" className={cx(rules.diff && 'met')}>Different from your current password</li></ul>
+            <Requirements id="pw-rules" pw={pw.new} />
             <div className="form-acts"><Btn label="Change password" icon="lock" variant="primary" type="submit" id="pw-go" busy={pwBusy} busyLabel="Checking" /></div>
           </form>
         </section>

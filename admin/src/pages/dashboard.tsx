@@ -37,6 +37,8 @@ export function Delta({ m, onBlue = false }: { m: Metric; onBlue?: boolean }) {
 }
 /* Audit actions read as sentences after the person's name */
 const VERBS: Record<string, string> = { 'Draft saved': 'saved a draft of', 'Review requested': 'requested a review of', 'Created as draft': 'created', 'Draft discarded': 'discarded the draft of', 'Deleted draft': 'deleted', 'Changes requested': 'requested changes to', 'User invited': 'invited', 'Role changed': 'changed the role of', 'User updated': 'updated', 'Profile updated': 'updated their profile:', 'User deactivated': 'deactivated', 'User reactivated': 'reactivated', 'User deleted': 'deleted the account of', 'Invitation resent': 'resent the invitation to', 'Notification created': 'created the notification', 'Notification edited': 'edited the notification', 'Notification scheduled': 'scheduled', 'Notification cancelled': 'cancelled', 'Notification duplicated': 'duplicated', 'Notification deleted': 'deleted the notification', 'Wayfinding file uploaded': 'uploaded the wayfinding file', 'Administrative settings changed': 'changed', 'Integration check run (simulated)': 'ran a check on' };
+/* Sign-in and password events stay in the audit log but not in the activity feed */
+const AUTH_ACTIONS = ['Signed in', 'Password reset requested', 'Password reset', 'Password changed'];
 const activityVerb = (a: string) => VERBS[a] || a.charAt(0).toLowerCase() + a.slice(1);
 /* Each person keeps one avatar style */
 const AVATAR_TONES = ['tone-a', 'tone-b', 'tone-c'];
@@ -96,7 +98,7 @@ function Body({ data: [recs, metrics, notes, way] }: { data: Loaded }) {
       ...(soon(d.end) && windowStatus(d) === 'active' ? [{ at: d.end as string, icon: 'campaign', what: 'Campaign ends', t: r.name, href: recLink(r) }] : [])]; }),
     ...recs.filter(r => r.type === 'alert').map(r => ({ r, d: latestData(r) })).filter(x => x.d.enabled && soon(x.d.start)).map(x => ({ at: x.d.start as string, icon: 'warning', what: 'Emergency alert starts', t: x.r.name, href: recLink(x.r) }))
   ].sort((a, b) => a.at.localeCompare(b.at)).slice(0, 4);
-  const recent = [...DB.db.audit].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 4);
+  const recent = [...DB.db.audit].filter(a => !AUTH_ACTIONS.includes(a.action)).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 4);
   const heroStats = ['dau', 'mau', 'searchSuccess', 'crashFree'].map(pick);
   const statLinks = ['analytics-adoption', 'analytics-adoption', 'analytics-search', 'analytics-content'];
   return (

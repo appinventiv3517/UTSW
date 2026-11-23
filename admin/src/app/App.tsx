@@ -17,12 +17,12 @@ export type Page = ComponentType<PageProps>;
 
 const DASH_MSG = 'Only the Dashboard is available in this preview.';
 const dashSay = () => { if (![...document.querySelectorAll('.toast-msg')].some(t => t.textContent === DASH_MSG)) toast(DASH_MSG); };
-const ensureDashSession = () => { if (__DASHBOARD_ONLY__ && !Session.current()) { Session.begin('u1'); Session.complete(); } };
+const ensureDashSession = () => { if (__DASHBOARD_ONLY__ && !Session.current()) Session.start('u1'); };
 
 type View = { kind: 'public'; name: string } | { kind: 'redirect'; to: string; returnTo?: string; say?: boolean; end?: boolean } | { kind: 'shell'; name: string; route: RouteDef | null; page: Page | null; denied: boolean; title: string };
 function resolve(name: string): View {
   if (__DASHBOARD_ONLY__) { const raw = location.hash.slice(1); if (raw !== 'dashboard') return { kind: 'redirect', to: 'dashboard', say: !!raw && Router.loaded }; }
-  if (PUBLIC_ROUTES.includes(name)) return { kind: 'public', name };
+  if (PUBLIC_ROUTES.includes(name) || name.startsWith('reset-')) return { kind: 'public', name };
   if (!Session.current()) return { kind: 'redirect', to: 'login', returnTo: name };
   if (Session.expired()) return { kind: 'redirect', to: 'expired', end: true };
   const role = Session.role()!;
@@ -87,7 +87,7 @@ export function startSession(): void {
     if (!Session.current() || Date.now() - lastTouch < 15000) return;
     lastTouch = Date.now(); Session.touch(); saveDb();
   }, { passive: true }));
-  setInterval(() => { if (Session.expired()) { Session.end(); Router.go('expired', { force: true }); } }, 30000);
+  setInterval(() => { if (Session.expired()) { Router.navigate('expired'); Session.end(); } }, 30000);
   window.addEventListener('beforeunload', e => { if (Router.guardFn && Unsaved.on) { e.preventDefault(); e.returnValue = ''; } });
   const markIcons = () => document.documentElement.classList.add('ms-ready');
   if (document.fonts && document.fonts.load) {

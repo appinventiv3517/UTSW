@@ -303,7 +303,7 @@ export function seedDb(): Db {
 
   /* ---- Integrations (all simulated – none is connected) ---- */
   const integrations = [
-    { id: 'idp', name: 'UTSW identity provider (SSO and MFA)', purpose: 'Admin sign-in', status: 'simulated', detail: 'Protocol (SAML or OIDC) and MFA mechanism pending' },
+    { id: 'idp', name: 'Admin sign-in and email', purpose: 'Email and password sign-in, password reset links and invitations', status: 'simulated', detail: 'No email service is connected. Reset links and invitations show on screen in the prototype.' },
     { id: 'mychart', name: 'Epic MyChart', purpose: 'Sign-in hand-off and deep links from the app', status: 'simulated', detail: 'The Admin configures destinations only; Epic stays the source of truth' },
     { id: 'gozio', name: 'Gozio wayfinding', purpose: 'Indoor maps in the app', status: 'manual', detail: 'Manual JSON export and upload; no direct connection' },
     { id: 'push', name: 'Push notification provider', purpose: 'Notifications', status: 'simulated', detail: 'Provider pending' },
@@ -325,5 +325,5 @@ export function seedDb(): Db {
     { id: uid('au'), at: t('2026-09-01T15:00:00Z'), by: 'u1', action: 'User deactivated', target: 'Grace Liu', targetId: 'u7', targetType: 'user', environment: null, version: null, comment: 'Moved to another department', before: { status: 'Active' }, after: { status: 'Deactivated' } },
     { id: uid('au'), at: t('2026-08-10T15:00:00Z'), by: 'u1', action: 'Role changed', target: 'Theo Adams', targetId: 'u8', targetType: 'user', environment: null, version: null, comment: '', before: { role: 'Admin' }, after: { role: 'Marketing' } });
 
-  return { schema: 7, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
+  return { schema: 8, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
 }

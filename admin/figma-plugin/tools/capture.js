@@ -24,8 +24,14 @@ const inject = (sel, html) => async p => { await p.evaluate(([s, h]) => { docume
 /* ---------- Screens ---------- */
 const S = (group, id, name, route, o = {}) => ({ group, id, name, route, ...o });
 const SCREENS = [
-  S('Sign in', 'login', 'Sign in', 'login', { signedOut: true }),
-  S('Sign in', 'login-mfa', 'Sign in – multi-factor check', 'login', { signedOut: true, act: async p => { await p.click('#sso'); await p.click('button[type=submit]'); await wait(700); } }),
+  S('Sign in', 'login', 'Log in', 'login', { signedOut: true }),
+  S('Sign in', 'login-error', 'Log in – invalid credentials', 'login', { signedOut: true, act: async p => { await p.fill('#login-email', 'dana.whitfield@'); await p.fill('#login-pw', 'wrong'); await p.click('#login-go'); await wait(900); } }),
+  S('Sign in', 'forgot-password', 'Forgot password', 'forgot-password', { signedOut: true }),
+  S('Sign in', 'forgot-password-error', 'Forgot password – invalid email', 'forgot-password', { signedOut: true, act: async p => { await p.fill('#fp-email', 'dana.whitfield@fit'); await p.click('#fp-go'); await wait(300); } }),
+  S('Sign in', 'reset-link-sent', 'Link sent', 'forgot-password', { signedOut: true, act: async p => { await p.fill('#fp-email', 'dana.whitfield@utsw.example'); await p.click('#fp-go'); await wait(900); } }),
+  S('Sign in', 'reset-create', 'Create new password', 'forgot-password', { signedOut: true, act: async p => { await p.fill('#fp-email', 'dana.whitfield@utsw.example'); await p.click('#fp-go'); await wait(900); await p.click('#fp-open'); await wait(500); await p.fill('#rp-new', 'NewPass#2027'); await p.fill('#rp-cnf', 'NewPass#2027'); await wait(200); } }),
+  S('Sign in', 'reset-done', 'Password reset', 'forgot-password', { signedOut: true, act: async p => { await p.fill('#fp-email', 'dana.whitfield@utsw.example'); await p.click('#fp-go'); await wait(900); await p.click('#fp-open'); await wait(500); await p.fill('#rp-new', 'NewPass#2027'); await p.fill('#rp-cnf', 'NewPass#2027'); await p.click('#rp-go'); await wait(900); } }),
+  S('Sign in', 'reset-expired', 'Link expired', 'reset-expired-sample', { signedOut: true }),
   S('Sign in', 'signed-out', 'Signed out', 'signed-out', { signedOut: true }),
   S('Dashboard', 'dashboard', 'Dashboard', 'dashboard'),
   S('Dashboard', 'dashboard-rail', 'Dashboard – sidebar collapsed', 'dashboard', { rail: true }),
@@ -120,7 +126,7 @@ const SCREENS = [
   const p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await wait(300); await p.evaluate(() => localStorage.clear()); await p.reload(); await wait(400);
-  await p.click('#sso'); await p.click('button[type=submit]'); await wait(300); await p.click('#mfa-ok'); await wait(1500);
+  await p.click('[data-fill="u1"]'); await p.click('#login-go'); await wait(1500);
   const baseline = await p.evaluate(k => localStorage.getItem(k), KEY);
   /* The icon font request (Material Symbols subset): the stylesheet link in the page's head */
   const fontUrl = fs.readFileSync(PORTAL, 'utf8').match(/href="(https:\/\/fonts\.googleapis\.com\/css2\?family=Material\+Symbols[^"]+)"/)[1].replace(/&amp;/g, '&');

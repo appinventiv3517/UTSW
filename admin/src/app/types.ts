@@ -40,7 +40,10 @@ export interface ZeroResult { id: string; query: string; count: number; lastSeen
 export interface Db {
   schema: number; records: Record<string, ConfigRecord>; users: User[]; notifications: Notification[]; wayfinding: Wayfinding;
   integrations: Integration[]; settings: Settings; audit: AuditEntry[]; zeroResults: ZeroResult[];
+  /* MOCK sign-in data: salted SHA-256 password hashes (only for passwords changed from the sample one) and reset links */
+  auth?: { pw: Record<string, string>; resets: Record<string, ResetLink> };
 }
+export interface ResetLink { userId: string; at: number; used: boolean }
 export interface SessionState { userId: string; role: Role; startedAt: number; lastActive: number }
 export interface Store { db: Db; session: SessionState | null; prefs: { simulateErrors?: boolean; [k: string]: unknown } }
 

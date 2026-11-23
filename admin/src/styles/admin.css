@@ -288,30 +288,60 @@ select.input:disabled{cursor:not-allowed}
 .toast.out{opacity:0; transition:opacity 200ms}
 @keyframes toastIn{from{opacity:0; transform:translateY(8px)}}
 
-/* ===================== Sign-in and system pages ===================== */
-.auth-main{min-height:100vh; display:grid; place-content:center; justify-items:center; gap:var(--s4); padding-block:var(--s10);
-  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); background:var(--bg)}
+/* ===================== Sign-in, password reset and system pages =====================
+   Login design: a UTSW Blue brand panel (half the width) beside a light panel with one centered card. Stacks below 900px. */
+.auth{min-height:100vh; display:grid; grid-template-columns:1fr 1fr; background:var(--bg)}
+.auth-brand{background:var(--blue); color:#FFFFFF; display:grid; place-items:center; padding:var(--s10) var(--s6)}
+.auth-brand-in{display:grid; justify-items:center; gap:var(--s8); text-align:center}
+.auth-logo{width:280px; max-width:100%; height:auto}
+.auth-welcome{font-size:var(--t32); line-height:1.2; font-weight:800; letter-spacing:-.01em}
+.auth-main{display:grid; place-content:center; justify-items:center; gap:var(--s4); padding:var(--s10) max(16px, env(safe-area-inset-right, 0px)) var(--s10) max(16px, env(safe-area-inset-left, 0px))}
 .auth-main:focus{outline:none}
-.auth-card{width:min(480px, 100%); display:grid; gap:var(--s4); justify-items:start; padding:var(--s8); border-radius:var(--r-xl); background:var(--surface); box-shadow:var(--shadow-2), 0 0 0 1px var(--line)}
-.auth-logo{width:232px; height:auto; margin-left:-12px}
-.auth-lede{color:var(--ink-2)}
-.auth-card .btn{min-width:240px}
-.auth-acts{display:flex; flex-wrap:wrap; gap:var(--s2); justify-content:flex-end; width:100%}
-.auth-acts .btn{min-width:0}
-.sim-note{display:flex; align-items:flex-start; gap:var(--s2); font-size:var(--t14); color:var(--ink-2); padding-top:var(--s3); border-top:1px solid var(--line); width:100%}
+.auth-card{width:min(464px, 100%); display:grid; gap:var(--s6); padding:var(--s8); border-radius:var(--r-lg); background:var(--surface); box-shadow:var(--shadow-1), 0 0 0 1px var(--line)}
+.auth-head{display:grid; gap:var(--s2); text-align:center}
+.auth-head.left{text-align:left}
+.auth-head h1,.auth-status h1{font-size:var(--t24); line-height:1.25; color:var(--blue); font-weight:800}
+.auth-lede{color:var(--ink-2); overflow-wrap:anywhere}
+.auth-form{display:grid; gap:var(--s4)}
+.auth-form .field{gap:var(--s2)}
+.auth-form .input{min-height:var(--hit-lg)}
+.auth-submit{width:100%; justify-content:center; margin-top:var(--s2)}
+.auth-card > .auth-submit{margin-top:0}
+.auth-link{justify-self:center; font-weight:600; color:var(--blue); text-underline-offset:3px; min-height:var(--hit); display:inline-flex; align-items:center}
+.auth-back{justify-self:start; display:inline-flex; align-items:center; gap:var(--s1); font-weight:600; color:var(--blue); text-decoration:none; min-height:var(--hit); margin:calc(-1 * var(--s3)) 0 calc(-1 * var(--s3)) calc(-1 * var(--s1))}
+.auth-back:hover{text-decoration:underline; text-underline-offset:3px}
+.auth-alert{display:flex; align-items:center; gap:var(--s2); padding:var(--s3) var(--s4); border-radius:var(--r-sm); background:#FBE9EE; color:var(--alert); font-weight:600; box-shadow:inset 4px 0 0 var(--alert)}
+.auth-alert:focus{outline:none; box-shadow:inset 4px 0 0 var(--alert), var(--focus)}
+.auth-status{display:grid; justify-items:center; gap:var(--s3); text-align:center}
+.auth-st-ic{width:72px; height:72px; border-radius:50%; display:grid; place-items:center; margin-bottom:var(--s2)}
+.auth-st-ic.ok{background:#E3F1E8; color:#1E7A43}
+.auth-st-ic.bad{background:#FBE9EE; color:var(--alert)}
+.auth-st-ic.info{background:var(--tint); color:var(--blue)}
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:52px}
+.pw-wrap .pw-eye{position:absolute; right:2px; top:50%; transform:translateY(-50%)}
+.pw-req{display:grid; gap:var(--s2); font-size:var(--t14)}
+.pw-req-h{font-weight:600; color:var(--ink)}
+.pw-req ul{list-style:none; margin:0; padding:0; display:grid; gap:var(--s1)}
+.pw-req li{display:flex; align-items:flex-start; gap:var(--s2); color:var(--ink-2)}
+.pw-req li .ms{margin-top:2px}
+.pw-req li.met{color:#1E7A43}
+.sim-note{display:flex; align-items:flex-start; gap:var(--s2); font-size:var(--t14); color:var(--ink-2); padding-top:var(--s4); border-top:1px solid var(--line); width:100%}
+.sim-note > div{display:grid; gap:var(--s1); min-width:0}
+.sim-note code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:var(--t14); color:var(--ink); background:var(--tint); padding:0 var(--s1); border-radius:4px}
+.sim-accts{list-style:none; margin:0; padding:0; display:grid}
+.sim-accts .text-link{overflow-wrap:anywhere; text-align:left; min-height:32px; border:0; background:none; padding:0; font:inherit; font-weight:600; cursor:pointer; border-radius:4px}
+.sim-accts .text-link:focus-visible{box-shadow:var(--focus)}
 .auth-flag{display:flex; align-items:center; gap:var(--s2); font-size:var(--t14); font-weight:600; color:var(--ink-2)}
-.idp{display:grid; gap:var(--s4); width:100%}
-.idp fieldset{border:0; margin:0; padding:0; display:grid; gap:var(--s2)}
-.acct{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); border-radius:var(--r-md); box-shadow:inset 0 0 0 1px var(--line-strong); cursor:pointer}
-.acct:has(input:checked){box-shadow:inset 0 0 0 2px var(--blue); background:var(--tint)}
-.acct input{width:20px; height:20px; margin:0; accent-color:var(--ctl)}
-.acct input:focus-visible{box-shadow:var(--focus); border-radius:50%}
-.acct .avatar{background:var(--ctl); color:#FFFFFF}
-.acct-t{display:grid; min-width:0}
-.acct-n{font-weight:700}
-.acct-r{font-size:var(--t14); color:var(--ink-2); overflow-wrap:anywhere}
-.mfa-wait{display:flex; align-items:center; gap:var(--s3); width:100%; padding:var(--s4); border-radius:var(--r-md); background:var(--tint); color:var(--blue); font-weight:600}
 .exit-ic{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background:var(--tint); color:var(--blue)}
+@media (max-width: 899px){
+  .auth{grid-template-columns:1fr; grid-template-rows:auto 1fr}
+  .auth-brand{padding:var(--s6) var(--s4)}
+  .auth-brand-in{gap:var(--s3)}
+  .auth-logo{width:200px}
+  .auth-welcome{font-size:var(--t20)}
+  .auth-main{place-content:start center; padding-top:var(--s6)}
+}
 .sys-page{padding-top:var(--s10)}
 
 /* ===================== Planned pages ===================== */

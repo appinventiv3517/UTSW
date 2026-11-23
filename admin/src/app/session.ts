@@ -1,6 +1,5 @@
-/* ---------- Simulated SSO session ----------
-   SIMULATED: no identity provider is connected. The real flow (SAML or OIDC, MFA, timeout) is pending UTSW (HANDOVER §8).
-   There is never a username and password form. */
+/* ---------- Session (email and password sign-in, MOCK) ----------
+   AuthService checks the email and password; this keeps who is signed in, their role and the idle timeout. */
 import { DB, saveDb, UserService } from '../services/services';
 import { ROLES, type Role } from './permissions';
 import type { User, SessionState } from './types';
@@ -9,14 +8,11 @@ import type { User, SessionState } from './types';
 const SESSION_IDLE_MS = (): number => ((DB.db.settings && DB.db.settings.sessionTimeout) || 30) * 60 * 1000;
 export const Session = {
   current: (): SessionState | null => DB.session,
-  /* Step 1: the person picks a sample account on the simulated identity-provider screen */
-  pending: null as string | null,
-  begin(userId: string): void { this.pending = userId; },
-  /* Step 2: simulated MFA approval starts the session */
-  complete(): boolean {
-    const u = UserService.byId(this.pending); if (!u) return false;
+  /* Starts the session once AuthService accepted the email and password */
+  start(userId: string): boolean {
+    const u = UserService.byId(userId); if (!u) return false;
     DB.session = { userId: u.id, role: u.role, startedAt: Date.now(), lastActive: Date.now() };
-    this.pending = null; saveDb(); return true;
+    saveDb(); return true;
   },
   touch(): void { if (DB.session) { DB.session.lastActive = Date.now(); } },
   expired(): boolean { return !!DB.session && Date.now() - DB.session.lastActive > SESSION_IDLE_MS(); },

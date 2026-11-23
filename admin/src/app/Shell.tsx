@@ -85,7 +85,7 @@ function UserMenu() {
   const act = async (k: 'profile' | 'signout') => {
     setOpen(false);
     if (k === 'profile') { Router.go('profile'); return; }
-    if (await Router.canLeave()) { Session.end(); Router.go('signed-out', { force: true }); } else b.current?.focus();
+    if (await Router.canLeave()) { Router.navigate('signed-out'); Session.end(); } else b.current?.focus();
   };
   return (
     <div className="user" id="user" ref={host} onKeyDown={e => { if (e.key === 'Escape' && open) { setOpen(false); b.current?.focus(); } }}>

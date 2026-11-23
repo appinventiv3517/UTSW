@@ -1,5 +1,5 @@
 /* ---------- Hash router with session and role guards ----------
-   Public routes: login, mfa, signed-out, expired. Everything else needs the simulated session,
+   Public routes: login, forgot-password, reset-<token>, signed-out, expired. Everything else needs the simulated session,
    and a role that can view the page's area; otherwise the access-denied view shows in place.
    A page with unsaved changes sets a guard; leaving it asks first. */
 import { useSyncExternalStore } from 'react';
@@ -7,7 +7,7 @@ import { ROUTES, type RouteDef } from './nav';
 import { getDbVersion, onDbChange } from '../services/services';
 
 export const DEFAULT_ROUTE = 'dashboard';
-export const PUBLIC_ROUTES = ['login', 'mfa', 'signed-out', 'expired'];
+export const PUBLIC_ROUTES = ['login', 'forgot-password', 'signed-out', 'expired'];
 
 export function matchRoute(name: string): { route: RouteDef; params: { id?: string } } | null {
   const exact = ROUTES.find(r => r.pattern === name);
@@ -39,6 +39,9 @@ export const Router = {
     if (force) this.clearGuard();
     if (location.hash.slice(1) === name) this.resolve(); else location.hash = name;
   },
+  /* Navigate now, in the same tick (no waiting for hashchange): used before signing out, so the page that
+     needs a session is gone before the session is */
+  navigate(name: string): void { this.clearGuard(); history.pushState(null, '', `#${name}`); this.resolve(); },
   /* Re-render the current page from fresh data, keeping focus where it is */
   refresh(): void { set({ name: state.name, nonce: state.nonce + 1, refresh: true }); },
   /* Show a route without adding a history entry (redirects) */

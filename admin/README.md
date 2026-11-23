@@ -2,7 +2,7 @@
 
 The UTSW MyCare 2.0 Admin Portal. All 12 modules from `handoff/admin-portal/BRIEF.md` work end to end on mock data. The Admin and the app are light only. The mobile previews follow the **UTSW MyCare Guest Flow 2** design (the stakeholder update). Planning inputs are `handoff/admin-portal/BRIEF.md` and `handoff/admin-portal/HANDOVER.md`.
 
-**Everything runs on mock data.** Nothing connects to MyCare, Epic/MyChart, Gozio, an identity provider, a push provider or an analytics source. Every screen says so, and the code has no endpoints, backend URLs or credentials.
+**Everything runs on mock data.** Nothing connects to MyCare, Epic/MyChart, Gozio, an email service, a push provider or an analytics source. Every screen says so, and the code has no endpoints or backend URLs. The only credentials are the mock sample accounts below.
 
 ## Build
 
@@ -21,7 +21,7 @@ Both files are committed beside the source. `vite-plugin-singlefile` inlines the
 
 | Module | Routes | Working flows |
 |---|---|---|
-| Sign-in | `login`, `mfa`, `signed-out`, `expired`, `denied` | Simulated UTSW SSO, then sample account, then simulated MFA approval. Never a password. Idle timeout from settings, sign out, access denied, and return to the requested page |
+| Sign-in and password reset | `login`, `forgot-password`, `reset-<token>`, `signed-out`, `expired`, `denied` | Follows the Admin Login design (no SSO, no MFA): a UTSW Blue brand panel beside one card. **Log in** with email address and password (show/hide password; Log in is enabled once both are filled; one “Invalid credentials. Please try again.” message, whatever was wrong). **Forgot password** → inline check “Enter a valid email address.” → **Link sent** (the same message whether or not an account uses the address). The reset link opens **Create new password** with the four requirements turning green as they're met and a match check, then **Password reset**. A used, unknown or 30-minute-old link shows **Link expired** with Resend reset link. Idle timeout from settings, log out, access denied, and return to the requested page after logging in |
 | Dashboard | `dashboard` | Quick create (alert, campaign, notification), four sample KPIs, live emergency alerts, "Right now in the app" (live guest home phone, campaign showing, alerts, layout and indoor-map versions), what's coming up in the next 30 days, and recent activity |
 | Feature publishing bar | Layout, Campaigns, Emergency alerts, Quick links, Services and resources, Audience segments | Home Screen is a sidebar group again, one page per feature. Each feature's page has a slim Publishing bar with three batch actions (each button says how many items it moves) – Deploy drafts to demo, Publish demo to production, and Publish drafts directly (skips demo). Each batch lists the items it can move, all ticked; untick any to leave them out. One comment goes into each item's history. Only what the role may do is offered (Marketing: deploy only). Single items keep their full Draft/Demo/Production row, which adds Publish directly |
 | Collapsible sidebar | Every page | On screens 1024px and wider, the button left of the logo collapses the sidebar to a 72px icon rail and expands it again; the choice is remembered in this browser. In the rail, each icon has a tooltip, the current section is highlighted, and a section opens as a flyout of its pages (Escape or a click outside closes it). Pages reflow to the wider space through their container queries. Below 1024px the menu button opens the sidebar as a drawer, as before |
@@ -39,7 +39,7 @@ Both files are committed beside the source. `vite-plugin-singlefile` inlines the
 | Notifications | `notifications`, `-new`, `-:id` | Create and edit with validation, then schedule or send now (Admin and Super Admin), cancel a scheduled one with a reason, duplicate, delete. Choose the audience segment; every notification goes out as push and Inbox. Lock-screen preview, plus results for sent messages Status is one row (status, when, actions); a Versions card lists every save with View and Restore |
 | Analytics | `analytics-*` | Home screen overview (home module click-through share) plus five categories with exactly the brief's metrics. 7, 30 or 90 days with loading and error states, metric tiles (no sparklines), line chart (hover and arrow-key crosshair, data table), and breakdowns. There is no separate analytics overview page |
 | Admin management (users) | `users`, `users-new`, `users-:id` | Search and filter by role and status. Create with required, email-format and duplicate checks (simulated invitation). Edit, change role, resend invite, deactivate or reactivate, delete. You can't remove or demote yourself |
-| My profile | `profile` | From the user menu (which shows the current role tag). Change your own first and last name (audited). Email, role, status and dates are read only. Password change is SIMULATED: the form checks the rules (12+ characters, a letter and a number, different from the current one, confirmation matches), sends and stores nothing, and clears the fields |
+| My profile | `profile` | From the user menu (which shows the current role tag). Change your own first and last name (audited). Email, role, status and dates are read only. Change password: current password, then a new one with the same four requirements as Create new password, and a confirmation. Saved to the mock data (hashed) and audited |
 | Audit and versioning | `audit`, `audit-history` | Every action with actor, time, environment, comment and a before-and-after table. Every configuration's versions with comparison and rollback where the type supports it |
 | Platform operations | `platform-integrations`, `platform-monitoring` | Simulated integration status with "Run check", fetch error and latency charts, and incidents |
 | Administrative settings | `admin-settings`, `admin-settings-locations` | Session timeout, default time zone, required publish comment, and the permission matrix. Location-aware facility messages with a location-card preview |
@@ -100,12 +100,13 @@ Routes are plain hash names (`#home-layout`, `#home-campaigns-campaign-flu`) bec
 
 ## What is mock or simulated
 
-- **Sign-in, MFA and session:** simulated, with sample accounts only.
+- **Sign-in and passwords:** email and password against mock accounts. Every active sample account starts with the password `MyCare#2026` (shown on the login page, with links that fill in an account). Passwords you set are kept only as salted SHA-256 hashes in this browser's mock data. Sign-ins and password events go to the audit log (not the Dashboard feed).
+- **Password reset email:** no email is sent. After “Link sent”, the page offers the reset link on screen (and a sample expired link). Links are single use and expire after 30 minutes.
 - **Publishing, sending, uploading and integration checks:** simulated in the browser.
 - **Analytics, monitoring and zero-result counts:** deterministic sample data.
 - **Saving:** changes are saved in this browser's `localStorage` (`utsw-admin-mock-v1`, always wrapped in try/catch). Clearing site data restores the seed.
 - **Errors:** every page has an error state with retry; the user-menu switch that simulated failures was removed on request, so the mock services don't fail on their own.
-- **Roles:** the role comes from the sample account chosen at sign-in (Super Admin, Admin or Marketing). There is no role switcher in the user menu.
+- **Roles:** the role comes from the account you log in with (Super Admin, Admin or Marketing). There is no role switcher in the user menu.
 - **Wayfinding files:** read in the browser with FileReader and never uploaded anywhere. The JSON schema checked is a placeholder until UTSW shares a real Gozio export.
 
 ## Permissions (proposed, pending confirmation)
@@ -141,19 +142,19 @@ Campaign tags such as "Flu season" (white on 14% white over the campaign gradien
 13. **Audiences:** attributes, precedence, conflict handling and PHI limits.
 14. **Notifications:** push provider, whether delivery types or an approval step are needed (removed from the prototype on request), who can send, cancel and edit rules, allowed video hosts.
 15. **Analytics:** data source and exact metric definitions.
-16. **Users:** invitation through the identity provider or the Admin; deletion vs deactivation; audit retention and before-and-after detail.
+16. **Users:** how invitations reach new admins (an email with a set-password link is assumed); deletion vs deactivation; audit retention and before-and-after detail.
 17. **Environments:** what "Demo" is (a separate environment or a build), and who can promote to production. Which config types support versioning and rollback (all flags here are assumptions).
 18. **Admin device support:** built for desktop (1280 and 1440, usable at 1024). It also works at phone width, but that is not a supported target until confirmed.
 19. **Spelling:** the UI uses US English ("Global colors") per UT Southwestern style, while the brief uses UK spelling. The one exception is the app's own label "Personalise My Homepage".
 20. **Logo:** `mycare-logo/` is a proposal pending CMPA approval and is used unaltered.
-21. **Password changes:** sign-in is UTSW SSO, so who changes an admin's password (the identity provider's own page, or never from the Admin) and whether the profile page should link there. The prototype's password form is simulated and stores nothing.
+21. **Passwords:** the Login design replaces SSO with email and password. Pending: the final password policy (the design's four rules are used: 8+ characters, an uppercase letter, a number and a special character), reset link lifetime (30 minutes assumed), lockout after failed attempts, password expiry and reuse, and whether MFA is needed for admins.
 
 Also pending: the session timeout (30 minutes is a placeholder) and the final permission matrix.
 
 ## Next
 
 - Connect the services to a real backend once an API contract exists. Screens only call the service interfaces in `src/services/services.ts`.
-- Replace the simulated sign-in with the approved identity provider, and the proposed permission matrix with the confirmed one.
+- Back AuthService with the real authentication service and email delivery (reset links, invitations), and replace the proposed permission matrix with the confirmed one.
 - Swap in real data sources for analytics, push and the Gozio export schema as UTSW confirms them.
 
 
