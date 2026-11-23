@@ -6,7 +6,7 @@ import type { Page, PageProps } from '../app/App';
 import { PageHead, initials } from '../app/Shell';
 import { Router } from '../app/router';
 import { Session } from '../app/session';
-import { ROLES, PERMISSIONS, LEVELS, can, type Role } from '../app/permissions';
+import { ROLES, can, type Role } from '../app/permissions';
 import { useLoad } from '../app/useLoad';
 import { DB, UserService } from '../services/services';
 import { Badge, Btn, ErrorState, Icon, LoadingState } from '../ui/kit';
@@ -25,7 +25,7 @@ const ROLE_OPTS = Object.entries(ROLES).map(([k, r]) => [k, r.label] as [string,
 const USER_FIELDS: FieldDef[] = [
   { key: 'first', label: 'First name', required: true, max: 40, wide: false },
   { key: 'last', label: 'Last name', required: true, max: 40, wide: false },
-  { key: 'email', label: 'Email address', required: true, max: 80, hint: 'Their UT Southwestern email. They get an email invitation to set their own password.' },
+  { key: 'email', label: 'Email address', required: true, max: 80 },
   { key: 'role', label: 'Role', type: 'radio', options: ROLE_OPTS }
 ];
 const userValidate = (d: Data, selfId?: string): Errors => {
@@ -34,12 +34,6 @@ const userValidate = (d: Data, selfId?: string): Errors => {
   else if (d.email && UserService.emailTaken(d.email, selfId)) e.email = `An account already exists for ${d.email.trim().toLowerCase()}.`;
   return e;
 };
-const areas = Object.entries(PERMISSIONS.areas);
-const RoleHelp = () => (
-  <div className="role-help">{(Object.entries(ROLES) as [Role, { label: string }][]).map(([k, r]) => (
-    <p key={k}><b>{r.label}:</b> {areas.filter(([, a]) => LEVELS.indexOf(a[k]) >= LEVELS.indexOf('publish')).length} areas to publish, {areas.filter(([, a]) => a[k] === 'none').length} areas hidden</p>))}
-    <p className="muted">The full matrix is under Administrative settings. Proposed, pending confirmation.</p></div>
-);
 const crumbs: [string, string | null][] = [['Admin management', null], ['All users', 'users']];
 
 function UsersPage(_: PageProps) {
@@ -53,7 +47,7 @@ function UsersPage(_: PageProps) {
         {load.status === 'loading' ? <LoadingState text="Loading users" /> : load.status === 'error' ? <ErrorState msg={load.error} onRetry={retry} /> : <>
           {!canManage && <p className="note-line"><Icon name="info" size={20} /><span>Your role can view users. A Super Admin manages accounts.</span></p>}
           <section className="card"><div className="card-body" id="us-table">
-            <DataTable<User> id="us" caption="Admin users" noun="user" rows={load.data} defaultSort={{ key: 'name', dir: 'asc' }} searchPlaceholder="Search names and emails" rowKey={u => u.id}
+            <DataTable<User> id="us" caption="Admin users" alwaysPaginate noun="user" rows={load.data} defaultSort={{ key: 'name', dir: 'asc' }} searchPlaceholder="Search names and emails" rowKey={u => u.id}
               searchText={u => `${fullName(u)} ${u.email}`}
               filters={[
                 { key: 'role', label: 'Role', options: ROLE_OPTS, match: (u, v) => u.role === v },
@@ -89,12 +83,11 @@ function NewUserPage(_: PageProps) {
   return (
     <div className="page">
       <PageHead crumbs={crumbs} title="Create user" lede="The person gets an email invitation (simulated) to set a password, then logs in with their email address and password." />
-      <div className="ed-grid"><section className="card"><div className="card-head"><h2>New user</h2></div>
+      <div className="ed-grid single"><section className="card"><div className="card-head"><h2>New user</h2></div>
         <form className="card-body form" id="un" noValidate onSubmit={e => { e.preventDefault(); submit(); }}>
           <Form sections={[{ fields: USER_FIELDS }]} data={d} errors={errors} prefix="f" onChange={setD} />
           <div className="form-actions"><a className="btn btn-text" href="#users"><span className="lbl">Cancel</span></a><Btn label="Create and send invitation" icon="send" variant="primary" type="submit" id="un-go" busy={busy} busyLabel="Creating" /></div>
-        </form></section>
-        <aside className="ed-side"><section className="card"><div className="card-body"><h2 className="side-h">Roles</h2><RoleHelp /></div></section></aside></div>
+        </form></section></div>
     </div>
   );
 }
@@ -113,7 +106,8 @@ function UserBody({ u }: { u: User }) {
   const dirty = d.first !== u.first || d.last !== u.last || d.email !== u.email || d.role !== u.role;
   useLeaveGuard(dirty, 'this user', { title: 'Leave without saving?', body: 'Your changes to this user aren’t saved.' });
   const activity = DB.db.audit.filter(a => a.by === u.id || a.targetId === u.id).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8);
-  const fields = USER_FIELDS.map(f => (!manage || (me && f.key === 'role')) ? { ...f, readonly: true } : f);
+  /* The email address is the sign-in, so it can't be changed here */
+  const fields = USER_FIELDS.map(f => (!manage || f.key === 'email' || (me && f.key === 'role')) ? { ...f, readonly: true } : f);
   const save = async () => {
     if (!dirty) { toast('There are no changes to save.'); return; }
     const errs = validateData(USER_FIELDS, d, x => userValidate(x, u.id));
@@ -130,7 +124,7 @@ function UserBody({ u }: { u: User }) {
     catch (err) { setBusy(null); toast((err as Error).message, { kind: 'error', ms: 8000 }); }
   };
   const act = async (k: string) => {
-    if (k === 'resend') run(k, () => UserService.resendInvite(u.id), `Invitation sent again to ${u.email} (simulated).`);
+    if (k === 'resend') { const c = await confirmDialog({ title: `Resend the invitation to ${fullName(u)}?`, body: <p>{u.email} gets a new invitation email with a link to set a password. The earlier link stops working.</p>, confirmLabel: 'Resend invitation' }); if (c.ok) run(k, () => UserService.resendInvite(u.id), `Invitation sent again to ${u.email} (simulated).`); }
     if (k === 'deactivate') { const c = await confirmDialog({ title: `Deactivate ${fullName(u)}?`, body: <p>They can’t sign in until the account is reactivated. Their history stays in the audit log.</p>, confirmLabel: 'Deactivate', variant: 'danger', comment: { label: 'Reason', required: true } }); if (c.ok) run(k, () => UserService.setStatus(u.id, 'deactivated', c.comment), `${fullName(u)} is deactivated.`); }
     if (k === 'reactivate') { const c = await confirmDialog({ title: `Reactivate ${fullName(u)}?`, body: <p>They can sign in again as {ROLES[u.role].label}.</p>, confirmLabel: 'Reactivate' }); if (c.ok) run(k, () => UserService.setStatus(u.id, 'active', ''), `${fullName(u)} is active again.`); }
     if (k === 'delete') { const c = await confirmDialog({ title: `Delete ${fullName(u)}’s account?`, body: <p>This removes the account for good. Consider deactivating instead – deletion vs. deactivation is pending confirmation (§10.16). The audit log keeps their past actions.</p>, confirmLabel: 'Delete account', variant: 'danger' }); if (c.ok) run(k, () => UserService.remove(u.id), `${fullName(u)}’s account is deleted.`, 'users'); }
@@ -152,7 +146,7 @@ function UserBody({ u }: { u: User }) {
         </div>
         <aside className="ed-side"><section className="card"><div className="card-body">
           <h2 className="side-h">Account</h2>
-          <dl className="facts"><dt>Status</dt><dd><UserBadge s={u.status} /></dd><dt>Created</dt><dd>{fmtDateTime(u.created)}</dd><dt>Last sign-in</dt><dd>{u.lastSignIn ? fmtDateTime(u.lastSignIn) : 'Never'}</dd><dt>Sign-in</dt><dd>Email address and password</dd></dl>
+          <dl className="facts"><dt>Status</dt><dd><UserBadge s={u.status} /></dd><dt>Created</dt><dd>{fmtDateTime(u.created)}</dd><dt>Last sign-in</dt><dd>{u.lastSignIn ? fmtDateTime(u.lastSignIn) : 'Never'}</dd></dl>
           {manage && <div className="stack-acts">
             {u.status === 'invited' && <Btn {...B} label="Resend invitation" icon="send" data-u="resend" busy={busy === 'resend'} busyLabel="Sending" onClick={() => act('resend')} />}
             {u.status === 'deactivated' ? <Btn {...B} label="Reactivate account" icon="how_to_reg" data-u="reactivate" busy={busy === 'reactivate'} busyLabel="Reactivating" onClick={() => act('reactivate')} />

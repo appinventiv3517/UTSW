@@ -13,6 +13,8 @@ export interface TableProps<T> {
   id: string; caption: string; noun?: string; rows: T[]; columns: Column<T>[]; searchText: (r: T) => string; searchPlaceholder?: string;
   filters?: TableFilter<T>[]; defaultSort?: { key: string; dir: 'asc' | 'desc' } | null; initialFilters?: Record<string, string | string[]>;
   empty: { icon?: string; title: string; text?: ReactNode; action?: ReactNode }; actions?: ReactNode; rowKey?: (r: T, i: number) => string;
+  /* Show the pager (range, page numbers, previous and next) even when everything fits on one page */
+  alwaysPaginate?: boolean;
 }
 export const TABLE_PAGE_SIZE = 8;
 type Filters = Record<string, string[]>;
@@ -159,8 +161,8 @@ export function DataTable<T>(cfg: TableProps<T>) {
           ? <EmptyState icon="search_off" title="No matches" text="Nothing matches this search and these filters." level={3} action={<Btn label="Clear search and filters" variant="secondary" data-clear="" onClick={clearAll} />} />
           : <EmptyState {...cfg.empty} level={3} />)}
       </div>
-      <nav className="pager" aria-label={`${cfg.caption} pages`} hidden={pages < 2}>
-        {pages > 1 && <>
+      <nav className="pager" aria-label={`${cfg.caption} pages`} hidden={!(pages > 1 || (cfg.alwaysPaginate && all.length > 0))}>
+        {(pages > 1 || (cfg.alwaysPaginate && all.length > 0)) && <>
           <span className="pg-info">{pg * size + 1}–{pg * size + rows.length} of {all.length}</span>
           <span className="pg-btns">
             <Btn label="Previous page" icon="chevron_left" variant="text" iconOnly data-page="prev" disabled={pg === 0} onClick={() => goPage('prev')} />
