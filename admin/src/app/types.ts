@@ -3,7 +3,8 @@ import type { Role } from './permissions';
 
 export type Env = 'draft' | 'demo' | 'production';
 export type ConfigType = 'homeLayout' | 'campaign' | 'alert' | 'quickLink' | 'featuredCard' | 'drawer' | 'globalColors' | 'appEntry'
-  | 'searchMappings' | 'searchSynonyms' | 'searchSpecialties' | 'searchTop' | 'searchRanking' | 'segment' | 'locations';
+  | 'searchMappings' | 'searchSynonyms' | 'searchSpecialties' | 'searchTop' | 'searchRanking' | 'segment' | 'locations'
+  | 'facilityWhy' | 'facilityNearby' | 'facilityPlaces' | 'wayfinding3d';
 
 export interface Version<T = Data> { version: number; data: T; updatedBy: string; updatedAt: string; comment: string; rollbackOf?: number }
 export interface Draft<T = Data> { data: T; updatedBy: string; updatedAt: string; comment: string; baseVersion: number | null; changesRequested?: string }

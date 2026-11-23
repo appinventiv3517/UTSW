@@ -46,7 +46,13 @@ export const NAV: NavSection[] = [
   { id: 'notifications', label: 'Notifications', icon: 'notifications', items: [
     { route: 'notifications', label: 'All notifications', area: 'notifications', children: [['notifications-new', 'Create notification'], ['notifications-:id', 'Notification']] }
   ] },
-  { id: 'wayfinding', label: 'Wayfinding', icon: 'directions_walk', items: [{ route: 'wayfinding', label: 'Wayfinding files', area: 'wayfinding' }] },
+  { id: 'wayfinding', label: 'Wayfinding and facilities', icon: 'directions_walk', items: [
+    { route: 'wayfinding', label: 'Wayfinding files', area: 'wayfinding' },
+    { route: 'wayfinding-3d', label: '3D map and directions', area: 'wayfinding' },
+    { route: 'facility-why', label: 'Why you’re here', area: 'facility' },
+    { route: 'facility-nearby', label: 'Guest nearby', area: 'facility' },
+    { route: 'facility-places', label: 'Places and catalogs', area: 'facility' }
+  ] },
   { id: 'audit', label: 'Audit and versioning', icon: 'history', items: [
     { route: 'audit', label: 'Audit logs', area: 'audit' },
     { route: 'audit-history', label: 'Configuration history', area: 'audit' }

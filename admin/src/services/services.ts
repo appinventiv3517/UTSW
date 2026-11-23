@@ -14,6 +14,8 @@ export let DB: Store = null as unknown as Store;
 export function loadDb(): void {
   const saved = store.read<Store>();
   DB = saved && saved.db && saved.db.schema === SCHEMA ? saved : { db: seedDb(), session: saved && saved.session && saved.db && saved.db.schema === SCHEMA ? saved.session : null, prefs: (saved && saved.prefs) || {} };
+  const fresh = seedDb();
+  Object.values(fresh.records).forEach(r => { if (!DB.db.records[r.id]) DB.db.records[r.id] = r; });
   MockSettings.simulateErrors = !!DB.prefs.simulateErrors;
 }
 /* Screens re-render after any change to the mock data (see useDb in app/store.ts) */
@@ -64,7 +66,11 @@ export const CONFIG_TYPES: Record<ConfigType, { label: string; area: Area; suppo
   searchTop: { label: 'Top and popular searches', area: 'search', supportsRollback: true, route: 'search-top' },
   searchRanking: { label: 'Ranking', area: 'search', supportsRollback: true, route: 'search-ranking' },
   segment: { label: 'Audience segment', area: 'audiences', supportsRollback: false, route: 'audiences' },
-  locations: { label: 'Location-aware configuration', area: 'locations', supportsRollback: true, route: 'admin-settings-locations' }
+  locations: { label: 'Location-aware configuration', area: 'locations', supportsRollback: true, route: 'admin-settings-locations' },
+  facilityWhy: { label: 'Why you’re here', area: 'facility', supportsRollback: true, route: 'facility-why' },
+  facilityNearby: { label: 'Guest nearby', area: 'facility', supportsRollback: true, route: 'facility-nearby' },
+  facilityPlaces: { label: 'Places and catalogs', area: 'facility', supportsRollback: true, route: 'facility-places' },
+  wayfinding3d: { label: '3D map and directions', area: 'wayfinding', supportsRollback: true, route: 'wayfinding-3d' }
 };
 export const recLink = (r: ConfigRecord): string => CONFIG_TYPES[r.type].route + (['campaign', 'alert', 'quickLink', 'featuredCard', 'segment'].includes(r.type) ? `-${r.id}` : '');
 /* What each environment holds */

@@ -7,6 +7,7 @@ import { analyticsPages } from './analytics';
 import { userPages } from './users';
 import { notificationPages } from './notifications';
 import { WayfindingPage } from './wayfinding';
+import { facilityPages } from './facility-pages';
 import { adminPages } from './admin-pages';
 import { ProfilePage } from './profile';
 import { campaignPages, alertPages, quickLinkPages, resourcePages, segmentPages } from './collection';
@@ -20,6 +21,7 @@ export const PAGES: Record<string, Page> = {
   ...userPages,
   ...notificationPages,
   wayfinding: WayfindingPage,
+  ...facilityPages,
   ...adminPages,
   profile: ProfilePage
 };

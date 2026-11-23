@@ -13,7 +13,7 @@ export const LEVELS = ['none', 'view', 'draft', 'demo', 'publish', 'manage'] as 
 export type Level = typeof LEVELS[number];
 export const LEVEL_LABEL: Record<Level, string> = { none: 'No access', view: 'View', draft: 'Edit drafts, request review', demo: 'Edit and deploy to demo', publish: 'Edit and publish', manage: 'Manage' };
 export type Area = 'dashboard' | 'analytics' | 'homeLayout' | 'quickLinks' | 'featuredCards' | 'drawer' | 'appEntry' | 'campaigns' | 'alerts' | 'colors' | 'search'
-  | 'audiences' | 'wayfinding' | 'notifications' | 'users' | 'audit' | 'platform' | 'adminSettings' | 'locations' | 'profile';
+  | 'audiences' | 'wayfinding' | 'notifications' | 'users' | 'audit' | 'platform' | 'adminSettings' | 'locations' | 'facility' | 'profile';
 export const PERMISSIONS: { status: string; areas: Record<Exclude<Area, 'profile'>, Record<Role, Level>> } = {
   status: 'Proposed – pending confirmation',
   areas: {
@@ -35,7 +35,8 @@ export const PERMISSIONS: { status: string; areas: Record<Exclude<Area, 'profile
     audit: { superAdmin: 'publish', admin: 'view', marketing: 'none' },
     platform: { superAdmin: 'publish', admin: 'view', marketing: 'none' },
     adminSettings: { superAdmin: 'publish', admin: 'view', marketing: 'none' },
-    locations: { superAdmin: 'publish', admin: 'publish', marketing: 'view' }
+    locations: { superAdmin: 'publish', admin: 'publish', marketing: 'view' },
+    facility: { superAdmin: 'publish', admin: 'publish', marketing: 'draft' }
   }
 };
 export const levelOf = (role: Role | null | undefined, area: Area): Level =>

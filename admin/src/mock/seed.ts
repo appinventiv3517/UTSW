@@ -252,6 +252,36 @@ export function seedDb(): Db {
     loc('rp', 'UTSW Richardson/Plano (sample)', 'Clinic', '', 'Surface lot, free', false),
     loc('rb', 'UTSW RedBird (sample)', 'Clinic', 'Enter through the south doors.', 'Surface lot, free', true)] }, { at: '2026-10-02T15:00:00Z' }));
 
+  /* ---- At a facility: the guest app's geolocation features (Nov 19 design + why you're here, guest nearby, 3D wayfinding) ---- */
+  const row = (o: Data, i: number) => ({ id: `r${i + 1}`, on: true, ...o });
+  records.push(rec('facility-why', 'facilityWhy', 'Why you’re here', { enabled: true, title: 'What brings you here today?', note: 'Your answer stays on this phone.', askOnce: true, rows: [
+    { label: 'An appointment', hint: 'Sign in to see it, or pick the clinic', glyph: 'calendar_month', leadsTo: 'Sign in, or pick the clinic' },
+    { label: 'Visiting someone', hint: 'Visiting hours, the information desk', glyph: 'person', leadsTo: 'Visiting hours and the information desk' },
+    { label: 'Lab or imaging', hint: 'Walk-in waits and prices', glyph: 'science', leadsTo: 'Lab and imaging waits and prices' },
+    { label: 'Pharmacy', hint: 'Floor 1 · 2 min walk', glyph: 'local_pharmacy', leadsTo: 'Pharmacy hours and directions' },
+    { label: 'I need care', hint: 'What to do now', glyph: 'medical_services', leadsTo: '911 note and doctors open today' },
+    { label: 'Just looking around', hint: 'Everything near you', glyph: 'map', leadsTo: 'Everything near you' }].map(row) }, { at: '2026-11-23T15:00:00Z' }));
+  records.push(rec('facility-nearby', 'facilityNearby', 'Guest nearby', { careOn: true, doctorsOn: true, facilitiesOn: true, doctorsCount: 3,
+    openNote: 'Open times are for information. To schedule, call 214-555-0100.', phone: '214-555-0100',
+    care: [{ name: 'Imaging', floor: 1, suite: '1300', glyph: 'medical_information' }, { name: 'Lab', floor: 2, suite: '2100', glyph: 'science' }, { name: 'Rehab', floor: 2, suite: '2400', glyph: 'accessibility_new' }, { name: 'Heart clinic', floor: 7, suite: '7200', glyph: 'cardiology' }].map(row),
+    tiles: [{ name: 'Café', floor: 1, glyph: 'restaurant', opens: 'Place page (menu, prices or services)' }, { name: 'Pharmacy', floor: 1, glyph: 'local_pharmacy', opens: 'Place page (menu, prices or services)' },
+      { name: 'Restrooms', floor: 1, glyph: 'wc', opens: 'Directions' }, { name: 'Information', floor: 1, glyph: 'support_agent', opens: 'Directions' },
+      { name: 'Chapel', floor: 1, glyph: 'self_improvement', opens: 'Place page (menu, prices or services)' }, { name: 'Snacks', floor: 2, glyph: 'restaurant', opens: 'Place page (menu, prices or services)' }].map(row) }, { at: '2026-11-23T15:00:00Z' }));
+  records.push(rec('facility-places', 'facilityPlaces', 'Places and catalogs', { rows: [
+    { name: 'Café', floor: 1, glyph: 'restaurant', hours: '6:30 a.m. – 7 p.m.', wait: '', kind: 'Menu', note: 'To look, not to order in the app.',
+      items: 'Breakfast | Egg and cheese sandwich | $4.50\nBreakfast | Oatmeal with fruit | $3.25 | Vegetarian\nLunch | Grilled chicken salad | $8.75 | Gluten-free\nLunch | Turkey wrap | $7.50\nLunch | Vegetable soup | $4.25 | Vegetarian\nDrinks | Coffee | $2.25\nDrinks | Fruit smoothie | $4.75' },
+    { name: 'Lab, Suite 2100', floor: 2, glyph: 'science', hours: '6:30 a.m. – 6 p.m.', wait: 'Walk-in wait about 15 min', kind: 'Common tests and self-pay prices', note: 'Self-pay prices before insurance.',
+      items: 'Blood tests | Complete blood count | $28\nBlood tests | Basic metabolic panel | $32 | Fasting\nBlood tests | Lipid panel | $35 | Fasting\nBlood tests | Hemoglobin A1C | $30' },
+    { name: 'Imaging, Suite 1300', floor: 1, glyph: 'medical_information', hours: '7 a.m. – 7 p.m.', wait: 'Walk-in wait about 20 min', kind: 'Exams and self-pay prices', note: 'Self-pay prices before insurance.',
+      items: 'Exams | Chest X-ray | $95\nExams | Ultrasound | $240\nExams | CT scan, head | $450' },
+    { name: 'Pharmacy', floor: 1, glyph: 'local_pharmacy', hours: '8 a.m. – 8 p.m.', wait: '', kind: 'Services and items', note: 'Prescription status is in MyChart.',
+      items: 'Services | Flu shot | $0 with most insurance\nServices | Prescription pickup | Bring a photo ID\nCommon items | Pain reliever, 100 tablets | $6.99\nCommon items | Bandages, 30 count | $4.49' },
+    { name: 'Chapel', floor: 1, glyph: 'self_improvement', hours: 'Open 24 hours', wait: '', kind: 'Gathering times', note: 'All faiths welcome.', items: 'Today | Morning reflection | 8 a.m.\nToday | Evening prayer | 6 p.m.' },
+    { name: 'Snacks', floor: 2, glyph: 'restaurant', hours: 'Open 24 hours', wait: '', kind: 'Menu', note: 'Grab and go, next to the lab.', items: 'Grab and go | Granola bar | $1.75\nGrab and go | Fresh fruit cup | $3.50 | Vegetarian\nGrab and go | Bottled water | $1.50' }].map(row) }, { at: '2026-11-23T15:00:00Z' }));
+  records.push(rec('wayfinding-3d', 'wayfinding3d', '3D map and directions', { mapFirst: true, floors: '1, 2, 7', defaultFloor: 1, cta: 'Get directions', fromStreet: true, overview: true, liveView: true, voice: true, simulate: false, dest: [
+    { name: 'Parking', glyph: 'local_parking', target: 'Garage A' }, { name: 'Main entrance', glyph: 'door_front', target: 'North entrance' }, { name: 'Pharmacy', glyph: 'local_pharmacy', target: 'Pharmacy, Floor 1' },
+    { name: 'Cafeteria', glyph: 'restaurant', target: 'Café, Floor 1' }, { name: 'Restrooms', glyph: 'wc', target: 'Nearest restrooms' }, { name: 'Elevators', glyph: 'elevator', target: 'Elevator B' }].map(row) }, { at: '2026-11-23T15:00:00Z' }));
+
   /* ---- Audience segments ---- */
   const seg = (id: string, name: string, description: string, rules: Data[], match = 'all', reach = 0) => rec(id, 'segment', name, { name, description, match, rules, reach }, { at: '2026-09-10T15:00:00Z', by: 'u2' });
   records.push(

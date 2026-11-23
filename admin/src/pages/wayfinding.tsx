@@ -38,7 +38,7 @@ export function WayfindingPage(_: PageProps) {
   const [load, retry, setData] = useLoad(() => WayfindingService.get());
   return (
     <div className="page">
-      <PageHead crumbs={[['Wayfinding', null]]} title="Wayfinding files" lede="Indoor maps come from a JSON file exported by hand from Gozio. Upload and validate a file, check it on demo, then publish it to production." />
+      <PageHead crumbs={[['Wayfinding and facilities', null]]} title="Wayfinding files" lede="Indoor maps come from a JSON file exported by hand from Gozio. Upload and validate a file, check it on demo, then publish it to production." />
       <div id="wf">{load.status === 'loading' ? <LoadingState text="Loading wayfinding" /> : load.status === 'error' ? <ErrorState msg={load.error} onRetry={retry} /> : <Body w={load.data} setW={setData} />}</div>
     </div>
   );

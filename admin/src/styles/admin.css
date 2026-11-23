@@ -1062,3 +1062,7 @@ body:has(:is(.hub-pub, .lc-slim)) #toasts{bottom:calc(var(--s4) + 92px + env(saf
 .pin-row > .mod-pos{line-height:40px; text-align:center}
 .pin-row > .badge{margin-top:var(--s2)}
 @container edit (max-width: 420px){ .pin-row{grid-template-columns:40px minmax(0,1fr); grid-template-areas:"ic txt" ". badge"} .pin-row > .mod-pos{display:none} .pin-row > .badge{justify-self:start; margin-top:0} }
+/* At a facility editors: icon beside a two-line cell; the side summary list */
+.cell-icon{display:flex;align-items:center;gap:12px;min-width:0}
+.cell-icon>.cell-2{min-width:0}
+.side-list{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--fg-2,inherit)}
