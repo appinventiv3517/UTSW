@@ -9,7 +9,7 @@ import type { ConfigRecord, ConfigType, Data, Db, Env, Store, User, Notification
 export const MockSettings = { latency: [160, 380] as [number, number], simulateErrors: false };
 export class ServiceError extends Error {}
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
-export const SCHEMA = 8;
+export const SCHEMA = 9;
 export let DB: Store = null as unknown as Store;
 export function loadDb(): void {
   const saved = store.read<Store>();

@@ -281,11 +281,11 @@ export const alertPages = defineCollection({
   preview: (d, id, src) => homePreview('guest', 'alert')(d, id, src, 'alerts')
 });
 
-/* ---- Quick links (Guest Flow 2: four MyChart tasks in a 2 × 2 grid) ---- */
-const QL_MAX = 4;
+/* ---- Quick links (Nov 19: six tiles – Wayfinding and Find a location, then four MyChart tasks) ---- */
+const QL_MAX = 6;
 export const quickLinkPages = defineCollection({
   route: 'home-quick-links', type: 'quickLink', area: 'quickLinks', section: 'Home Screen', title: 'Quick links', noun: 'quick link', newLabel: 'New quick link', icon: 'apps',
-  lede: 'The four tiles in the Quick links module, in a 2 × 2 grid with the icon left of a two-line label. In the guest design all four open MyChart; the Admin never edits MyChart content.',
+  lede: 'The six tiles in the Quick links module, two a row with the icon left of a two-line label: Wayfinding and Find a location open in the app; the four MyChart tasks open MyChart sign-in first. The Admin never edits MyChart content.',
   summary: list => { const on = list.filter(r => latestData(r).enabled !== false).length; return on > QL_MAX ? <NoteLine>{on} quick links are on. The home screen shows the first {QL_MAX} by position.</NoteLine> : null; },
   nameIcon: d => d.icon, defaultSort: { key: 'order', dir: 'asc' },
   defaults: () => ({ title: '', icon: 'chat', iconAlt: '', destination: { type: 'mychart', value: 'Messages' }, requiresSignIn: true, order: Math.min(ConfigService.peekAll('quickLink').length + 1, QL_MAX), enabled: true }),
@@ -295,7 +295,7 @@ export const quickLinkPages = defineCollection({
     { key: 'iconAlt', label: 'Icon alternative text', max: 60, hint: 'Leave empty when the title already says it – the icon is then decorative.' },
     { key: 'destination', label: 'Destination', type: 'destination', required: true, noNone: true },
     { key: 'requiresSignIn', label: 'Opens MyChart sign-in first', type: 'switch', hint: 'Guests go to MyChart sign-in, then to the task. Screen readers hear “opens MyChart”.' },
-    { key: 'order', label: 'Position', type: 'number', min: 1, maxNum: QL_MAX, wide: false, hint: 'Reading order: 1 and 2 on top, 3 and 4 below.' }] }],
+    { key: 'order', label: 'Position', type: 'number', min: 1, maxNum: QL_MAX, wide: false, hint: 'Reading order, two a row: 1 and 2 on top, then 3 and 4, then 5 and 6.' }] }],
   validate: d => d.destination.type === 'mychart' && !d.requiresSignIn ? { requiresSignIn: 'MyChart destinations need sign-in. Turn on “Opens MyChart sign-in first”.' } as Errors : {},
   columns: [
     { key: 'destination', label: 'Destination', render: destCell, cls: 'dest' },

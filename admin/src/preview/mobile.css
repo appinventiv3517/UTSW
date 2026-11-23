@@ -304,3 +304,48 @@ html:not(.ms-ready) .ms{color:transparent!important}
 .loc-tip .ms,.loc-row .ms{color:var(--c-blue)}
 .loc-row{display:flex; gap:var(--sp-8); align-items:center; font-size:var(--fs-14); color:var(--c-text-2)}
 .loc-body .btn{border-radius:var(--r-full); margin-top:var(--sp-8)}
+
+/* ---------- At a facility (Nov 19 + geolocation): 3D map first, Why you're here, Guest nearby, place pages, Wayfinding ---------- */
+.geo-hero{position:relative; height:460px; background:#F7FAFD; overflow:hidden; border-radius:0 0 var(--r-24) var(--r-24)}
+.geo-hero.tall{height:420px}
+.gh-map{position:absolute; left:0; right:0; top:84px; bottom:72px; width:100%; height:calc(100% - 156px); object-fit:contain; transform:scale(1.18)}
+.gh-top{position:absolute; left:var(--sp-16); right:76px; top:var(--sp-16); z-index:2}
+.gh-chip{display:inline-flex; align-items:center; gap:var(--sp-12); max-width:100%; min-height:64px; padding:var(--sp-8) var(--sp-16); border-radius:var(--r-16); background:rgba(255,255,255,.86); box-shadow:0 4px 16px rgba(0,20,40,.16)}
+.gh-chip > span{min-width:0}
+.gh-chip h2{font-size:var(--fs-16); line-height:var(--lh-16); font-weight:700; color:var(--c-text); text-wrap:balance}
+.gh-chip .eyebrow{display:block; color:var(--c-blue)}
+.gh-live{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--c-green); box-shadow:0 0 0 4px rgba(67,176,42,.22); flex:none}
+.gh-side{position:absolute; right:var(--sp-16); top:var(--sp-16); z-index:2; display:grid; border-radius:var(--r-12); overflow:hidden; background:var(--c-surface); box-shadow:0 4px 12px rgba(0,20,40,.18)}
+.gh-fl{position:relative; width:44px; height:44px; border:0; background:var(--c-surface); color:var(--c-text); font:inherit; font-size:var(--fs-16); font-weight:700}
+.gh-fl + .gh-fl{box-shadow:inset 0 1px 0 var(--c-border)}
+.gh-fl[aria-current="page"]{background:var(--c-blue); color:var(--c-on-blue)}
+.gh-fl i{position:absolute; right:5px; top:5px; width:8px; height:8px; border-radius:50%; background:var(--c-cyan); box-shadow:0 0 0 2px var(--c-surface)}
+.gh-foot{position:absolute; left:var(--sp-16); right:var(--sp-16); bottom:var(--sp-16); z-index:2; display:flex; align-items:flex-end; justify-content:space-between; gap:var(--sp-8); flex-wrap:wrap}
+.gh-foot .btn{box-shadow:0 4px 12px rgba(0,20,40,.24)}
+.tag-s{display:inline-flex; align-items:center; min-height:24px; padding:0 var(--sp-8); border-radius:var(--r-8); background:var(--c-surface); color:var(--c-text-2); font-size:var(--fs-12); line-height:var(--lh-12); font-weight:600}
+.top.low .hero{margin-inline:var(--sp-16); border-radius:var(--r-16); padding-top:var(--sp-16)}
+.why{overflow:hidden}
+.why-head{background:var(--c-blue); color:var(--c-on-blue); padding:var(--sp-16); display:flex; flex-direction:column; gap:var(--sp-4)}
+.why-head .eyebrow{color:var(--c-on-blue-2)}
+.why-head h2{font-size:var(--fs-20); line-height:var(--lh-20); font-weight:700}
+.why-foot{display:flex; align-items:center; justify-content:space-between; gap:var(--sp-8); padding:var(--sp-8) var(--sp-16); box-shadow:0 -1px 0 var(--c-border)}
+.wf-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--sp-8)}
+.wf-dest{display:flex; flex-direction:column; align-items:center; gap:var(--sp-8); padding:var(--sp-12) var(--sp-4); border:0; font:inherit; font-size:var(--fs-14); line-height:var(--lh-14); font-weight:600; color:var(--c-text); text-align:center}
+.wf-dest .fine{font-size:var(--fs-12); line-height:var(--lh-12); font-weight:400; margin-top:calc(var(--sp-4) * -1)}
+.wf-here{padding:var(--sp-16); display:flex; flex-direction:column; gap:var(--sp-4)}
+.wf-here h2{font-size:var(--fs-18); line-height:var(--lh-18); font-weight:700; color:var(--c-blue)}
+.wf-here p{font-size:var(--fs-14); line-height:var(--lh-14); color:var(--c-text-2)}
+.wf-here .row-btns{margin-top:var(--sp-12); align-items:center}
+.wf-here .eyebrow{display:flex; align-items:center; gap:var(--sp-8); color:var(--c-blue)}
+.ctx-card .loc-tip, .ctx-card .loc-row{margin-top:var(--sp-4)}
+.btn-secondary{background:var(--c-surface); color:var(--c-blue); box-shadow:inset 0 0 0 2px var(--c-blue)}
+.geo-wait{display:flex; align-items:center; gap:var(--sp-8); margin-top:var(--sp-8); color:var(--c-text); font-weight:600}
+.geo-wait .ms{color:var(--c-blue)}
+.grp-h{display:flex; align-items:center; justify-content:space-between; gap:var(--sp-8)}
+.sug-type{font-size:var(--fs-12); line-height:var(--lh-12); font-weight:600; color:var(--c-text-2); background:var(--c-tint); border-radius:var(--r-full); padding:var(--sp-4) var(--sp-8); flex:none; margin-left:var(--sp-4)}
+.geo-cat{padding:var(--sp-12) var(--sp-16)}
+.geo-cat h3{font-size:var(--fs-14); line-height:var(--lh-14); font-weight:700; color:var(--c-blue); margin-bottom:var(--sp-8)}
+.geo-cat ul{list-style:none; display:flex; flex-direction:column; margin:0; padding:0}
+.geo-cat li{display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-12); padding:var(--sp-8) 0; font-size:var(--fs-14); line-height:var(--lh-14); color:var(--c-text)}
+.geo-cat li + li{box-shadow:0 -1px 0 var(--c-border)}
+.geo-cat li b{font-variant-numeric:tabular-nums; text-align:right; flex:none; max-width:50%}

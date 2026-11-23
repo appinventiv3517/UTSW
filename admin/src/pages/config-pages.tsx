@@ -235,11 +235,11 @@ const entryPages = defineSingleton({
       { key: 'reacceptOnChange', label: 'Ask everyone to accept again when the version changes', type: 'switch', show: d => d.eulaVisible }] },
     { title: 'Sign-in prompt', fields: [
       { key: 'loginPromptVisible', label: 'Ask people to sign in', type: 'switch' },
-      { key: 'loginPromptType', label: 'Prompt type', type: 'radio', show: d => d.loginPromptVisible, options: [['choice', 'Welcome screen at launch: Sign in as a patient or Continue as guest'], ['module', 'Only the MyChart sign-in card on the guest home screen']] }] }
+      { key: 'loginPromptType', label: 'Prompt type', type: 'radio', show: d => d.loginPromptVisible, options: [['module', 'The MyChart sign-in card and Sign in button on the guest home (Nov 19: no welcome screen – Get started or Skip goes straight to Home)']] }] }
   ],
-  initialExtras: { entryView: 'welcome' },
-  previewExtras: (x, setX) => <div className="pv-row"><Segmented id="pv-entry" label="Preview screen" options={[['onboarding', 'Onboarding'], ['welcome', 'Welcome']]} value={(x.entryView as string) || 'welcome'} onChange={v => setX({ entryView: v })} /></div>,
-  preview: (d, src, x) => ({ screen: 'entry', layout: layoutFor('guest'), content: { ...appContent(), entry: d, entryView: x.entryView || 'welcome' }, label: src === 'working' ? 'your first-launch settings, not live' : `${src} first launch` })
+  initialExtras: { entryView: 'onboarding' },
+  previewExtras: (x, setX) => <div className="pv-row"><Segmented id="pv-entry" label="Preview screen" options={[['onboarding', 'Onboarding'], ['home', 'Home after Get started']]} value={(x.entryView as string) || 'onboarding'} onChange={v => setX({ entryView: v })} /></div>,
+  preview: (d, src, x) => ({ screen: 'entry', layout: layoutFor('guest'), content: { ...appContent(), entry: d, entryView: x.entryView || 'onboarding' }, label: src === 'working' ? 'your first-launch settings, not live' : `${src} first launch` })
 });
 
 /* ---- Search: top searches, query mappings, synonyms, specialty mapping ---- */
@@ -271,11 +271,11 @@ function rowsSingleton(o: RowsSingletonOpts) {
   });
 }
 const dupCheck = (key: string, label: string) => (v: Data, others: Row[]): Errors => others.some(r => String(r[key]).trim().toLowerCase() === String(v[key]).trim().toLowerCase()) ? { [key]: `“${v[key]}” already has a ${label}.` } : {};
-const SEARCH_PLACES: [string, string][] = [['home', 'Top searches on the home screen'], ['popular', 'Popular searches on Find Care']];
+const SEARCH_PLACES: [string, string][] = [['home', 'Top searches in the search sheet'], ['popular', 'Popular searches on Find Care']];
 const Listed = ({ ok, yes, no, children }: { ok: boolean; yes: string; no: string; children: ReactNode }) => <>{ok ? <Badge kind="live" text={yes} /> : <Badge kind="hidden" text={no} />}{children}</>;
 const topPages = rowsSingleton({
   route: 'search-top', id: 'search-top', title: 'Top and popular searches', noun: 'search term', caption: 'Top and popular searches',
-  lede: 'The chips patients tap instead of typing: four Top searches under the Find Care search on the home screen, and Popular searches on the Find Care screen.',
+  lede: 'The chips patients tap instead of typing: four Top searches when the search sheet opens (Nov 19: no longer repeated under the search on Home), and Popular searches on the Find Care screen.',
   columns: [
     { key: 'term', label: 'Chip text', sortable: true, render: r => r.term },
     { key: 'where', label: 'Shows in', sortable: true, render: r => (SEARCH_PLACES.find(x => x[0] === r.where) || [, r.where])[1] }],
@@ -289,7 +289,7 @@ const topPages = rowsSingleton({
     const rows = d.rows as Row[], home = rows.filter(r => r.where === 'home'), hit = rows.filter(r => r.term.toLowerCase().includes(q));
     const shown = home.slice(0, 4).map(r => r.term);
     return <><Listed ok={!!hit.length} yes="Listed" no="Not listed">{hit.length
-      ? <p>“{q}” is {hit.map(r => r.where === 'home' ? (shown.includes(r.term) ? 'a top search on the home screen' : 'a top search, but only the first four show') : 'a popular search on Find Care').join(' and ')}.</p>
+      ? <p>“{q}” is {hit.map(r => r.where === 'home' ? (shown.includes(r.term) ? 'a top search in the search sheet' : 'a top search, but only the first four show') : 'a popular search on Find Care').join(' and ')}.</p>
       : <p>No chip says “{q}”.</p>}</Listed><p className="muted">Home shows: {shown.join(', ') || 'none'}.</p></>;
   } }
 });

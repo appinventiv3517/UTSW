@@ -75,6 +75,9 @@ export function appContent({ env = 'production', overrides = {}, audience = 'gue
   return {
     ...STATIC_CONTENT,
     top: topSearches(pick, 'home'),
+    /* At a facility (guest geolocation): the four Wayfinding and facilities records */
+    facility: (() => { const g = (id: string) => { const r = ConfigService.peek(id); return r ? pick(r) : null; };
+      const pl = g('facility-places'); return { why: g('facility-why'), near: g('facility-nearby'), places: pl ? pl.rows : [], map: g('wayfinding-3d') }; })(),
     quickLinks: withNew('quickLink', ordered('quickLink')).map(x => ({ title: x.d.title || 'New quick link', icon: x.d.icon, highlight: editing(x) })),
     resources: withNew('featuredCard', ordered('featuredCard')).map(x => ({ category: x.d.category, title: x.d.title || 'New card', description: x.d.subtitle, icon: x.d.icon, highlight: editing(x) })),
     campaign: camp2 ? campaignView(camp2.d) : null,

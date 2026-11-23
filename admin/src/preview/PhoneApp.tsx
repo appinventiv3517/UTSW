@@ -1,15 +1,19 @@
 /* Mobile preview – the phone app drawn inside the preview iframe (its own document, so the app's CSS never meets the Admin's).
-   Markup follows the UTSW MyCare Guest Flow 2 design (stakeholder update): home modules (tiles … announcements),
-   alert banners, the Find Care hero, the floating tab bar, the menu, onboarding and the welcome (sign-in choice) screen.
+   Markup follows the UTSW MyCare Nov 19 design (guest-v2) with geolocation for guests: home modules (tiles … announcements),
+   alert banners, the Find Care hero, the four-tab bar, the menu, onboarding, the contextual location card, and at a facility
+   the 3D map first, Why you're here, Care near you, Doctors open today, Facilities, place pages and Wayfinding.
+   EXTRA_GLYPHS: directions my_location layers view_in_ar call schedule warning */
+/*
    It is fed by the configuration the Admin passes in. Every control is inert: the preview shows the configuration,
    it does not run the app. The app UI is light only. */
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { LOGO_ICON_B64, LOGO_REVERSED_B64 } from '../app/assets';
+import GEO_MAP from './geo-map.jpg?inline';
 import type { Data } from '../app/types';
 
 /* Glyphs the fixed chrome uses (Material Symbols Rounded). Configurable items pass glyph names from the approved list. */
 const ICONS = {
-  home: 'home', findCare: 'stethoscope', search: 'search', wayfinding: 'directions_walk', favorites: 'favorite', signIn: 'login',
+  home: 'home', findCare: 'stethoscope', search: 'search', wayfinding: 'directions', directions: 'directions', favorites: 'favorite', signIn: 'login',
   menu: 'menu', close: 'close', back: 'arrow_back', expand: 'expand_more', next: 'chevron_right', external: 'open_in_new', go: 'arrow_forward',
   trending: 'trending_up', emergency: 'warning', advisory: 'error', time: 'schedule', place: 'location_on', info: 'info', parking: 'local_parking',
   indoor: 'directions_walk', guest: 'explore', checked: 'check_circle', lock: 'lock', inbox: 'inbox', visits: 'calendar_month', near: 'near_me',
@@ -63,18 +67,46 @@ function Alerts({ C }: { C: Data }) {
 const Hero = ({ C }: { C: Data }) => (
   <section className="hero" aria-labelledby="h-hero"><span className="aurora" aria-hidden="true"><i></i></span>
     <div className="hero-copy"><h1 className="vh" id="h-hero">UTSW MyCare home</h1>
-      <p className="fc-kick"><Ico k="findCare" size={20} />Find Care</p><p className="sub">Search UTSW MyCare for doctors, locations, and more.</p></div>
+      <p className="fc-kick"><Ico k="findCare" size={20} />Find Care</p></div>
     <B className="search-entry"><Ico k="search" /><span>Doctors, locations, and more</span></B>
-    <div className="top-s"><span className="eyebrow" id="top-h">Top searches</span>
-      <div className="chips" role="group" aria-labelledby="top-h">{(C.top || []).slice(0, 4).map((t: string | string[], i: number) => <B key={i} className="chip on-blue-chip"><Ico k="trending" size={16} />{Array.isArray(t) ? t[0] : t}</B>)}</div></div>
   </section>
 );
+/* At a facility: the 3D map leads Home (a still of the app's live map; the preview runs no scripts) */
+const FAC_NAME = 'UTSW Clinical Center at Las Colinas';
+function GeoHero({ m, eyebrow = 'You’re here', tall }: { m: Data; eyebrow?: string; tall?: boolean }) {
+  const floors = String(m.floors || '1').split(',').map(x => +x.trim()).filter(Boolean).sort((a, b) => b - a), f = +m.defaultFloor || floors[floors.length - 1];
+  return (
+    <section className={`geo-hero${tall ? ' tall' : ''}`} aria-labelledby="h-geo"><img className="gh-map" src={GEO_MAP} alt={`Sample 3D map of ${FAC_NAME}, Floor ${f}`} />
+      <div className="gh-top"><span className="gh-chip"><i className="gh-live" aria-hidden="true"></i><span><span className="eyebrow">{eyebrow}</span><h2 id="h-geo">{FAC_NAME}</h2></span></span></div>
+      <div className="gh-side" role="group" aria-label="Floor">{floors.map(n => <B key={n} className="gh-fl" aria-current={n === f ? 'page' : undefined}>{n}{n === 1 && <i aria-hidden="true"></i>}</B>)}</div>
+      <div className="gh-foot"><span className="tag-s">Sample 3D map · Floor {f}</span><B className="btn btn-primary btn-sm"><Ico k="directions" size={20} /><span>{m.cta || 'Get directions'}</span></B></div>
+    </section>
+  );
+}
+const walk = (floor: number) => 1 + (floor - 1) * 2 + (floor > 2 ? 1 : 0);
+function FacilityTop({ F }: { F: Data }) {
+  const w = F.why, n = F.near, rows = (x: Data[] = []) => x.filter(r => r.on !== false);
+  const docs = [['Maya Patel, M.D.', 'Primary care · Open until 5 p.m.', 'MP'], ['Daniel Okafor, M.D.', 'Cardiology · Open until 4:30 p.m.', 'DO'], ['Rachel Kim, D.O.', 'Family medicine · Open until 6 p.m.', 'RK'], ['Luis Romero, M.D.', 'Internal medicine · Open until 3 p.m.', 'LR'], ['Ava Chen, M.D.', 'Pediatrics · Open until 5 p.m.', 'AC'], ['Sam Brooks, M.D.', 'Orthopedics · Open until 4 p.m.', 'SB']];
+  return <>
+    {w && w.enabled && <section className="mod" data-m="why" aria-labelledby="h-why"><div className="card why">
+      <div className="why-head"><span className="eyebrow">Welcome to {FAC_NAME}</span><h2 id="h-why">{w.title}</h2></div>
+      <div className="list">{rows(w.rows).map((r, i) => <Row key={i} lead={<Well g={r.glyph} />} title={r.label} sub={r.hint} cls={r.hl ? 'pv-hl' : ''} />)}</div>
+      <div className="why-foot"><span className="fine">{w.note}</span><B className="btn btn-ghost btn-sm">Not now</B></div></div></section>}
+    {n && n.careOn && <section className="mod" data-m="near-care" aria-labelledby="h-nc"><Head id="nc" title="Care near you" extra={<span className="fine">Sample</span>} />
+      <div className="card list">{rows(n.care).slice().sort((a, b) => a.floor - b.floor).map((r, i) => <Row key={i} lead={<Well g={r.glyph} />} title={r.name} sub={`Floor ${r.floor}${r.suite ? `, Suite ${r.suite}` : ''} · ${walk(r.floor)} min walk`} />)}</div></section>}
+    {n && n.doctorsOn && <section className="mod" data-m="near-docs" aria-labelledby="h-nd"><Head id="nd" title="Doctors open today" />
+      <div className="card list">{docs.slice(0, n.doctorsCount || 3).map(([t, s, a], i) => <Row key={i} lead={<span className={`avatar a${i % 3 + 1}`} aria-hidden="true">{a}</span>} title={t} sub={s} />)}</div>
+      <p className="fine">{n.openNote}</p></section>}
+    {n && n.facilitiesOn && <section className="mod" data-m="near-fac" aria-labelledby="h-nf"><Head id="nf" title="Facilities" />
+      <div className="wf-grid">{rows(n.tiles).map((t, i) => <B key={i} className="card wf-dest"><Well g={t.glyph} /><span>{t.name}</span><span className="fine">{walk(t.floor)} min</span></B>)}</div></section>}
+  </>;
+}
 
 /* ---------- Modules, in the order the Admin sets ---------- */
 const Head = ({ id, title, all, extra }: { id: string; title: string; all?: boolean; extra?: ReactNode }) =>
   <div className="mod-head"><h2 className="sec-h" id={`h-${id}`}>{title}</h2>{all && <B className="btn btn-ghost btn-sm">See all</B>}{extra}</div>;
 const MODULES: Record<string, (C: Data, guest: boolean) => ReactNode> = {
-  tiles: C => { const list: Data[] = (C.quickLinks || []).slice(0, 4); return <><Head id="tiles" title="Quick links" />
+  tiles: C => { const list: Data[] = (C.quickLinks || []).slice(0, 6); return <><Head id="tiles" title="Quick links" />
     {list.length ? <div className="tiles">{list.map((t, i) => <B key={i} className={`tile${t.highlight ? ' pv-hl' : ''}`}><Well g={t.icon} /><span>{t.title}</span></B>)}</div> : <p className="pv-empty">No quick links are on.</p>}</>; },
   mychart: (_, guest) => !guest ? null : (
     <div className="mychart"><span className="mc-glow" aria-hidden="true"></span>
@@ -98,19 +130,20 @@ const MODULES: Record<string, (C: Data, guest: boolean) => ReactNode> = {
       : <p className="pv-empty">No services or resources are on.</p>}</>; },
   news: C => <><Head id="news" title="Announcements" />
     <div className="card list ann">{(C.announcements || []).map((a: Data, i: number) => <Row key={i} lead={<span className="ann-date">{a.d}</span>} title={a.t} sub={a.s} end={a.isNew ? <span className="new-pill">New</span> : <Ico k="next" size={20} />} />)}</div></>,
-  saved: C => <><Head id="saved" title="Your saved providers" all />
-    <div className="card list">{(C.saved || []).map((p: Data, i: number) => <Row key={i} lead={<span className={`avatar ${p.a}`} aria-hidden="true">{p.i}</span>} title={p.n} sub={p.s} />)}</div>
-    <p className="fine">Shows only on devices with saved providers.</p></>,
   visits: C => <><Head id="visits" title="Your next visits" extra={<span className="eyebrow">From MyChart</span>} />
     <div className="card list ann">{(C.visits || []).map((v: Data, i: number) => <Row key={i} lead={<span className="ann-date">{v.m} {v.d}</span>} title={`${v.type} · ${v.t}`} sub={`${v.who} · ${v.where}`} />)}</div></>,
   near: C => <><Head id="near" title="Near you" all />
     <div className="card list">{(C.near || []).map((n: Data, i: number) => <Row key={i} g="place" title={n.t} sub={n.s} />)}</div></>
 };
-function Home({ msg }: { msg: Data }) {
+function Home({ msg, ctx, facility }: { msg: Data; ctx?: ReactNode; facility?: boolean }) {
   const C = msg.content, guest = msg.audience !== 'authenticated';
   const mods = (msg.layout.modules as { id: string; on: boolean }[]).filter(m => m.on).map(m => ({ id: m.id, el: MODULES[m.id] ? MODULES[m.id](C, guest) : null })).filter(m => m.el);
+  const F = C.facility || {}, mapFirst = facility && F.map && F.map.mapFirst !== false;
   return (
-    <div className="v-inner"><div className="top" data-m="alerts"><Alerts C={C} /><Hero C={C} /></div>
+    <div className="v-inner">{facility ? <>
+      <div className="top" data-m="alerts"><Alerts C={C} />{mapFirst ? <GeoHero m={F.map} /> : <Hero C={C} />}</div><FacilityTop F={F} />
+      {mapFirst && <div className="top low" data-m="hero"><Hero C={C} /></div>}</>
+      : <><div className="top" data-m="alerts"><Alerts C={C} /><Hero C={C} /></div>{ctx && <section className="mod" data-m="ctx">{ctx}</section>}</>}
       {mods.length ? mods.map(m => <section key={m.id} className="mod" data-m={m.id} aria-labelledby={`h-${m.id}`}>{m.el}</section>)
         : <div className="mod"><p className="pv-empty">No modules are visible on this layout.</p></div>}</div>
   );
@@ -143,23 +176,11 @@ const Onboarding = () => (
     <div className="ob-copy"><h2>Find the right doctor</h2><p>Search by name, specialty, or condition, and read full profiles to choose the provider who fits your care.</p></div>
     <div className="ob-foot"><div className="ob-dots" aria-hidden="true"><i className="on"></i><i></i><i></i><i></i></div><B className="btn btn-primary"><span>Next</span><Ico k="go" size={20} /></B></div></div>
 );
-const Welcome = () => (
-  <div className="ob ob-welcome"><div className="ob-stage" aria-hidden="true"></div>
-    <div className="ob-bar" aria-hidden="true"></div>
-    <div className="ob-wel-art" aria-hidden="true"><span className="ob-wel-ring r2"></span><span className="ob-wel-ring"></span><span className="ob-wel-icon"><img src={APP_ICON} alt="" /></span></div>
-    <div className="ob-wel-body"><h2>Welcome to UTSW MyCare</h2><p>Sign in to MyChart for your health record, or continue as a guest to find care.</p>
-      <div className="ob-choices">
-        <B className="ob-choice primary"><span className="ob-ic"><Ico k="signIn" /></span><span className="rt"><b>Sign in as a patient</b><span>Messages, test results, visits, and bills</span></span><Ico k="next" /></B>
-        <B className="ob-choice secondary"><span className="ob-ic"><Ico k="guest" /></span><span className="rt"><b>Continue as guest</b><span>Find doctors, locations, and directions</span></span><Ico k="next" /></B>
-      </div>
-      <B className="ob-wel-link">New to MyChart? <u>Create an account</u></B></div></div>
-);
-interface Out { home?: boolean; title?: string; tab?: number; view?: ReactNode; overlay?: ReactNode; dark?: boolean }
+interface Out { home?: boolean; title?: string; tab?: number; view?: ReactNode; overlay?: ReactNode; dark?: boolean; ctx?: ReactNode; facility?: boolean; noBar?: boolean }
 function entry(C: Data): Out {
   const e = C.entry;
   const eula = e.eulaVisible ? <><div className="pv-shade"></div><div className="sheet" role="dialog" aria-label="Terms of use"><div className="grab"></div><h2>Before you start</h2><p className="meta">Terms of use, version {e.eulaVersion}</p><p>{e.eulaText}</p><B className="btn btn-primary">Accept and continue</B></div></> : null;
   if (C.entryView === 'onboarding' && e.onboardingVisible) return { overlay: <><Onboarding />{eula}</> };
-  if (e.loginPromptVisible && e.loginPromptType === 'choice') return { overlay: <><Welcome />{eula}</> };
   return { home: true, overlay: eula };
 }
 function push(C: Data): Out {
@@ -171,26 +192,51 @@ function push(C: Data): Out {
         <p className="push-t">{p.title || 'Notification title'}</p><p className="push-b">{p.body || ''}</p>{p.art && <div className="push-img"><Art svg={p.art} /></div>}</div>
       <p className="push-note">{p.delivery === 'push+inbox' ? 'Also saved in the app’s Inbox' : 'Push only'}</p></div>) };
 }
+/* Nov 19: location-specific information shows as the contextual card on Home (You're here / Get directions) */
 function location(C: Data): Out {
   const l = C.location;
-  if (!l) return { title: 'Locations', tab: -1, view: <div className="res-body"><p className="pv-empty">No facilities have location-specific information.</p></div> };
-  return { title: 'Locations', tab: -1, view: (
-    <div className="res-body"><article className="card loc-card"><div className="loc-map" aria-hidden="true"><i></i></div><div className="loc-body"><h2>{l.name}</h2>
-      <p className="loc-row"><Ico k="place" size={20} /><span>{l.type}</span></p>
+  if (!l) return { home: true, ctx: <p className="pv-empty">No facilities have location-specific information.</p> };
+  return { home: true, ctx: (
+    <article className="card wf-here ctx-card"><span className="eyebrow"><i className="gh-live" aria-hidden="true"></i>You’re here</span><h2>{l.name}</h2><p>{l.type}</p>
       {l.message && <p className="loc-tip"><Ico k="info" size={20} /><span>{l.message}</span></p>}
       {l.parking && <p className="loc-row"><Ico k="parking" size={20} /><span>{l.parking}</span></p>}
-      {l.indoor && <B className="btn btn-primary"><Ico k="indoor" size={20} /><span>Indoor directions</span></B>}</div></article></div>) };
+      <div className="row-btns">{l.indoor && <B className="btn btn-primary btn-sm"><Ico k="directions" size={20} /><span>Get directions</span></B>}<B className="btn btn-secondary btn-sm">Details</B></div></article>) };
+}
+/* Place page: hours, the walk-in wait, the catalog, Start 3D directions */
+function place(C: Data): Out {
+  const rows: Data[] = ((C.facility || {}).places || []).filter((r: Data) => r.on !== false);
+  const p = rows.find(r => r.sel) || rows[0];
+  if (!p) return { title: 'Place', view: <div className="res-body"><p className="pv-empty">No place pages are on.</p></div> };
+  const groups: [string, string[][]][] = [];
+  String(p.items || '').split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => { const [g, ...r] = l.split('|').map(x => x.trim()); const hit = groups.find(x => x[0] === g); if (hit) hit[1].push(r); else groups.push([g, [r]]); });
+  return { title: p.name.split(',')[0], view: (
+    <div className="res-body"><div className="card wf-here"><span className="eyebrow">{FAC_NAME}</span><h2>{p.name}</h2><p>Floor {p.floor} · {walk(p.floor)} min walk{p.hours ? ` · Open ${p.hours}` : ''}</p>
+      {p.wait && <p className="geo-wait"><Ico k="time" size={20} /><span>{p.wait} (sample)</span></p>}
+      <div className="row-btns"><B className="btn btn-primary btn-sm"><Ico k="directions" size={20} /><span>Start 3D directions</span></B></div></div>
+      {groups.length > 0 && <section className="grp"><div className="grp-h"><h2 className="lbl-h">{p.kind}</h2><span className="sug-type">Sample</span></div>
+        {groups.map(([h, items], i) => <div key={i} className="card geo-cat"><h3>{h}</h3><ul>{items.map(([t, pr, tag], j) => <li key={j}><span>{t}{tag && <span className="sug-type">{tag}</span>}</span><b>{pr}</b></li>)}</ul></div>)}
+        {p.note && <p className="fine">{p.note}</p>}</section>}</div>) };
+}
+/* Wayfinding (Nov 19 redesign, in the app): map first at a facility, then quick destinations */
+function wayfinding(C: Data): Out {
+  const m = (C.facility || {}).map || {};
+  return { title: 'Wayfinding', view: (
+    <div className="v-inner"><div className="top"><GeoHero m={m} eyebrow="Wayfinding" tall /></div>
+      <section className="mod"><Head id="wd" title="Where to?" />
+        <div className="wf-grid">{(m.dest || []).filter((d: Data) => d.on !== false).map((d: Data, i: number) => <B key={i} className={`card wf-dest${d.hl ? ' pv-hl' : ''}`}><Well g={d.glyph} /><span>{d.name}</span></B>)}</div></section>
+      <section className="mod"><Head id="wo" title="Route options" />
+        <div className="card list">{[m.fromStreet && ['directions_car', 'From the street', 'Drive in, park, walk, enter'], m.overview && ['layers', 'Route overview', 'Every floor of the route'], m.liveView && ['view_in_ar', 'Live view', 'Simulated camera view'], m.voice && ['volume_up', 'Voice guidance', 'Spoken turn by turn']].filter(Boolean).map((r, i) => { const [g, t, s] = r as string[]; return <Row key={i} g={g} title={t} sub={s} />; })}</div></section></div>) };
 }
 
 /* ---------- Chrome ---------- */
-const TABS: [string, string][] = [['Home', 'home'], ['Find Care', 'findCare'], ['Search', 'search'], ['Wayfinding', 'wayfinding'], ['Favorites', 'favorites']];
+const TABS: [string, string][] = [['Home', 'home'], ['Find Care', 'findCare'], ['Search', 'search'], ['Favorites', 'favorites']];
 /* Global colors: only the approved set maps onto app tokens */
 const colorVars = (c: Data | null): CSSProperties => c ? { '--c-blue': c.primary, '--c-mid-blue': c.secondary, '--c-muted-blue': c.tertiary, '--c-bg': c.background } as CSSProperties : {};
 
 export function PhoneApp({ msg, onRendered }: { msg: Data; onRendered: () => void }) {
   const C = msg.content, guest = msg.audience !== 'authenticated';
   const screen = msg.screen || 'home';
-  const out: Out = screen === 'drawer' ? { home: true, overlay: <Menu C={C} /> } : screen === 'entry' ? entry(C) : screen === 'push' ? push(C) : screen === 'location' ? location(C) : { home: true };
+  const out: Out = screen === 'drawer' ? { home: true, overlay: <Menu C={C} /> } : screen === 'entry' ? entry(C) : screen === 'push' ? push(C) : screen === 'location' ? location(C) : screen === 'facility' ? { home: true, facility: true } : screen === 'place' ? place(C) : screen === 'wayfinding' ? wayfinding(C) : { home: true };
   const title = out.home ? '' : out.title || '';
   const tab = out.home ? 0 : out.tab != null ? out.tab : -1;
   const phone = useRef<HTMLDivElement>(null), view = useRef<HTMLDivElement>(null);
@@ -212,7 +258,7 @@ export function PhoneApp({ msg, onRendered }: { msg: Data; onRendered: () => voi
         {title ? <><h1 className="ttl">{title}</h1>{menuBtn}</>
           : <><img className="logo" alt="UTSW MyCare" src={LOGO} /><span className="sp"></span>{guest && <B className="ab-sign"><Ico k="signIn" size={20} /><span>Sign in</span></B>}{menuBtn}</>}
       </header>
-      <div className="views"><div className="view" id="view" tabIndex={0} ref={view} aria-label={`Mobile preview: ${msg.label}. Scroll with the arrow keys.`}>{out.home ? <Home msg={msg} /> : out.view}</div></div>
+      <div className="views"><div className="view" id="view" tabIndex={0} ref={view} aria-label={`Mobile preview: ${msg.label}. Scroll with the arrow keys.`}>{out.home ? <Home msg={msg} ctx={out.ctx} facility={out.facility} /> : out.view}</div></div>
       <nav className="tabbar" id="tabbar" aria-label="Main">{TABS.map(([l, g], i) => <B key={l} className="tab" aria-current={i === tab ? 'page' : undefined}><span className="pill"><Ico k={g} /></span><span>{l}</span></B>)}</nav>
       <div className="homebar" aria-hidden="true"></div>
       <div id="overlay">{out.overlay}</div>

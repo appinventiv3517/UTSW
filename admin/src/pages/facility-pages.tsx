@@ -4,7 +4,8 @@
 import type { ReactNode } from 'react';
 import type { Page } from '../app/App';
 import { defineSingleton, RowsEditor, type EditorProps } from './config-pages';
-import { Badge, Icon } from '../ui/kit';
+import { Badge, Icon, Segmented } from '../ui/kit';
+import { appContent, layoutFor } from '../ui/preview';
 import { Form, type FormSection, type Errors } from '../ui/forms';
 import { same } from '../app/util';
 import type { Data } from '../app/types';
@@ -25,6 +26,9 @@ const rowDiff = (label: string, a: Row[] = [], b: Row[] = [], name: (r: Row) => 
   ...b.filter(r => { const o = a.find(x => x.id === r.id); return o && !same(o, r); }).map(r => `${label} edited: ${name(r)}`)];
 const show = (v: unknown) => v === true ? 'on' : v === false ? 'off' : String(v ?? '');
 const fieldDiff = (a: Data | null, b: Data, keys: [string, string][]) => keys.filter(([k]) => !a || !same(a[k], b[k])).map(([k, l]) => `${l}: ${show(b[k])}`);
+/* The phone preview: Home at a facility (or a place page, or Wayfinding) with this record's working copy */
+const pv = (id: string, screen: string, what: string) => (d: Data, src: string) => ({ screen, layout: layoutFor('guest'), content: appContent({ overrides: { [id]: d } }), focus: screen === 'facility' ? 'alerts' : undefined,
+  label: src === 'working' ? `your ${what}, not live` : `${src} ${what}` });
 const Side = ({ title, items }: { title: string; items: ReactNode[] }) => <><h2 className="side-h">{title}</h2><ul className="side-list">{items.map((x, i) => <li key={i}>{x}</li>)}</ul></>;
 
 /* ---- Why you're here ---- */
@@ -50,6 +54,7 @@ const whyPages = defineSingleton({
       columns={[{ key: 'label', label: 'Answer', render: r => <IconCell g={r.glyph}><span>{r.label}</span><span className="muted">{r.hint}</span></IconCell> },
         { key: 'leadsTo', label: 'Home shows', render: r => r.leadsTo, cls: 'wrap' }, { key: 'on', label: 'Status', render: shown }]}
       sections={WHY_ROW} blank={() => ({ label: '', hint: '', glyph: 'map', leadsTo: 'Everything near you', on: true })} validate={uniq('label', 'answer')} /></>,
+  preview: pv('facility-why', 'facility', 'why you’re here'),
   sideStatic: d => <Side title="What guests see" items={[d.enabled ? `“${d.title}” on Home at a facility` : 'The question is off', `${(d.rows as Row[]).filter(r => r.on).length} answers, plus Not now`, d.note || 'No privacy line', 'A “Here for: … · Change” bar after they answer']} />
 });
 
@@ -81,6 +86,7 @@ const nearbyPages = defineSingleton({
       columns={[{ key: 'name', label: 'Facility', render: r => <IconCell g={r.glyph}><span>{r.name}</span><span className="muted">Floor {r.floor}</span></IconCell> },
         { key: 'opens', label: 'Opens', render: r => r.opens, cls: 'wrap' }, { key: 'on', label: 'Status', render: shown }]}
       sections={TILE_ROW} blank={() => ({ name: '', floor: 1, glyph: 'restaurant', opens: 'Directions', on: true })} validate={uniq('name', 'facility')} /></>,
+  preview: pv('facility-nearby', 'facility', 'guest nearby'),
   sideStatic: d => <Side title="What guests see" items={[d.careOn ? `Care near you: ${(d.care as Row[]).filter(r => r.on).length} departments` : 'Care near you is off',
     d.doctorsOn ? `Doctors open today: ${d.doctorsCount}, with “${d.openNote}”` : 'Doctors open today is off', d.facilitiesOn ? `Facilities: ${(d.tiles as Row[]).filter(r => r.on).length} tiles` : 'Facilities is off']} />
 });
@@ -106,6 +112,10 @@ const placesPages = defineSingleton({
       { key: 'kind', label: 'Catalog', render: r => <span className="cell-2"><span>{r.kind || 'None'}</span><span className="muted">{lines(r.items).length} items{r.wait ? ` · ${r.wait}` : ''}</span></span> },
       { key: 'on', label: 'Status', render: shown }]}
     sections={PLACE_ROW} blank={() => ({ name: '', floor: 1, glyph: 'restaurant', hours: '', wait: '', kind: 'Menu', items: '', note: '', on: true })} validate={(v, others) => ({ ...uniq('name', 'place')(v, others), ...(lines(v.items as string).some(l => l.split('|').length < 3) ? { items: 'Each line needs Group | Item | Price or time.' } : {}) })} />,
+  initialExtras: { place: 0 },
+  previewExtras: (x, setX) => <div className="pv-row"><Segmented id="pv-place" label="Preview place" options={[['0', 'Café'], ['1', 'Lab'], ['2', 'Imaging'], ['3', 'Pharmacy']]} value={String(x.place ?? 0)} onChange={v => setX({ place: +v })} /></div>,
+  preview: (d, src, x) => { const i = +(x.place as number) || 0, rows = (d.rows as Row[]).map((r, j) => ({ ...r, sel: j === i }));
+    return pv('facility-places', 'place', 'place pages')({ ...d, rows }, src); },
   sideStatic: d => <Side title="Place pages" items={(d.rows as Row[]).map(r => <span className="cell-2"><span>{r.name}{r.on ? '' : ' (hidden)'}</span><span className="muted">{r.kind}: {lines(r.items).length} items</span></span>)} />
 });
 
@@ -137,6 +147,9 @@ const mapPages = defineSingleton({
       columns={[{ key: 'name', label: 'Destination', render: r => <IconCell g={r.glyph}><span>{r.name}</span><span className="muted">{glyphLabel(r.glyph)}</span></IconCell> },
         { key: 'target', label: 'Route ends at', render: r => r.target, cls: 'wrap' }, { key: 'on', label: 'Status', render: shown }]}
       sections={DEST_ROW} blank={() => ({ name: '', glyph: 'map', target: '', on: true })} validate={uniq('name', 'destination')} /></>,
+  initialExtras: { mapView: 'facility' },
+  previewExtras: (x, setX) => <div className="pv-row"><Segmented id="pv-map" label="Preview screen" options={[['facility', 'Home at a facility'], ['wayfinding', 'Wayfinding']]} value={(x.mapView as string) || 'facility'} onChange={v => setX({ mapView: v })} /></div>,
+  preview: (d, src, x) => pv('wayfinding-3d', (x.mapView as string) || 'facility', '3D map settings')(d, src),
   sideStatic: d => <Side title="What guests see" items={[d.mapFirst ? 'The 3D map is the first fold on Home and Wayfinding' : 'Home keeps its usual order; the map opens from Wayfinding',
     `Floors ${d.floors}; Floor ${d.defaultFloor} first`, ['overview', 'liveView', 'voice'].filter(k => d[k]).map(k => ({ overview: 'Route overview', liveView: 'Live view', voice: 'Voice' } as Data)[k]).join(', ') || 'No extra map buttons',
     d.fromStreet ? 'Get there and Drive there start in-app directions from the street' : 'Directions start at the entrance']} />

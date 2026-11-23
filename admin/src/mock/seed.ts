@@ -13,6 +13,7 @@ export const APPROVED_ICONS = [
   { key: 'findCare', glyph: 'stethoscope', label: 'Find Care – doctors' },
   { key: 'place', glyph: 'location_on', label: 'Locations' },
   { key: 'wayfinding', glyph: 'directions_walk', label: 'Wayfinding' },
+  { key: 'directions', glyph: 'directions', label: 'Directions (Wayfinding tile)' },
   { key: 'route', glyph: 'route', label: 'Directions on campus' },
   { key: 'messages', glyph: 'chat', label: 'Message your doctor' },
   { key: 'results', glyph: 'labs', label: 'Test results' },
@@ -104,22 +105,22 @@ export const STATIC_CONTENT = {
    Authenticated modules come from the personalised homepage prototype until the signed-in home is designed. */
 export const HOME_FIXED = [
   { id: 'alerts', label: 'Emergency alerts', desc: 'Pinned to top while active · Emergency before advisory, then newest. Managed in Emergency alerts.', icon: 'warning', link: 'home-alerts' },
-  { id: 'hero', label: 'Welcome, search, and top searches', desc: 'Pinned below alerts · Find Care search and four top searches. Top searches are managed in Search configuration.', icon: 'search', link: 'search-top' }
+  { id: 'hero', label: 'Find Care search', desc: 'Pinned below alerts · One Find Care heading and one search field (Nov 19). Top searches show in the search sheet, managed in Search configuration.', icon: 'search', link: 'search-top' },
+  { id: 'facility', label: 'At a facility: 3D map first', desc: 'Only when location puts a guest at a facility: the live 3D map leads Home, then Why you’re here, Care near you, Doctors open today and Facilities; the modules below follow. Managed in Wayfinding and facilities.', icon: 'directions_walk', link: 'wayfinding-3d' }
 ];
 export const HOME_MODULES = {
-  tiles: { label: 'Quick links', desc: 'Four tiles in a 2 × 2 grid, managed in Quick links. All open MyChart.', icon: 'apps', link: 'home-quick-links' },
+  tiles: { label: 'Quick links', desc: 'Six tiles, two a row: Wayfinding and Find a location, then four MyChart tasks. Managed in Quick links.', icon: 'apps', link: 'home-quick-links' },
   mychart: { label: 'MyChart sign-in card', desc: 'Guest only · Sign in or create a MyChart account.', icon: 'login', guestOnly: true },
   featured: { label: 'MedBlog', desc: 'Story cards for the newest MedBlog stories, with See all.', icon: 'newspaper' },
   campaign: { label: 'Campaign banner', desc: 'The live campaign, managed in Campaigns. Ended campaigns hide automatically.', icon: 'campaign', link: 'home-campaigns' },
   services: { label: 'Services and resources', desc: 'Swipeable cards managed in Services and resources.', icon: 'library_books', link: 'home-featured-cards' },
   news: { label: 'Announcements', desc: 'Newest first, with a New tag on recent ones.', icon: 'feed' },
-  saved: { label: 'Your saved providers', desc: 'Shows only when this device has saved providers.', icon: 'favorite' },
   visits: { label: 'Your next visits', desc: 'Upcoming visits from MyChart. Read only – Epic stays the source.', icon: 'calendar_month' },
   near: { label: 'Near you', desc: 'Closest UT Southwestern locations to the patient.', icon: 'near_me' }
 };
 export const AUDIENCE_MODULES = {
-  guest: ['tiles', 'mychart', 'featured', 'campaign', 'services', 'news', 'saved'],
-  authenticated: ['visits', 'tiles', 'near', 'featured', 'campaign', 'services', 'news', 'saved']
+  guest: ['tiles', 'mychart', 'featured', 'campaign', 'services', 'news'],
+  authenticated: ['visits', 'tiles', 'near', 'featured', 'campaign', 'services', 'news']
 };
 
 /* Audience attributes – only non-clinical, device or account-state attributes (no PHI). Pending UTSW approval (§10.13). */
@@ -169,16 +170,16 @@ export function seedDb(): Db {
   /* ---- Home layouts ---- */
   const mods = (order: string[], off: string[] = []) => order.map(id => ({ id, on: !off.includes(id) }));
   const head = ['alerts', 'hero'];
-  const g = rec('home-layout-guest', 'homeLayout', 'Guest home layout', { head, modules: mods(['tiles', 'mychart', 'featured', 'services', 'news', 'campaign', 'saved'], ['campaign']) }, { by: 'u1', at: '2026-09-08T14:05:00Z', comment: 'Initial guest home from the approved design' });
-  g.versions[2] = ver(2, { head, modules: mods(['tiles', 'campaign', 'mychart', 'featured', 'services', 'news', 'saved']) }, 'u2', '2026-09-29T15:30:00Z', 'Turn on the flu campaign and move it up for launch week');
-  g.versions[3] = ver(3, { head, modules: mods(['tiles', 'mychart', 'featured', 'campaign', 'services', 'news', 'saved']) }, 'u2', '2026-10-14T13:45:00Z', 'Guest Flow 2 order: campaign after MedBlog, then Services and resources');
+  const g = rec('home-layout-guest', 'homeLayout', 'Guest home layout', { head, modules: mods(['tiles', 'mychart', 'featured', 'services', 'news', 'campaign'], ['campaign']) }, { by: 'u1', at: '2026-09-08T14:05:00Z', comment: 'Initial guest home from the approved design' });
+  g.versions[2] = ver(2, { head, modules: mods(['tiles', 'campaign', 'mychart', 'featured', 'services', 'news']) }, 'u2', '2026-09-29T15:30:00Z', 'Turn on the flu campaign and move it up for launch week');
+  g.versions[3] = ver(3, { head, modules: mods(['tiles', 'mychart', 'featured', 'campaign', 'services', 'news']) }, 'u2', '2026-10-14T13:45:00Z', 'Guest Flow 2 order: campaign after MedBlog, then Services and resources');
   g.production = 3; g.demo = 3; g.nextVersion = 4;
   g.events.push(
     evt('Draft saved', 'draft', null, 'u3', '2026-09-26T19:12:00Z', 'Flu campaign launch'), evt('Review requested', 'draft', null, 'u3', '2026-09-26T19:14:00Z', 'Please review for the Sept. 29 launch'),
     evt('Deployed to demo', 'demo', 2, 'u2', '2026-09-29T15:30:00Z', 'Turn on the flu campaign and move it up for launch week'), evt('Published to production', 'production', 2, 'u2', '2026-09-29T17:00:00Z', 'Flu campaign launch'),
     evt('Deployed to demo', 'demo', 3, 'u2', '2026-10-14T13:45:00Z', 'Guest Flow 2 order: campaign after MedBlog, then Services and resources'), evt('Published to production', 'production', 3, 'u1', '2026-10-14T15:20:00Z', 'Checked on demo devices'));
   records.push(g);
-  records.push(rec('home-layout-authenticated', 'homeLayout', 'Authenticated home layout', { head, modules: mods(['visits', 'tiles', 'near', 'featured', 'campaign', 'services', 'news', 'saved']) }, { by: 'u1', at: '2026-10-20T15:00:00Z', comment: 'From the personalised homepage prototype – pending the signed-in design' }));
+  records.push(rec('home-layout-authenticated', 'homeLayout', 'Authenticated home layout', { head, modules: mods(['visits', 'tiles', 'near', 'featured', 'campaign', 'services', 'news']) }, { by: 'u1', at: '2026-10-20T15:00:00Z', comment: 'From the personalised homepage prototype – pending the signed-in design' }));
 
   /* ---- Campaigns (SOW: three to five for the MVP) ---- */
   const camp = (o: Data) => ({ type: 'Seasonal', tag: 'Flu season', icon: 'vaccines', description: '', ctaLabel: 'Learn more', destination: { type: 'screen', value: 'Find Care' }, audience: 'seg-all', start: '2026-10-01T08:00', end: '2026-12-31T23:59', timeZone: TZ, enabled: true, ...o });
@@ -198,8 +199,9 @@ export function seedDb(): Db {
   /* ---- Quick links: four MyChart tasks (Guest Flow 2) ---- */
   const ql = (k: string, title: string, icon: string, dest: Data, locked: boolean, order: number) => rec(`quick-link-${k}`, 'quickLink', title, { title, icon, iconAlt: '', destination: dest, requiresSignIn: locked, order, enabled: true }, { at: '2026-09-08T14:00:00Z', by: 'u1' });
   records.push(
-    ql('msg', 'Message your doctor', 'chat', { type: 'mychart', value: 'Messages' }, true, 1), ql('res', 'Get your test results', 'labs', { type: 'mychart', value: 'Test results' }, true, 2),
-    ql('visits', 'Manage Your Visits', 'calendar_month', { type: 'mychart', value: 'Visits' }, true, 3), ql('bill', 'Manage Billing', 'credit_card', { type: 'mychart', value: 'Billing' }, true, 4));
+    ql('way', 'Wayfinding', 'directions', { type: 'screen', value: 'Wayfinding' }, false, 1), ql('locs', 'Find a location', 'location_on', { type: 'screen', value: 'Locations' }, false, 2),
+    ql('msg', 'Message your doctor', 'chat', { type: 'mychart', value: 'Messages' }, true, 3), ql('res', 'Get your test results', 'labs', { type: 'mychart', value: 'Test results' }, true, 4),
+    ql('visits', 'Manage your visits', 'calendar_month', { type: 'mychart', value: 'Visits' }, true, 5), ql('bill', 'Manage billing', 'credit_card', { type: 'mychart', value: 'Billing' }, true, 6));
 
   /* ---- Services and resources cards (type featuredCard): category label, title, one line of help (Guest Flow 2) ---- */
   const fc = (k: string, category: string, title: string, subtitle: string, icon: string, dest: Data, order: number, opts?: RecOpts) => rec(`featured-card-${k}`, 'featuredCard', title, { category, title, subtitle, icon, iconAlt: '', destination: dest, order, enabled: true }, { at: '2026-09-08T14:00:00Z', by: 'u1', ...opts });
@@ -213,14 +215,14 @@ export function seedDb(): Db {
   /* ---- Content and navigation ---- */
   const di = (id: string, label: string, icon: string, dest: Data, visible = true, sub = '') => ({ id, label, sub, icon, destination: dest, visible });
   records.push(rec('drawer', 'drawer', 'Menu', { sections: [
-    { id: 'updates', label: 'Updates', items: [di('inbox', 'Inbox', 'inbox', { type: 'screen', value: 'Inbox' }, true, 'Updates from UTSW MyCare'), di('saved', 'Saved providers', 'favorite', { type: 'screen', value: 'Favorites' }, true, 'Doctors you save appear here'), di('locs', 'Locations', 'location_on', { type: 'screen', value: 'Locations' }, true, 'Hospitals, clinics, and urgent care'), di('signin', 'Sign in to MyChart', 'login', { type: 'screen', value: 'MyChart sign-in' }, true, 'Messages, test results, visits, and billing'), di('medblog', 'MedBlog', 'newspaper', { type: 'screen', value: 'MedBlog' }, true, 'Health news and tips from our experts')] },
+    { id: 'updates', label: 'Updates', items: [di('inbox', 'Inbox', 'inbox', { type: 'screen', value: 'Inbox' }, true, 'Updates from UTSW MyCare'), di('saved', 'Favorites', 'favorite', { type: 'screen', value: 'Favorites' }, true, 'Doctors and locations you save · also in the tab bar'), di('locs', 'Locations', 'location_on', { type: 'screen', value: 'Locations' }, true, 'Hospitals, clinics, and urgent care'), di('way', 'Wayfinding', 'directions', { type: 'screen', value: 'Wayfinding' }, true, 'Directions to and inside our buildings'), di('signin', 'Sign in to MyChart', 'login', { type: 'screen', value: 'MyChart sign-in' }, true, 'Messages, test results, visits, and billing'), di('medblog', 'MedBlog', 'newspaper', { type: 'screen', value: 'MedBlog' }, true, 'Health news and tips from our experts')] },
     { id: 'patients', label: 'Patients and visitors', items: [di('presources', 'Patient resources', 'folder_open', { type: 'screen', value: 'Patient resources' }, true, 'Billing, records, forms, and support'), di('guide', 'Patient resource guide', 'menu_book', { type: 'url', value: 'https://utswmed.example/guide' }, true, 'Your guide to care at UT Southwestern'), di('shuttle', 'Shuttle', 'airport_shuttle', { type: 'screen', value: 'Shuttle' }, true, 'Routes and times between campuses'), di('covid', 'COVID-19 resources', 'coronavirus', { type: 'url', value: 'https://utswmed.example/covid-19' }, true, 'Testing, vaccines, and visitor guidelines')] },
     { id: 'about', label: 'About UT Southwestern', items: [di('why', 'Why UT Southwestern', 'workspace_premium', { type: 'screen', value: 'Why UT Southwestern' }, true, 'Our care, research, and rankings'), di('physician', 'Resources for physicians', 'medical_information', { type: 'url', value: 'https://utswmed.example/physicians' }, true, 'Referrals and clinical tools'), di('website', 'Visit the full website', 'language', { type: 'url', value: 'https://utswmed.example' }, true, 'utsouthwestern.edu')] },
     { id: 'social', label: 'Follow us', style: 'chips', items: ['Facebook', 'Instagram', 'LinkedIn', 'X'].map(x => di(`so-${x.toLowerCase()}`, x, 'public', { type: 'url', value: `https://${x === 'X' ? 'x' : x.toLowerCase()}.example/utsouthwestern` })) },
     { id: 'legal', label: '', items: [di('privacy', 'Privacy policy', 'privacy_tip', { type: 'url', value: 'https://utswmed.example/privacy' }), di('terms', 'Terms of use', 'description', { type: 'url', value: 'https://utswmed.example/terms' }), di('a11y', 'Accessibility', 'accessibility_new', { type: 'url', value: 'https://utswmed.example/accessibility' })] }
   ] }, { at: '2026-09-08T14:00:00Z', by: 'u1' }));
   records.push(rec('global-colors', 'globalColors', 'Global colors', { primary: '#004278', secondary: '#336893', tertiary: '#7BAFD4', background: '#F7F8FA' }, { by: 'u1', at: '2026-09-08T14:00:00Z' }));
-  records.push(rec('app-entry', 'appEntry', 'App entry', { onboardingVisible: true, eulaVisible: false, eulaVersion: '1.0 (sample)', eulaText: 'By using MyCare, you agree to the terms of use and privacy notice. MyCare doesn’t replace emergency care. In an emergency, call 911. (Sample text – the approved EULA is pending.)', reacceptOnChange: true, loginPromptVisible: true, loginPromptType: 'choice' }, { by: 'u1', at: '2026-09-08T14:00:00Z' }));
+  records.push(rec('app-entry', 'appEntry', 'App entry', { onboardingVisible: true, eulaVisible: false, eulaVersion: '1.0 (sample)', eulaText: 'By using MyCare, you agree to the terms of use and privacy notice. MyCare doesn’t replace emergency care. In an emergency, call 911. (Sample text – the approved EULA is pending.)', reacceptOnChange: true, loginPromptVisible: true, loginPromptType: 'module' }, { by: 'u1', at: '2026-09-08T14:00:00Z' }));
 
   /* ---- Search (SYN line 1894, TOP 1983, POPULAR 1984, SORTS 2489) ---- */
   records.push(rec('search-mappings', 'searchMappings', 'Query mappings', { rows: [
@@ -355,5 +357,5 @@ export function seedDb(): Db {
     { id: uid('au'), at: t('2026-09-01T15:00:00Z'), by: 'u1', action: 'User deactivated', target: 'Grace Liu', targetId: 'u7', targetType: 'user', environment: null, version: null, comment: 'Moved to another department', before: { status: 'Active' }, after: { status: 'Deactivated' } },
     { id: uid('au'), at: t('2026-08-10T15:00:00Z'), by: 'u1', action: 'Role changed', target: 'Theo Adams', targetId: 'u8', targetType: 'user', environment: null, version: null, comment: '', before: { role: 'Admin' }, after: { role: 'Marketing' } });
 
-  return { schema: 8, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
+  return { schema: 9, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
 }
