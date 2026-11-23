@@ -252,9 +252,9 @@ window.__alWalk = function (opts) {
         overlays.push({ k: 'F', n: 'Backdrop', box: { x: 0, y: 0, w: innerWidth, h: opts.height || innerHeight }, pad: [0, 0, 0, 0], h: {}, abs: 1, fill: color(bd.backgroundColor) ? [{ c: color(bd.backgroundColor) }] : [{ c: [0.05, 0.1, 0.15, 0.5] }], ch: [] });
       }
     }
-    if (lift) { overlays.push(node); return null; }
     if (node && cs) { const zi = cs.zIndex === 'auto' ? null : +cs.zIndex, positioned = cs.position !== 'static';
       node.zk = !positioned ? 0 : zi == null ? 1 : zi < 0 ? zi - 1 : 1 + zi; }
+    if (lift) { overlays.push(node); return null; }
     return node;
   }
   const flat = k => k.k === 'contents' ? k.ch.flatMap(flat) : [k];

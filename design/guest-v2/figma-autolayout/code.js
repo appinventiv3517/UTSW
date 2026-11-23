@@ -38,7 +38,23 @@ function styleFrame(f, n) {
     if (n.st.dash) f.dashPattern = [4, 4];
   }
   if (n.r) { const [tl, tr, br, bl] = n.r; if (tl === tr && tr === br && br === bl) f.cornerRadius = tl; else { f.topLeftRadius = tl; f.topRightRadius = tr; f.bottomRightRadius = br; f.bottomLeftRadius = bl; } }
-  if (n.fx) f.effects = n.fx.map(e => ({ type: e.k, color: { ...rgb(e.c), a: e.c[3] }, offset: { x: e.x, y: e.y }, radius: e.b, spread: e.s, visible: true, blendMode: 'NORMAL' }));
+  let fx = n.fx || [];
+  if (!n.st) {
+    const line = fx.find(e => e.b === 0 && ((e.x === 0 && e.y === 0 && e.s > 0) || (e.s === 0 && (e.x === 0) !== (e.y === 0))));
+    if (line) {
+      fx = fx.filter(e => e !== line);
+      f.strokes = [solid(line.c)];
+      if (line.s > 0) { f.strokeAlign = (line.k === 'INNER_SHADOW') ? 'INSIDE' : 'OUTSIDE'; f.strokeWeight = line.s; }
+      else {
+        f.strokeAlign = (line.k === 'INNER_SHADOW') ? 'INSIDE' : 'OUTSIDE';
+        const w = Math.abs(line.x || line.y), side = line.y ? (line.y < 0) !== !!(line.k === 'INNER_SHADOW') ? 'T' : 'B' : (line.x < 0) !== !!(line.k === 'INNER_SHADOW') ? 'L' : 'R';
+        f.strokeTopWeight = side === 'T' ? w : 0; f.strokeBottomWeight = side === 'B' ? w : 0; f.strokeLeftWeight = side === 'L' ? w : 0; f.strokeRightWeight = side === 'R' ? w : 0;
+      }
+    }
+  }
+  /* In Figma a shadow on a frame with no fill is cast by its contents (it would shadow every letter): only filled frames keep shadows */
+  if (!(n.fill || []).length) fx = [];
+  if (fx.length) f.effects = fx.map(e => ({ type: e.k, color: { ...rgb(e.c), a: e.c[3] }, offset: { x: e.x, y: e.y }, radius: e.b, spread: e.s, visible: true, blendMode: 'NORMAL' }));
   if (n.o != null) f.opacity = n.o;
   f.clipsContent = !!n.clip;
 }
