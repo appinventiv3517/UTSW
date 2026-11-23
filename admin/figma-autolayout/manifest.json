@@ -1,0 +1,13 @@
+{
+  "name": "UTSW MyCare Admin – Auto-layout screens",
+  "id": "utsw-mycare-admin-autolayout",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "reasoning": "The screens and icons come from the JSON file you choose; the plugin makes no network requests."
+  }
+}

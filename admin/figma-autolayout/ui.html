@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UTSW MyCare Admin – Auto-layout screens</title>
+<style>
+  :root{--bg:var(--figma-color-bg,#fff);--fg:var(--figma-color-text,#1f2a33);--muted:var(--figma-color-text-secondary,#5b6770);--line:var(--figma-color-border,#d5dde5);--accent:#004278}
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;font:13px/1.45 Inter,system-ui,sans-serif;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;gap:12px}
+  h1{font-size:14px;margin:0}
+  p{margin:0;color:var(--muted)}
+  label.file{display:flex;flex-direction:column;gap:6px;font-weight:600}
+  fieldset{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0;display:flex;flex-direction:column;gap:4px}
+  legend{font-weight:600;padding:0 4px}
+  button{height:36px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:600 13px Inter,system-ui,sans-serif;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #log{min-height:20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<h1>Import auto-layout screens</h1>
+<p>Choose <b>admin-autolayout.json</b>. Each flow is built on its own page; screens with the same name are replaced.</p>
+<label class="file">JSON file <input type="file" id="file" accept=".json,application/json"></label>
+<fieldset id="flows" hidden><legend>Flows</legend></fieldset>
+<button id="go" disabled>Build screens</button>
+<div id="log" role="status" aria-live="polite"></div>
+<script>
+  let text = null;
+  const $ = id => document.getElementById(id);
+  $('file').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    text = await f.text();
+    try {
+      const d = JSON.parse(text), box = $('flows');
+      box.querySelectorAll('label').forEach(l => l.remove());
+      d.flows.forEach(fl => { const l = document.createElement('label'); l.innerHTML = `<input type="checkbox" checked value="${fl.name.replace(/"/g, '&quot;')}"> ${fl.name} (${fl.screens.length} screens)`; box.appendChild(l); });
+      box.hidden = false; $('go').disabled = false; $('log').textContent = '';
+    } catch (err) { $('log').textContent = 'That file isn’t valid JSON.'; $('go').disabled = true; }
+  };
+  $('go').onclick = () => {
+    const flows = [...document.querySelectorAll('#flows input:checked')].map(i => i.value);
+    if (!flows.length) { $('log').textContent = 'Choose at least one flow.'; return; }
+    $('go').disabled = true; $('log').textContent = 'Starting…';
+    parent.postMessage({ pluginMessage: { type: 'build', text, flows } }, '*');
+  };
+  onmessage = e => { const m = e.data.pluginMessage; if (!m) return; $('log').textContent = m.msg; if (m.done) $('go').disabled = false; };
+</script>
+</body>
+</html>
