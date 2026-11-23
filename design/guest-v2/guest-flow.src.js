@@ -909,7 +909,8 @@ function geoMount(){const t=top();
   const h=$("#home-m3 .m3-host")||$("#way-m3 .m3-host");if(!h||!M3.ok())return;
   const fl=S.geoFloor||1,plan="lv"+fl,dest=S.why==="pharm"?ROOMS["lv1-pharm"]:null;
   const box=h.parentElement,side=$(".gh-side",view),hTop=$(".gh-top",view),hFoot=$(".gh-foot",view);
-  const ins=t.v==="home"&&hTop?{top:hTop.offsetTop+hTop.offsetHeight+8,bottom:box.clientHeight-hFoot.offsetTop+8,avoid:side?[[side.offsetLeft-6,side.offsetTop-6,box.clientWidth,side.offsetTop+side.offsetHeight+6]]:[]}:{top:8,bottom:8};
+  const r=el=>[el.offsetLeft-6,el.offsetTop-6,el.offsetLeft+el.offsetWidth+6,el.offsetTop+el.offsetHeight+6];
+  const ins=t.v==="home"&&hTop?{top:24,bottom:box.clientHeight-hFoot.offsetTop+8,avoid:[r(hTop.firstElementChild),r(side)]}:{top:8,bottom:8};
   M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{...ins,animate:true})}
 function wayMapHTML(){const f=S.geoFloor||1;
   return `<section class="grp" aria-labelledby="wf-3d"><div class="grp-h"><h2 class="lbl-h" id="wf-3d">Inside · 3D map</h2><span class="sug-type">Sample</span></div>
