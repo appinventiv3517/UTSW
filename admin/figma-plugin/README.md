@@ -19,11 +19,11 @@ Each section goes on its own page (`Admin – Home Screen`, `Admin – Empty sta
 
 Fonts: the plugin uses **Inter** (Regular, Medium, Semi Bold, Bold, Extra Bold), which Figma includes. Small line-wrap differences are possible because Figma's Inter may be a different version from the web font.
 
-## Screens (83)
+## Screens (89)
 
 | Section | Screens |
 |---|---|
-| Sign in | Sign in, multi-factor check, signed out |
+| Sign in | Log in, invalid credentials, forgot password, invalid email, link sent, create new password, password reset, link expired, logged out |
 | Dashboard | Dashboard, dashboard with the sidebar collapsed |
 | Analytics and reporting | Home screen overview, Adoption and engagement, Search, Content, Care and wayfinding, Notifications |
 | Admin management | All users, Create user, user details (active and invited), My profile |
