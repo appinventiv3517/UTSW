@@ -203,7 +203,14 @@ async function run(D, pick) {
       /* One-line labels must stay on one line: if Figma's Inter measures a hair wider than the browser's and a label
          wraps, it hugs its text instead (it moves by a fraction of a pixel at most) */
       for (const t of f.findAll(x => x.type === 'TEXT')) {
-        if (t.getPluginData('single') === '1' && t.textAutoResize === 'HEIGHT' && t.height > +t.getPluginData('lh') * 1.5) { t.textAutoResize = 'WIDTH_AND_HEIGHT'; fixed++; }
+        if (t.getPluginData('single') !== '1' || t.textAutoResize === 'WIDTH_AND_HEIGHT') continue;
+        const w0 = t.width, h0 = t.height, prev = t.textAutoResize, inAuto = t.parent && t.parent.layoutMode && t.parent.layoutMode !== 'NONE' && t.layoutPositioning !== 'ABSOLUTE';
+        const sh = inAuto ? t.layoutSizingHorizontal : null, sv = inAuto ? t.layoutSizingVertical : null;
+        t.textAutoResize = 'WIDTH_AND_HEIGHT';
+        if (t.width <= w0 + 0.5) {  /* fits: back to the exported box */
+          t.textAutoResize = prev; if (prev !== 'HEIGHT') t.resize(w0, h0); else t.resize(w0, t.height);
+          if (inAuto) { try { t.layoutSizingHorizontal = sh; t.layoutSizingVertical = sv; } catch (e) { /* keep */ } }
+        } else fixed++;
       }
       const col = i % PER;
       if (col === 0 && i) { rowY += rowH + GAP; rowH = 0; }

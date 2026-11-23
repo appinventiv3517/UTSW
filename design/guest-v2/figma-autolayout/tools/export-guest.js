@@ -93,6 +93,7 @@ const SCREENS = [
       /* moving the screen resets every scroll position (the onboarding track, lists): keep them */
       const scrolled = [...sc.querySelectorAll('*')].filter(e => e.scrollLeft || e.scrollTop).map(e => [e, e.scrollLeft, e.scrollTop]);
       document.body.prepend(sc);
+      const fm = document.createElement('style'); fm.textContent = '#screen, #screen *{font-optical-sizing:none!important}'; document.head.appendChild(fm);
       scrolled.forEach(([e, l, t]) => { e.scrollLeft = l; e.scrollTop = t; });
       /* Onboarding: only the slide on screen is part of the frame */
       const on = sc.querySelector('#ob:not([hidden]) .ob-slide.on');

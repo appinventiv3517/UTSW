@@ -21,6 +21,7 @@ Fonts: Inter (Regular, Medium, Semi Bold, Bold, Extra Bold). The plugin stops wi
 - **Every frame is an auto-layout frame**, with direction, padding, spacing, alignment and Hug, Fill or Fixed sizing on each axis.
 - **Absolute layers are kept to things that float in the app too**: the tab bar, sheets and their backdrops, the menu drawer, the search layer, labels and controls over the 3D map, notification dots, and touch targets pulled into padding with negative margins (a section’s “See all”). Each sits inside an auto-layout parent.
 - **Text is editable Inter text** with per-word weight and color.
+- **Text is measured the way Figma measures it**: the export lays out Inter without optical sizes (Figma’s Inter has none), and the plugin measures every one-line label in Figma – one that would wrap hugs its text instead.
 - **CSS line tricks become real strokes**: dividers and rings the app draws with 1 px box-shadows are strokes in Figma (a shadow on an unfilled frame would be cast by its letters and blur the text). Only filled frames keep soft shadows.
 - **Icons, the logo and the app icon are vectors** (the app’s Material Symbols Rounded paths, colors resolved).
 - **The live 3D map is an image fill** of the sample map at 2× resolution, in a fixed frame, with its labels and controls as layers on top.
