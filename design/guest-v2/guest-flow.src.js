@@ -638,26 +638,29 @@ function wfContextCard(){
     <button class="btn btn-primary btn-sm wf-ctx-go" data-action="push" data-v="wayfinding" data-to="${l.id}">${ic("directions",20)}<span>Get directions</span></button></div></section>`;
 }
 function viewWayfinding(){
-  const t=top(),c=wfCtx(),to=t.to?LOCS[t.to]:null;
-  const here=c==="facility"?LOCS[WF_FAC]:null,visit=c==="visit"?LOCS[WF_VISIT.loc]:null;
-  const place=to||here||visit;
-  const ls=Object.values(LOCS).sort((a,b)=>(locDist(a)??0)-(locDist(b)??0)).slice(0,4);
-  const head=here&&(!to||to===here)?`<div class="card wf-here"><span class="eyebrow">You’re here</span><h2>${esc(here.n)}</h2><p>Choose where you’re going inside. Directions start from where you are.</p></div>`
-    :visit&&(!to||to===visit)?`<div class="card wf-here"><span class="eyebrow">Your visit · ${WF_VISIT.when}</span><h2>${esc(visit.n)}</h2><p>${WF_VISIT.room}. Plan to arrive 15 minutes early.</p>
-      <div class="row-btns"><button class="btn btn-primary btn-sm" data-action="toast" data-kind="out" data-msg="Opens your maps app: ${esc(visit.n)}">${ic("near_me",20)}<span>Drive there</span></button>
-      <button class="btn btn-secondary btn-sm" data-action="toast" data-kind="go" data-msg="Shows the indoor route to ${WF_VISIT.room}">${ic("route",20)}<span>Route to ${WF_VISIT.room.split(",")[0]}</span></button></div></div>`
-    :to?`<div class="card wf-here"><span class="eyebrow">Directions to</span><h2>${esc(to.n)}</h2><p>${esc(to.a)}</p>
-      <div class="row-btns"><button class="btn btn-primary btn-sm" data-action="toast" data-kind="out" data-msg="Opens your maps app: ${esc(to.n)}">${ic("near_me",20)}<span>Get there</span></button>${locFavBtn(to).replace('class="icon-btn fav-loc"','class="icon-btn fav-loc inline"')}</div></div>`:"";
-  return `<div class="res-body">${head}
-   <button class="card wf-go press" data-action="toast" data-kind="go" data-msg="Opens indoor wayfinding: choose a destination">
-     <span class="wf-go-ic">${ic("directions_walk")}</span><span class="rt"><b>Where are you going?</b><span>${place?`Clinics, rooms, and services at ${esc(place.n)}`:"Turn-by-turn directions to and inside our buildings"}</span></span>${ic("chevron_right",20)}</button>
-   <section class="grp" aria-labelledby="wf-q"><h2 class="lbl-h" id="wf-q">${place?"Nearby inside":"Quick destinations"}</h2>
-     <div class="wf-grid">${WF_DEST.map(([g,l])=>here&&WF_ROOM[l]?`<button class="card wf-dest press" data-action="geo-nav" data-room="${WF_ROOM[l]}">${well(g)}<span>${l}</span></button>`:`<button class="card wf-dest press" data-action="toast" data-kind="go" data-msg="Shows the route to the nearest ${l.toLowerCase()}">${well(g)}<span>${l}</span></button>`).join("")}</div></section>
-   ${here&&(!to||to===here)?wayMapHTML():""}
-   <section class="grp" aria-labelledby="wf-c"><h2 class="lbl-h" id="wf-c">Campuses and buildings</h2>
-     <div class="card list">${ls.map(l=>locRow(l,`data-action="toast" data-kind="go" data-msg="Opens indoor maps for ${esc(l.n)}"`)).join("")}</div></section>
-   <p class="fine">No appointment or MyChart account needed. Sample campuses; indoor maps and live directions come from the wayfinding provider in the real app.</p></div>`;
+  const t=top(),c=wfCtx(),to=t.to?LOCS[t.to]:null,here=c==="facility"&&(!to||to.id===WF_FAC),visit=c==="visit"&&(!to||to.id===WF_VISIT.loc)?LOCS[WF_VISIT.loc]:null;
+  const place=to||(here?LOCS[WF_FAC]:visit)||LOCS[WF_FAC],f=S.geoFloor||1;
+  const ls=Object.values(LOCS).filter(l=>l.id!==place.id).sort((a,b)=>(locDist(a)??0)-(locDist(b)??0)).slice(0,4);
+  const btn=here?"":`<button class="btn btn-primary btn-sm" data-action="geo-out" data-room="entrance">${ic("directions_car",20)}<span>Get there</span></button>`;
+  const visitCard=visit?`<section class="mod" aria-labelledby="wf-v"><div class="card wf-here"><span class="eyebrow">Your visit · ${WF_VISIT.when}</span><h2 id="wf-v">${WF_VISIT.what}</h2><p>${esc(visit.n)}, ${WF_VISIT.room}. Plan to arrive 15 minutes early.</p>
+      <div class="row-btns"><button class="btn btn-primary btn-sm" data-action="geo-out" data-room="lv2-pc">${ic("directions_car",20)}<span>Drive there</span></button>
+      <button class="btn btn-secondary btn-sm" data-action="geo-nav" data-room="lv2-pc" data-in="1">${ic("route",20)}<span>Route to ${WF_VISIT.room.split(",")[0]}</span></button></div></div></section>`:"";
+  const dest=(id,l,g)=>`<button class="card wf-dest press" data-action="${id==="parking"||id==="entrance"?"geo-out":"geo-nav"}" data-room="${id}">${well(g)}<span>${l}</span>${ROOMS[id]?`<span class="fine">${walkMin(ROOMS[id])} min</span>`:""}</button>`;
+  return `<div class="v-inner geo-home"><div class="top">${geoHero({loc:place,eyebrow:here?"You’re here":visit?"Your visit":"Wayfinding",btn})}</div>
+   ${visitCard}
+   <section class="mod" aria-labelledby="wf-where"><button class="card wf-go press" data-action="geo-where">
+     <span class="wf-go-ic">${ic("directions_walk")}</span><span class="rt"><b id="wf-where">Where are you going?</b><span>Clinics, rooms, and services at ${esc(place.n)}</span></span>${ic("chevron_right",20)}</button></section>
+   <section class="mod" aria-labelledby="wf-q"><div class="mod-head"><h2 class="sec-h" id="wf-q">${here?"Nearby inside":"Quick destinations"}</h2></div>
+     <div class="wf-grid">${[["parking","Parking","local_parking"],["entrance","Main entrance","door_front"],["lv1-pharm","Pharmacy","local_pharmacy"],["lv1-cafe","Cafeteria","restaurant"],["lv1-wc","Restrooms","wc"],["lv1-elev","Elevators","elevator"]].map(([id,l,g])=>dest(id,l,g)).join("")}</div></section>
+   <section class="mod" aria-labelledby="wf-fl"><div class="mod-head"><h2 class="sec-h" id="wf-fl">Floor ${f}</h2><span class="fine">Sample</span></div>
+     <div class="card list">${roomsOn("lv"+f).filter(r=>r.kind!=="other"&&r.kind!=="core").map(r=>`<button class="row" data-action="geo-nav" data-room="${r.id}">${well(r.ic||roomGlyph(r.id))}<span class="rt"><b>${r.name}${r.suite?`, Suite ${r.suite}`:""}</b><span>${whereL(r)}</span></span>${ic("directions",20)}</button>`).join("")}</div></section>
+   <section class="mod" aria-labelledby="wf-c"><div class="mod-head"><h2 class="sec-h" id="wf-c">Campuses and buildings</h2></div>
+     <div class="card list">${ls.map(l=>locRow(l,`data-action="push" data-v="wayfinding" data-to="${l.id}"`)).join("")}</div></section>
+   <p class="fine pad">No appointment or MyChart account needed. Every building uses the same sample indoor map here; live maps and positions come from the wayfinding provider in the real app.</p></div>`;
 }
+const roomGlyph=id=>({"lv2-lab":"science","lv1-img":"medical_information","lv7-heart":"cardiology","lv2-pc":"stethoscope"}[id]||"accessibility_new");
+/* Where are you going? – every room, by floor, in a sheet; each starts directions in the app */
+function openWhere(){openSheet("where","Where are you going?",`<div class="stack">${GEO.plans.map(pl=>`<h3 class="lbl-h">Floor ${PLAN_META[pl].floor}</h3><div class="card list">${roomsOn(pl).filter(r=>r.kind!=="other"&&r.kind!=="core").map(r=>`<button class="row" data-action="geo-nav" data-room="${r.id}">${well(r.ic||roomGlyph(r.id))}<span class="rt"><b>${r.name}${r.suite?`, Suite ${r.suite}`:""}</b><span>${whereL(r)}</span></span>${ic("directions",20)}</button>`).join("")}</div>`).join("")}</div>`,null,true)}
 function viewLocations(){
   const ls=Object.values(LOCS).sort((a,b)=>(locDist(a)??0)-(locDist(b)??0));
   return `<div class="res-body"><p class="fine" style="margin:0">Tap a location for directions. Tap the heart to keep it in Favorites.</p>
@@ -765,7 +768,7 @@ const ROOM_ROWS=[
  ["lv1-wc","lv1","n",236,308,"amen","Restrooms","","wc"],["lv1-chapel","lv1","s",12,64,"amen","Chapel","","self_improvement"],
  ["lv1-lobby","lv1","s",64,196,"other","Lobby","",""],["lv1-img","lv1","s",196,308,"dept","Imaging","1300",""],
  ["lv2-lab","lv2","n",12,100,"dept","Lab","2100",""],["lv2-wc","lv2","n",100,136,"amen","Restrooms","","wc"],
- ["lv2-elev","lv2","n",136,176,"core","Elevator B","","elevator"],["lv2-wait","lv2","n",176,308,"other","Waiting","",""],
+ ["lv2-elev","lv2","n",136,176,"core","Elevator B","","elevator"],["lv2-pc","lv2","n",176,308,"dept","Primary care","200",""],
  ["lv2-quiet","lv2","s",12,64,"amen","Quiet room","","self_improvement"],["lv2-snack","lv2","s",64,100,"amen","Snacks","","restaurant"],
  ["lv2-rehab","lv2","s",100,308,"dept","Rehab","2400",""],
  ["lv7-wait","lv7","n",12,100,"other","Waiting","",""],["lv7-wc","lv7","n",100,136,"amen","Restrooms","","wc"],
@@ -823,11 +826,11 @@ function whyFocus(){
     <div class="row-btns">${goBtn("lv1-pharm")}${placeBtn("lv1-pharm","Items and services")}</div></div>`;
   return `<div class="notice warn"><span class="lead">${ic("warning",20)}</span><span class="nb"><b>If this is an emergency, call 911.</b><span>Or go to the Emergency Department. For other care today, see the doctors open today below – open times are for information.</span></span></div>`;
 }
-function geoHero(){const f=S.geoFloor||1,l=LOCS[GEO.fac];
-  return `<section class="geo-hero" aria-labelledby="h-geo"><div class="m3-box" id="home-m3"><div class="m3-host" role="img" aria-label="Interactive 3D sample map of ${esc(l.n)}, Floor ${f}${f===1?", with where you are":""}. Drag sideways to turn it."></div></div>
-    <div class="gh-top"><span class="gh-chip"><i class="gh-live" aria-hidden="true"></i><span><span class="eyebrow">You’re here</span><h2 id="h-geo">${esc(l.n)}</h2></span></span></div>
-    <div class="gh-side" role="group" aria-label="Floor">${[7,2,1].map(n=>`<button class="gh-fl" data-action="geo-floor" data-f="${n}" aria-pressed="${f===n}" aria-label="Floor ${n}${n===1?", you are here":""}">${n}${n===1?'<i aria-hidden="true"></i>':""}</button>`).join("")}</div>
-    <div class="gh-foot"><span class="tag-s">Sample 3D map · Floor ${f}</span><button class="btn btn-primary btn-sm" data-action="push" data-v="wayfinding" data-to="${GEO.fac}">${ic("directions",20)}<span>Get directions</span></button></div></section>`}
+function geoHero(o={}){const f=S.geoFloor||1,l=o.loc||LOCS[GEO.fac],eb=o.eyebrow||"You’re here",here=!o.loc||o.loc.id===GEO.fac&&wfCtx()==="facility";
+  return `<section class="geo-hero" aria-labelledby="h-geo"><div class="m3-box" id="geo-m3"><div class="m3-host" role="img" aria-label="Interactive 3D sample map of ${esc(l.n)}, Floor ${f}${f===1?", with where you are":""}. Drag sideways to turn it."></div></div>
+    <div class="gh-top"><span class="gh-chip"><i class="gh-live" aria-hidden="true"></i><span><span class="eyebrow">${eb}</span><h2 id="h-geo">${esc(l.n)}</h2></span></span></div>
+    <div class="gh-side" role="group" aria-label="Floor">${[7,2,1].map(n=>`<button class="gh-fl" data-action="geo-floor" data-f="${n}" aria-pressed="${f===n}" aria-label="Floor ${n}${n===1?", you are here":""}">${n}${n===1&&here?'<i aria-hidden="true"></i>':""}</button>`).join("")}</div>
+    <div class="gh-foot"><span class="tag-s">Sample 3D map · Floor ${f}</span>${o.btn!==undefined?o.btn:`<button class="btn btn-primary btn-sm" data-action="push" data-v="wayfinding" data-to="${GEO.fac}">${ic("directions",20)}<span>Get directions</span></button>`}</div></section>`}
 function nearLists(){
   const R=ROOMS,docs=PROV.filter(p=>p.locs.includes(GEO.fac)).concat(PROV).filter((p,i,a)=>a.indexOf(p)===i).slice(0,3);
   const care=CARE_HERE.map(id=>R[id]).sort((a,b)=>walkMin(a)-walkMin(b));
@@ -848,7 +851,18 @@ function viewPlace(id){const r=ROOMS[id],I=PINFO[id]||{};
       <p class="fine">${I.note}</p></section>`:""}</div>`}
 
 /* ---------- 3D turn-by-turn ---------- */
-function geoSteps(id){
+const G_DRIVE=[[0,100],[76,100],[76,64]],G_WALK=[[76,64],[76,50],[160,50]];
+function outsideSteps(to){const D=G_DRIVE,Wk=G_WALK,st=[
+  {k:"drive",ic:"straight",t:"Head east on Sample Parkway",sub:"0.2 mi",plan:"campus",routes:[[D]],you:D[0],head:D[1],u:0,walk:[D[0],D[1]]},
+  {k:"turnin",ic:"turn_left",t:"Turn left into Garage A",sub:"120 spaces open (sample)",plan:"campus",routes:[[D.slice(1)]],you:D[1],head:D[2],u:0,walk:[D[1],D[2]]},
+  {k:"walk",ic:"directions_walk",t:"Park, then take the covered walkway",sub:gft(plen(Wk)),plan:"campus",routes:[[D,"done"],[Wk]],you:Wk[0],head:Wk[1],u:plen(Wk),walk:Wk},
+  {k:"enter",ic:"door_front",t:"Enter at the North entrance",sub:"Straight ahead",plan:"campus",routes:[[Wk,"done"]],you:Wk[2],head:[Wk[2][0]+10,Wk[2][1]],flag:[172,Wk[2][1]],u:8,walk:[Wk[2],[Wk[2][0]+10,Wk[2][1]]]}];
+  if(to==="parking"){st.length=2;Object.assign(st[1],{last:true,ic:"local_parking",t:"Garage A is ahead",sub:"Park on any level"})}
+  if(to==="entrance"){st[3]={...st[3],last:true,ic:"door_front"}}
+  return st}
+function geoSteps(id,outside){if(id==="parking"||id==="entrance")return outsideSteps(id);
+  const inside=geoSteps0(id);return outside?outsideSteps().concat(inside):inside}
+function geoSteps0(id){
   const r=ROOMS[id],e=GEO.elev,E=GEO.you,north=r.side==="n",side=east=>east?(north?"left":"right"):(north?"right":"left");
   const arrive=(east,from)=>({k:"arrive",ic:"flag",t:`${r.name} is on your ${side(east)}`,sub:r.suite?`Suite ${r.suite} · Floor ${r.floor}`:`Floor ${r.floor}`,plan:r.plan,you:[r.cx,100],head:[r.cx+(east?10:-10),100],dest:r.id,flag:[r.cx,100],routes:[[[from,[r.cx,100]],"done"]],last:true,u:0});
   if(r.floor===1){const east=r.cx>E[0];
@@ -868,6 +882,7 @@ function xraySpec(youPlan,you,t,extra={}){
     s.head=s.stackRoutes[youPlan][0][0][1]}
   return s}
 function navSpec(N){const s=N.steps[N.i],t=ROOMS[N.room];
+  if(s.plan==="campus")return {plan:"campus",routes:N.all?[[G_DRIVE,"done"],[G_WALK]]:s.routes,you:s.you,head:s.head,flag:s.flag||null,destB:"clem",mode:N.all?"overview":N.live?"live":"follow",labelsTab:false};
   if(s.k==="ride")return xraySpec("lv1",[GEO.elev,100],t,{mode:"stack"});
   if(N.all)return xraySpec(s.plan,s.you||[GEO.elev,100],t);
   return {plan:s.plan,routes:s.routes||[],you:s.you||null,head:s.head||null,flag:s.flag||null,dest:s.dest||null,mode:N.live?"live":"follow",labelsTab:false}}
@@ -879,14 +894,14 @@ function viewNav3d(){const N=top();
       <div class="n3-side"><button class="icon-btn n3-b" data-action="geo-all" aria-label="Route overview, all floors">${ic("layers",20)}</button><button class="icon-btn n3-b" data-action="geo-live" aria-label="Live view – simulated">${ic("view_in_ar",20)}</button></div></div>
     <div class="card n3-card" id="n3-card"></div>
     <ol class="sr-only" aria-label="All steps">${N.steps.map(s=>`<li>${s.t}. ${s.sub||""}</li>`).join("")}</ol></div>`}
-function n3Paint(anim){const N=top();if(N.v!=="nav3d")return;const s=N.steps[N.i],r=ROOMS[N.room],last=N.i===N.steps.length-1;
+function n3Paint(anim){const N=top();if(N.v!=="nav3d")return;const s=N.steps[N.i],r=ROOMS[N.room]||{name:N.room==="parking"?"Garage A":"North entrance",suite:"",floor:1},last=N.i===N.steps.length-1;
   const left=N.steps.slice(N.i).reduce((a,x)=>a+(x.u||0),0),min=Math.max(1,Math.round(left/80));
   $("#n3-banner").innerHTML=`<span class="n3-arrow">${ic(s.ic)}</span><span class="n3-txt"><b id="n3-t">${s.t}</b><span id="n3-s">${s.sub||""}</span></span>`;
   $("#n3-banner").classList.toggle("arrived",!!s.last);
   $$("#n3-side .n3-b,.n3-side .n3-b").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.action==="geo-all"?!!N.all:!!N.live))});
-  $("#n3-tag").textContent=`Sample 3D map · ${s.k==="ride"?"Elevator":N.all?"Route overview":"Floor "+PLAN_META[s.plan].floor}${N.live&&!N.all&&s.k!=="ride"?" · Live view, simulated":""}`;
+  $("#n3-tag").textContent=`Sample 3D map · ${s.k==="ride"?"Elevator":N.all?"Route overview":s.plan==="campus"?"Campus":"Floor "+PLAN_META[s.plan].floor}${N.live&&!N.all&&s.k!=="ride"?" · Live view, simulated":""}`;
   $("#n3-card").innerHTML=`<div class="n3-eta"><b>${last?"Arrived":`${min} min`}</b><span>${last?(r.suite?`Suite ${r.suite}`:"You are here"):`${gft(left)} · Step ${N.i+1} of ${N.steps.length}`}</span></div>
-    <p class="n3-dest">${ic("flag",20)}<span>${r.name}${r.suite?`, Suite ${r.suite}`:""} · Floor ${r.floor}</span></p>
+    <p class="n3-dest">${ic("flag",20)}<span>${r.name}${r.suite?`, Suite ${r.suite}`:""}${ROOMS[N.room]?` · Floor ${r.floor}`:" · Lakeview University Hospital"}</span></p>
     <div class="n3-dots" aria-hidden="true">${N.steps.map((_,k)=>`<i class="${k<N.i?"on":k===N.i?"here":""}"></i>`).join("")}</div>
     ${s.lift?`<p class="n3-lift"><b id="n3-fl">1</b><span>Floor 1 to Floor ${s.lift} · Elevator B</span></p>`:""}
     <div class="n3-btns"><button class="btn btn-secondary" data-action="geo-step" data-d="-1" ${N.i===0?"disabled":""}>${ic("arrow_back",20)}<span>Back</span></button>
@@ -902,16 +917,16 @@ async function n3Step(d){const N=top();if(n3Busy||N.v!=="nav3d")return;const s=N
     else if(s.walk&&!N.all){const L=s.walk.reduce((a,p,i,arr)=>i?a+Math.hypot(p[0]-arr[i-1][0],p[1]-arr[i-1][1]):0,0);await M3.walk(s.walk,Math.min(3200,Math.max(900,L*14)),t=>{const x=$("#n3-s");if(x)x.textContent=gft(L*(1-t))})}
     n3Busy=false;if(top()!==N)return}
   N.i=Math.max(0,Math.min(N.steps.length-1,N.i+d));n3Paint(true);const f=$('#n3-card [data-d="1"]')||$('#n3-card [data-action="back"]');if(f)f.focus({preventScroll:true});view.scrollTop=0}
-function geoNav(id){push({v:"nav3d",room:id,steps:geoSteps(id),i:0})}
+function geoNav(id,outside){if(outside===undefined)outside=wfCtx()!=="facility";push({v:"nav3d",room:id,steps:geoSteps(id,outside),i:0})}
 /* After a view renders: mount the live 3D map where the view has one */
 function geoMount(){const t=top();
   if(t.v==="nav3d"){n3Paint(false);return}
-  const h=$("#home-m3 .m3-host")||$("#way-m3 .m3-host");if(!h||!M3.ok())return;
+  const h=$("#geo-m3 .m3-host");if(!h||!M3.ok())return;
   const fl=S.geoFloor||1,plan="lv"+fl,dest=S.why==="pharm"?ROOMS["lv1-pharm"]:null;
   const box=h.parentElement,side=$(".gh-side",view),hTop=$(".gh-top",view),hFoot=$(".gh-foot",view);
   const r=el=>[el.offsetLeft-6,el.offsetTop-6,el.offsetLeft+el.offsetWidth+6,el.offsetTop+el.offsetHeight+6];
-  const ins=t.v==="home"&&hTop?{top:24,bottom:box.clientHeight-hFoot.offsetTop+8,avoid:[r(hTop.firstElementChild),r(side)]}:{top:8,bottom:8};
-  M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{...ins,animate:true})}
+  const ins=hTop?{top:24,bottom:box.clientHeight-hFoot.offsetTop+8,avoid:[r(hTop.firstElementChild),r(side)]}:{top:8,bottom:8};
+  M3.mount(h,{plan,routes:dest?[[[GEO.you,[dest.cx,100]]]]:[],you:fl===1&&wfCtx()==="facility"?GEO.you:null,head:dest?[dest.cx,100]:null,flag:dest?[dest.cx,100]:null,dest:dest&&dest.id,mode:"overview",labelsTab:true},{...ins,animate:true})}
 function wayMapHTML(){const f=S.geoFloor||1;
   return `<section class="grp" aria-labelledby="wf-3d"><div class="grp-h"><h2 class="lbl-h" id="wf-3d">Inside · 3D map</h2><span class="sug-type">Sample</span></div>
     <div class="card geo-map"><div class="m3-box" id="way-m3">${m3Fallback()}</div>
@@ -1771,7 +1786,9 @@ screen.addEventListener("click",e=>{
    case "retry":if(S.data==="error"||S.data==="offline"){S.data="live";syncControls()}load();break;
    case "profile":push({v:"profile",id});break;
    case "geo-why":S.why=el.dataset.k==="change"?null:el.dataset.k;rerenderKeep(true);sayPolite(S.why?"Home updated for your visit":"What brings you here today?");break;
-   case "geo-nav":geoNav(el.dataset.room);break;
+   case "geo-nav":{const go=()=>geoNav(el.dataset.room,el.dataset.in?false:undefined);sheetKind?closeSheet(go):go();break}
+   case "geo-out":geoNav(el.dataset.room,true);break;
+   case "geo-where":openWhere();break;
    case "geo-place":push({v:"place",room:el.dataset.room});break;
    case "geo-label":PINFO[el.dataset.room]?push({v:"place",room:el.dataset.room}):geoNav(el.dataset.room);break;
    case "geo-step":n3Step(+el.dataset.d);break;
