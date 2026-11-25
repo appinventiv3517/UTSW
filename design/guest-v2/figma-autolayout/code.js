@@ -207,7 +207,7 @@ async function run(D, pick) {
         const w0 = t.width, h0 = t.height, prev = t.textAutoResize, inAuto = t.parent && t.parent.layoutMode && t.parent.layoutMode !== 'NONE' && t.layoutPositioning !== 'ABSOLUTE';
         const sh = inAuto ? t.layoutSizingHorizontal : null, sv = inAuto ? t.layoutSizingVertical : null;
         t.textAutoResize = 'WIDTH_AND_HEIGHT';
-        if (t.width <= w0 + 0.5) {  /* fits: back to the exported box */
+        if (t.width <= w0 + 0.01) {  /* fits: back to the exported box (any wider and it would wrap: it keeps hugging) */
           t.textAutoResize = prev; if (prev !== 'HEIGHT') t.resize(w0, h0); else t.resize(w0, t.height);
           if (inAuto) { try { t.layoutSizingHorizontal = sh; t.layoutSizingVertical = sv; } catch (e) { /* keep */ } }
         } else fixed++;

@@ -17,7 +17,7 @@ const ctl = (k, v) => async p => { await p.click(`[data-ctl="${k}"] [data-v="${v
 const scrollTo = sel => async p => { await p.evaluate(s => { const v = document.querySelector('#view'), e = document.querySelector('#view ' + s); if (e) v.scrollTop = e.getBoundingClientRect().top - v.getBoundingClientRect().top + v.scrollTop - 16; }, sel); await wait(400); };
 const seq = (...f) => async p => { for (const x of f) await x(p); };
 const S = (flow, id, name, act, o = {}) => ({ flow, id, name, act, ...o });
-const START = 'Splash and onboarding', HOME = 'Home', WAY = 'Wayfinding and directions';
+const START = 'Splash and onboarding', HOME = 'Home', EMPTY = 'Empty and error states', WAY = 'Wayfinding and directions';
 const why = k => seq(jump('geo-why'), tap(`[data-action="geo-why"][data-k="${k}"]`));
 const nav = (k, extra) => seq(jump('geo-nav'), async p => { for (let i = 0; i < k; i++) { await p.click('#screen [data-action="geo-step"][data-d="1"]'); await wait(300); } }, extra || (async () => {}));
 const SCREENS = [
@@ -54,6 +54,15 @@ const SCREENS = [
   S(HOME, 'medblog', '21 MedBlog – see all', seq(ctl('alerts', '0'), jump('medblog'))),
   S(HOME, 'mychart-tab', '22 MyChart tab – sign in', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="mychart"]'))),
 
+  S(EMPTY, 'empty-search-none', '01 Search – no recent searches yet', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search')), { fixed: 1, popup: 1 }),
+  S(EMPTY, 'empty-search-nomatch', '02 Search – no matches', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search'), async p => { await p.fill('#q', 'zzqx'); await wait(700); }), { fixed: 1, popup: 1 }),
+  S(EMPTY, 'empty-fav-clin', '03 Favorites – no saved clinicians', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'))),
+  S(EMPTY, 'empty-fav-locs', '04 Favorites – no saved locations', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'), tap('input[name="favseg"][value="locations"]'))),
+  S(EMPTY, 'empty-results', '05 Find Care – no results', seq(ctl('alerts', '0'), jump('empty'))),
+  S(EMPTY, 'empty-error', '06 Find Care – service error', seq(ctl('alerts', '0'), jump('error'))),
+  S(EMPTY, 'empty-offline', '07 Find Care – offline', seq(ctl('alerts', '0'), jump('offline'))),
+  S(EMPTY, 'empty-denied', '08 Find Care – location denied', seq(ctl('alerts', '0'), jump('denied'))),
+
   S(WAY, 'way-here', '01 Wayfinding – at a facility', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'))),
   S(WAY, 'pop-where', '02 Pop-up – where are you going', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'), tap('[data-action="geo-where"]')), { fixed: 1, popup: 1 }),
   S(WAY, 'way-visit', '03 Wayfinding – before a visit', seq(ctl('alerts', '0'), jump('wf-visit'), tap('.wf-ctx-go'))),
@@ -71,7 +80,11 @@ const SCREENS = [
 /* Numbered in order within each flow */
 const NUM = {}; SCREENS.forEach(x => { NUM[x.flow] = (NUM[x.flow] || 0) + 1; x.name = String(NUM[x.flow]).padStart(2, '0') + ' ' + x.name.replace(/^\d+ /, ''); });
 /* Splash, Onboarding and Home by default; ALL=1 adds Wayfinding and directions */
-const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
+/* Dark theme: every screen again, on its own pages */
+const DARK = ' – Dark';
+SCREENS.push(...SCREENS.map(x => ({ ...x, id: x.id + '-dark', flow: x.flow + DARK, dark: 1 })));
+const BASE = process.env.ALL ? [START, HOME, EMPTY, WAY] : [START, HOME, EMPTY];
+const FLOWS = process.env.LIGHT ? BASE : [...BASE, ...BASE.map(f => f + DARK)];
 
 (async () => {
   const only = process.argv[2];
@@ -89,7 +102,7 @@ const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
     await p.evaluate(() => { localStorage.clear(); });
     await p.reload(); await wait(1500);
     await p.click('[data-ctl="rm"] [data-v="1"]').catch(() => {}); await wait(200);
-    await p.click('[data-ctl="theme"] [data-v="light"]').catch(() => {});
+    await p.click(`[data-ctl="theme"] [data-v="${sc.dark ? 'dark' : 'light'}"]`).catch(() => {});
     await p.evaluate(() => { const s = document.querySelector('#splash'); if (s && !s.hidden) s.click(); }); await wait(600);
     await p.evaluate(() => { const b = document.querySelector('#ob:not([hidden]) .ob-skip, #ob:not([hidden]) [data-action="ob-skip"]'); if (b) b.click(); }); await wait(600);
     await sc.act(p); await wait(sc.keepSplash ? 0 : 1800);
@@ -125,7 +138,7 @@ const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
     await p.addScriptTag({ path: path.join(__dirname, 'serialize.js') });
     await p.evaluate(() => window.__figMaterialize());
     /* Splash and onboarding cover the app: only their own layers (and the status bar) are exported */
-    const exclude = '.sr-only, .ghost-wrap, .ptr, .skip' + (sc.flow === START ? ', #screen > :not(#splash):not(#splash-still):not(#ob):not(.statusbar)' : '');
+    const exclude = '.sr-only, .ghost-wrap, .ptr, .skip' + (sc.flow.startsWith(START) ? ', #screen > :not(#splash):not(#splash-still):not(#ob):not(.statusbar)' : '');
     const box = await p.evaluate(([name, h, ex]) => window.__alWalk({ name, height: h, exclude: ex }), [sc.name, H, exclude]);
     const { tree, errs: diffs } = run(box);
     if (diffs.length) { failed++; report.push(`✗ ${sc.id}: ${diffs.length} layers off`); diffs.slice(0, 12).forEach(d => report.push(`    ${d}`)); }

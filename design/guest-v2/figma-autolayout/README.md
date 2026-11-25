@@ -1,11 +1,13 @@
 # UTSW MyCare Guest – auto-layout Figma import
 
-`guest-autolayout.json` holds 29 screens of the patient (guest) app from `../guest-flow.html` – the Nov 25 version – including every pop-up, on two pages:
+`guest-autolayout.json` holds 74 screens of the patient (guest) app from `../guest-flow.html` – the Nov 25 version – in light and in dark theme, including every pop-up, on six pages:
 
 - **Splash and onboarding** (5): splash, onboarding slides 1–4.
 - **Home** (24): guest home; with alerts; all alerts shown; pop-ups (alert details, the menu, the menu at full length down to the Follow us brand icons and legal links, search with no recent searches yet, search with recent searches, search results); home before a visit; home at a facility – why you’re here, and each answer (an appointment, visiting someone, lab or imaging, pharmacy, I need care, just looking around / guest nearby, not now) and the Floor 2 map; place pages (café menu, lab prices); Locations; MedBlog; the MyChart tab’s sign-in page.
+- **Empty and error states** (8): search with no recent searches yet; search with no matches; Favorites with no saved clinicians; Favorites with no saved locations; Find Care with no results; service error; offline; location access off.
+- **… – Dark** (37): the same three pages again in dark theme.
 
-What this version shows: the tab bar Home, Find Care, MyChart, Favorites (MyChart opens MyChart sign-in); six quick links; Recent searches in the search sheet in place of Top searches; “Clinician” wording; Follow us as round brand icons. Wayfinding and directions screens are left out by default (`ALL=1` adds them).
+What this version shows: the tab bar Home, Find Care, MyChart, Favorites (MyChart opens MyChart sign-in); six quick links; Recent searches in the search sheet in place of Top searches; “Clinician” wording; Follow us as round brand icons. Wayfinding and directions screens are left out by default (`ALL=1` adds them; `LIGHT=1` skips the dark pages).
 
 Scrolling screens are exported at their full height (390 wide); screens with a pop-up are one phone tall (390 × 844), except the full-length menu, which grows to show every item.
 
@@ -19,6 +21,8 @@ Fonts: Inter (Regular, Medium, Semi Bold, Bold, Extra Bold). The plugin stops wi
 
 ## How it’s built
 
+- **Fill means equal**: leftover space inside a box is left as space, never written as padding. Figma won’t shrink a Fill layer below its content (padding included), so padding standing in for empty space would make side-by-side tiles unequal.
+- **One-line labels never wrap**: the plugin measures each one-line label with your Figma’s Inter; if it is any wider than its box, the label hugs its text instead of wrapping.
 - **Every frame is an auto-layout frame**, with direction, padding, spacing, alignment and Hug, Fill or Fixed sizing on each axis.
 - **Absolute layers are kept to things that float in the app too**: the tab bar, sheets and their backdrops, the menu drawer, the search layer, labels and controls over the 3D map, notification dots, and touch targets pulled into padding with negative margins (a section’s “See all”). Each sits inside an auto-layout parent.
 - **Text is editable Inter text** with per-word weight and color.

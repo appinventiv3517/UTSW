@@ -58,6 +58,7 @@ function fixInside(n) { if (n.k === 'T') { n.auto = n._single && near(n._hugW, n
 
 function layout(f, flow, pad, hints) {
   const b = f._b;
+  f._cssPad = [...pad];
   if (!flow.length) { f.lay = null; f._hugW = b.w; f._hugH = b.h; f.ch = []; return; }
   const inner = { x: b.x + pad[3], y: b.y + pad[0], w: b.w - pad[1] - pad[3], h: b.h - pad[0] - pad[2] };
   const noOverlap = (arr, s, len) => { const a = [...arr].sort((p, q) => p._b[s] - q._b[s]); for (let i = 1; i < a.length; i++) if (a[i]._b[s] < a[i - 1]._b[s] + a[i - 1]._b[len] - E) return false; return true; };
@@ -207,6 +208,18 @@ function settle(n) {
     }
     settle(c);
   }
+  trimPad(n);
+}
+/* Empty space after the last child is not padding unless the frame hugs: in Figma a Fill layer can't shrink below its
+   content, padding included, so padding that only stands for leftover space makes Fill siblings unequal (a 2-up tile
+   row). With MIN alignment the space stays where it was; only Fill children would move, so those frames keep it. */
+function trimPad(n) {
+  if (!n.lay || !n._cssPad) return;
+  const H = n.lay === 'H', kids = (n.ch || []).filter(c => !c.abs);
+  const padE = H ? 1 : 2, padCE = H ? 2 : 1, prim = H ? n.sh : n.sv, cross = H ? n.sv : n.sh;
+  const fillP = kids.some(c => (H ? c.sh : c.sv) === 'FILL'), fillC = kids.some(c => (H ? c.sv : c.sh) === 'FILL');
+  if (n.pa === 'MIN' && prim !== 'HUG' && !fillP) n.pad[padE] = r2(Math.min(n.pad[padE], Math.max(0, n._cssPad[padE])));
+  if (n.ca === 'MIN' && cross !== 'HUG' && !fillC) n.pad[padCE] = r2(Math.min(n.pad[padCE], Math.max(0, n._cssPad[padCE])));
 }
 
 /* ---------- Check: Figma's auto-layout rules, applied to the result ---------- */
