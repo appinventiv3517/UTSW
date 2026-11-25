@@ -234,7 +234,7 @@ function wayfinding(C: Data): Out {
 }
 
 /* ---------- Chrome ---------- */
-const TABS: [string, string][] = [['Home', 'home'], ['Find Care', 'findCare'], ['Search', 'search'], ['Favorites', 'favorites']];
+const TABS: [string, string][] = [['Home', 'home'], ['Find Care', 'findCare'], ['MyChart', 'signIn'], ['Favorites', 'favorites']];
 /* Global colors: only the approved set maps onto app tokens */
 const colorVars = (c: Data | null): CSSProperties => c ? { '--c-blue': c.primary, '--c-mid-blue': c.secondary, '--c-muted-blue': c.tertiary, '--c-bg': c.background } as CSSProperties : {};
 
