@@ -34,7 +34,7 @@ const SCREENS = [
   S(HOME, 'home-alerts-more', '03 Home – alerts, all shown', seq(ctl('alerts', '2'), jump('home'), tap('.more-alerts'))),
   S(HOME, 'pop-alert', '04 Pop-up – alert details', seq(ctl('alerts', '2'), jump('home'), tap('.alert-toggle'), tap('[data-action="alert-details"]')), { fixed: 1, popup: 1 }),
   S(HOME, 'pop-menu', '05 Pop-up – menu', seq(ctl('alerts', '0'), jump('menu')), { fixed: 1, popup: 1 }),
-  S(HOME, 'pop-menu-follow', '05 Pop-up – menu, Follow us', seq(ctl('alerts', '0'), jump('menu'), async p => { await p.evaluate(() => { const b = document.getElementById('drawer-body'), h = document.getElementById('mn-4'); if (b && h) b.scrollTop = h.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 220; }); await wait(400); }), { fixed: 1, popup: 1 }),
+  S(HOME, 'pop-menu-full', '05 Pop-up – menu, full length (to Follow us and legal)', seq(ctl('alerts', '0'), jump('menu')), { fixed: 1, popup: 1, grow: '#drawer-body' }),
   S(HOME, 'pop-search', '06 Pop-up – search, no recent searches yet', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search')), { fixed: 1, popup: 1 }),
   S(HOME, 'pop-search-recent', '06 Pop-up – search, recent searches', seq(ctl('alerts', '0'), jump('gsearch-recent')), { fixed: 1, popup: 1 }),
   S(HOME, 'pop-search-results', '07 Pop-up – search results', seq(ctl('alerts', '0'), jump('gsearch')), { fixed: 1, popup: 1 }),
@@ -95,7 +95,7 @@ const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
     await sc.act(p); await wait(sc.keepSplash ? 0 : 1800);
     if (!sc.keepSplash) await p.evaluate(() => { const t = document.getElementById('toast'); if (t) t.classList.remove('show', 'on'); });
     /* The phone screen becomes the page: one frame, 390 wide; scrolling screens grow to their full content */
-    const H = await p.evaluate(([fixed, VH]) => {
+    const H = await p.evaluate(([fixed, VH, grow]) => {
       const sc = document.getElementById('screen'), v = document.getElementById('view');
       /* moving the screen resets every scroll position (the onboarding track, lists): keep them */
       const scrolled = [...sc.querySelectorAll('*')].filter(e => e.scrollLeft || e.scrollTop).map(e => [e, e.scrollLeft, e.scrollTop]);
@@ -110,11 +110,13 @@ const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
       Object.assign(sc.style, { borderRadius: '0', margin: '0', position: 'relative', boxShadow: 'none' });
       let h = VH;
       if (!fixed) { v.scrollTop = 0; const chrome = sc.getBoundingClientRect().height - v.getBoundingClientRect().height; h = Math.ceil(chrome + v.scrollHeight); }
+      /* a scrolling panel (the menu) shown at full length: the screen grows by what the panel hides */
+      if (grow) { const g = sc.querySelector(grow); if (g) { g.scrollTop = 0; h = VH + Math.ceil(g.scrollHeight - g.clientHeight); } }
       sc.style.height = h + 'px';
       const a = document.activeElement; if (a && a.blur && !a.closest('.layer, .drawer-layer, .search-layer, .ob')) a.blur();
       return h;
-    }, [!!sc.fixed, VH]);
-    await p.setViewportSize({ width: W, height: H }); await wait(1500);
+    }, [!!sc.fixed, VH, sc.grow || '']);
+    await p.setViewportSize({ width: W, height: H }); await p.mouse.move(W - 1, 1); await wait(1500); /* no leftover hover from the last tap */
     /* the track's scroll handler re-selects slide 1 after the reset: put the slide's dots and button back */
     await p.evaluate(() => { const k = window.__obKeep; if (!k) return; const ob = document.getElementById('ob'); ob.querySelectorAll('.ob-slide').forEach(x => x.classList.toggle('on', x === k.on));
       const d = ob.querySelector('.ob-dots'), nx = ob.querySelector('[data-action="ob-next"]'); if (d) d.innerHTML = k.dots; if (nx) nx.innerHTML = k.next; }); await wait(300);

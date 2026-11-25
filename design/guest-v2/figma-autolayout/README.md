@@ -1,12 +1,13 @@
 # UTSW MyCare Guest – auto-layout Figma import
 
-`guest-autolayout.json` holds 39 guest screens from `../guest-flow.html`, including every pop-up, on three pages:
+`guest-autolayout.json` holds 29 screens of the patient (guest) app from `../guest-flow.html` – the Nov 25 version – including every pop-up, on two pages:
 
 - **Splash and onboarding** (5): splash, onboarding slides 1–4.
-- **Home** (21): guest home; with alerts; all alerts shown; pop-ups (alert details, menu, search, search results); home before a visit; home at a facility – why you’re here, and each answer (an appointment, visiting someone, lab or imaging, pharmacy, I need care, guest nearby, not now); the Floor 2 map; place pages (café menu, lab prices); Locations; MedBlog.
-- **Wayfinding and directions** (13): Wayfinding at a facility, before a visit and for another location; the pop-up “Where are you going?”; directions steps (main hall, turn to the elevator, elevator ride, out of the elevator, live view, route overview, arrived, from the street, into the garage).
+- **Home** (24): guest home; with alerts; all alerts shown; pop-ups (alert details, the menu, the menu at full length down to the Follow us brand icons and legal links, search with no recent searches yet, search with recent searches, search results); home before a visit; home at a facility – why you’re here, and each answer (an appointment, visiting someone, lab or imaging, pharmacy, I need care, just looking around / guest nearby, not now) and the Floor 2 map; place pages (café menu, lab prices); Locations; MedBlog; the MyChart tab’s sign-in page.
 
-Scrolling screens are exported at their full height (390 wide); screens with a pop-up and the directions screens are one phone tall (390 × 844).
+What this version shows: the tab bar Home, Find Care, MyChart, Favorites (MyChart opens MyChart sign-in); six quick links; Recent searches in the search sheet in place of Top searches; “Clinician” wording; Follow us as round brand icons. Wayfinding and directions screens are left out by default (`ALL=1` adds them).
+
+Scrolling screens are exported at their full height (390 wide); screens with a pop-up are one phone tall (390 × 844), except the full-length menu, which grows to show every item.
 
 ## Import
 
