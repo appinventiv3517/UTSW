@@ -34,7 +34,9 @@ const SCREENS = [
   S(HOME, 'home-alerts-more', '03 Home – alerts, all shown', seq(ctl('alerts', '2'), jump('home'), tap('.more-alerts'))),
   S(HOME, 'pop-alert', '04 Pop-up – alert details', seq(ctl('alerts', '2'), jump('home'), tap('.alert-toggle'), tap('[data-action="alert-details"]')), { fixed: 1, popup: 1 }),
   S(HOME, 'pop-menu', '05 Pop-up – menu', seq(ctl('alerts', '0'), jump('menu')), { fixed: 1, popup: 1 }),
-  S(HOME, 'pop-search', '06 Pop-up – search', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search')), { fixed: 1, popup: 1 }),
+  S(HOME, 'pop-menu-follow', '05 Pop-up – menu, Follow us', seq(ctl('alerts', '0'), jump('menu'), async p => { await p.evaluate(() => { const b = document.getElementById('drawer-body'), h = document.getElementById('mn-4'); if (b && h) b.scrollTop = h.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 220; }); await wait(400); }), { fixed: 1, popup: 1 }),
+  S(HOME, 'pop-search', '06 Pop-up – search, no recent searches yet', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search')), { fixed: 1, popup: 1 }),
+  S(HOME, 'pop-search-recent', '06 Pop-up – search, recent searches', seq(ctl('alerts', '0'), jump('gsearch-recent')), { fixed: 1, popup: 1 }),
   S(HOME, 'pop-search-results', '07 Pop-up – search results', seq(ctl('alerts', '0'), jump('gsearch')), { fixed: 1, popup: 1 }),
   S(HOME, 'home-visit', '08 Home – before a visit', seq(ctl('alerts', '0'), jump('wf-visit'))),
   S(HOME, 'home-why', '09 Home at a facility – why you’re here', seq(ctl('alerts', '0'), jump('geo-why'))),
@@ -50,6 +52,7 @@ const SCREENS = [
   S(HOME, 'place-lab', '19 Place – lab prices', seq(ctl('alerts', '0'), why('lab'), tap('[data-action="geo-place"][data-room="lv2-lab"]'))),
   S(HOME, 'locations', '20 Locations', seq(ctl('alerts', '0'), jump('locations'))),
   S(HOME, 'medblog', '21 MedBlog – see all', seq(ctl('alerts', '0'), jump('medblog'))),
+  S(HOME, 'mychart-tab', '22 MyChart tab – sign in', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="mychart"]'))),
 
   S(WAY, 'way-here', '01 Wayfinding – at a facility', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'))),
   S(WAY, 'pop-where', '02 Pop-up – where are you going', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'), tap('[data-action="geo-where"]')), { fixed: 1, popup: 1 }),
@@ -65,10 +68,14 @@ const SCREENS = [
   S(WAY, 'nav-drive', '12 Directions – from the street', seq(ctl('alerts', '0'), jump('wf-visit'), tap('.wf-ctx-go'), tap('[data-action="geo-out"][data-room="lv2-pc"]')), { fixed: 1 }),
   S(WAY, 'nav-garage', '13 Directions – into the garage', seq(ctl('alerts', '0'), jump('wf-visit'), tap('.wf-ctx-go'), tap('[data-action="geo-out"][data-room="lv2-pc"]'), tap('[data-action="geo-step"][data-d="1"]')), { fixed: 1 })
 ];
+/* Numbered in order within each flow */
+const NUM = {}; SCREENS.forEach(x => { NUM[x.flow] = (NUM[x.flow] || 0) + 1; x.name = String(NUM[x.flow]).padStart(2, '0') + ' ' + x.name.replace(/^\d+ /, ''); });
+/* Splash, Onboarding and Home by default; ALL=1 adds Wayfinding and directions */
+const FLOWS = process.env.ALL ? [START, HOME, WAY] : [START, HOME];
 
 (async () => {
   const only = process.argv[2];
-  const list = only ? SCREENS.filter(s => only.split(',').some(o => s.id.includes(o))) : SCREENS;
+  const list = (only ? SCREENS.filter(s => only.split(',').some(o => s.id.includes(o))) : SCREENS).filter(s => FLOWS.includes(s.flow));
   const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const screens = [], report = [];
   let failed = 0;
@@ -129,7 +136,7 @@ const SCREENS = [
   await browser.close();
   if (failed && !process.env.FORCE) { console.log(`\n${failed} screen(s) have layers out of place. Nothing written.`); process.exit(1); }
   const out = { format: 'utsw-guest-autolayout', version: 1, exported: new Date().toISOString(), font: 'Inter', icons: {},
-    flows: [START, HOME, WAY].map(f => ({ name: f, screens: screens.filter(s => s.flow === f).map(({ flow, ...s }) => s) })).filter(f => f.screens.length) };
+    flows: FLOWS.map(f => ({ name: f, screens: screens.filter(s => s.flow === f).map(({ flow, ...s }) => s) })).filter(f => f.screens.length) };
   fs.writeFileSync(OUT, JSON.stringify(out));
   console.log(`\n${screens.length} screens, ${(fs.statSync(OUT).size / 1024).toFixed(0)} KB → ${OUT}`);
 })();
