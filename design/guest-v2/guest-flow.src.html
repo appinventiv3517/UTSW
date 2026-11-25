@@ -246,6 +246,12 @@ ul,ol{padding:0}
 mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 
 .chips{display:flex;flex-wrap:wrap;gap:var(--sp-8)}
+/* Follow us (menu footer): brand glyphs in the app's icon language – a 48.0 tinted round well, Blue glyph, 12.0 label under */
+.social{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-8)}
+.soc-btn{display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);min-height:44px;padding:var(--sp-8) 0;border:0;background:transparent;color:var(--c-text);font:inherit;cursor:pointer;border-radius:var(--r-12)}
+.soc-ic{display:grid;place-items:center;width:48px;height:48px;border-radius:var(--r-full);background:var(--c-surface);color:var(--c-blue);box-shadow:0 0 0 1px var(--c-border),0 1px 2px rgba(0,30,60,.06)}
+.soc-l{font-size:var(--fs-12);line-height:var(--lh-12);font-weight:600;color:var(--c-text-2)}
+.soc-btn:focus-visible{outline:2px solid var(--c-focus);outline-offset:2px}
 .chip{min-height:44px;padding-inline:var(--sp-16);border-radius:var(--r-full);border:1px solid var(--c-border-strong);background:var(--c-surface);color:var(--c-text);font-size:var(--fs-14);line-height:var(--lh-14);font-weight:600;display:inline-flex;align-items:center;gap:var(--sp-8);cursor:pointer;text-align:left}
 .chip .ic{color:var(--c-blue)}
 .chip:hover{background:var(--c-tint)}
@@ -327,7 +333,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .wf-here h2{font-size:var(--fs-18);line-height:var(--lh-18);font-weight:700;color:var(--c-blue)}
 .wf-here p{font-size:var(--fs-14);line-height:var(--lh-14);color:var(--c-text-2)}
 .wf-here .row-btns{margin-top:var(--sp-12);align-items:center}
-/* Favorites: Providers / Locations */
+/* Favorites: Clinicians / Locations */
 .fav-seg{background:var(--c-surface);box-shadow:0 0 0 1px var(--c-border)}
 .segm.fav-seg>label>span{display:flex;align-items:center;justify-content:center;gap:var(--sp-4)}
 .fav-seg .seg-n{margin:0;min-width:20px;height:20px;padding-inline:6px;border-radius:var(--r-full);background:var(--c-tint);color:var(--c-blue);font-size:var(--fs-12);line-height:20px;display:inline-grid;place-items:center}
@@ -558,7 +564,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .fav{position:absolute;top:var(--sp-8);right:var(--sp-8);color:var(--c-blue)}
 .fav:hover{background:var(--c-tint)}
 .fav[aria-pressed="true"]{color:var(--c-magenta)}
-/* Provider card: gradient initials, name, Blue specialty, location; rating and tags; hairline; next opening with chevron */
+/* Clinician card: gradient initials, name, Blue specialty, location; rating and tags; hairline; next opening with chevron */
 .pcard .pc-main{flex-direction:column;align-items:stretch;gap:var(--sp-12);padding:var(--sp-16) var(--sp-16) 0}
 .pc-top{display:flex;gap:var(--sp-16);align-items:flex-start;padding-right:var(--sp-32)}
 .pc-av{background:linear-gradient(145deg,#2A6AA3 0%,var(--c-brand) 70%);color:#FFFFFF;box-shadow:0 4px 12px rgba(0,66,120,.24)}
@@ -865,13 +871,13 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 .sf-sum b{color:var(--c-blue)}
 .search-body{flex:1;overflow-y:auto;padding:var(--sp-16);display:flex;flex-direction:column;gap:var(--sp-24)}
 .res-group{display:flex;flex-direction:column;gap:var(--sp-12)}
-/* Compact one-line chip row (Top searches on the search screen): scrolls sideways, edges fade; 36.0 chips keep a 44.0 touch area */
+/* Compact one-line chip row (Recent searches on the search screen): scrolls sideways, edges fade; 36.0 chips keep a 44.0 touch area */
 .chips-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:calc(var(--sp-16) * -1);padding:var(--sp-4) var(--sp-16);scroll-padding-inline:var(--sp-16);
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--sp-16),#000 calc(100% - var(--sp-24)),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 var(--sp-16),#000 calc(100% - var(--sp-24)),transparent)}
 .chips-row::-webkit-scrollbar{display:none}
 .chip-sm{min-height:36px;padding-inline:var(--sp-12);gap:var(--sp-4);flex:none;white-space:nowrap;position:relative}
 .chip-sm::after{content:"";position:absolute;inset:-4px 0}
-/* Saved providers / Search history toggle on the search screen */
+/* Saved clinicians / Search history toggle on the search screen */
 .yt{display:grid;grid-template-columns:1fr 1fr;padding:var(--sp-4);border-radius:var(--r-full);background:var(--c-tint);gap:var(--sp-4)}
 .yt-btn{min-height:44px;border:0;border-radius:var(--r-full);background:transparent;font:inherit;font-size:var(--fs-14);line-height:var(--lh-14);font-weight:600;color:var(--c-text-2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-4);white-space:nowrap;transition:background var(--dur-base) var(--ease-std),color var(--dur-base) var(--ease-std),box-shadow var(--dur-base) var(--ease-std)}
 .yt-btn[aria-selected="true"]{background:var(--c-surface);color:var(--c-blue);box-shadow:0 1px 3px rgba(0,30,60,.12),0 0 0 1px var(--c-border)}
@@ -1132,7 +1138,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
     <span class="appicon" role="img" aria-label="UTSW MyCare app icon"><!--APP_ICON--></span>
     <div>
       <h1>UTSW MyCare guest flow: Home and Find my care</h1>
-      <p>Interactive prototype · iOS frame 390 × 844 pt, also checked at 360 pt · Guest only · Fictional providers and sample data</p>
+      <p>Interactive prototype · iOS frame 390 × 844 pt, also checked at 360 pt · Guest only · Fictional clinicians and sample data</p>
     </div>
   </header>
 
@@ -1194,7 +1200,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
           <div class="sys-layer" id="sys" hidden></div>
         </div>
       </div>
-      <p class="stage-note">Tap or click anything. Scroll slowly to see the scroll-linked motion. The location prompt and share sheet are simulated system UI. Saved providers are stored in this browser only. Each load starts with the splash and onboarding, then goes straight to Home as a guest.</p>
+      <p class="stage-note">Tap or click anything. Scroll slowly to see the scroll-linked motion. The location prompt and share sheet are simulated system UI. Saved clinicians are stored in this browser only. Each load starts with the splash and onboarding, then goes straight to Home as a guest.</p>
     </div>
 
     <div class="side">
@@ -1206,7 +1212,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
           <fieldset class="ctrl"><legend>Wayfinding on Home</legend>
             <div class="seg" data-ctl="wf"><button data-v="none">Hidden</button><button data-v="facility">At a facility</button><button data-v="visit">Upcoming visit</button></div>
             <span class="cap-note">“At a facility” needs location permission, so it also sets Location to Allowed; switching location off hides the card. “Upcoming visit” stands in for a signed-in MyChart appointment.</span></fieldset>
-          <fieldset class="ctrl"><legend>Provider search service</legend>
+          <fieldset class="ctrl"><legend>Clinician search service</legend>
             <div class="seg" data-ctl="data"><button data-v="live">Works</button><button data-v="slow">Slow</button><button data-v="error">Fails</button><button data-v="offline">Offline</button></div></fieldset>
           <fieldset class="ctrl"><legend>Emergency alerts</legend>
             <div class="seg" data-ctl="alerts"><button data-v="0">None</button><button data-v="1">One</button><button data-v="2">Two</button></div></fieldset>
@@ -1236,7 +1242,7 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
 
       <section class="panel" aria-labelledby="cms-h">
         <h2 id="cms-h">Guest home module layout</h2>
-        <p>The order and visibility UTSW administrators set in the CMS. Changes show on the phone right away, with no app release. Expired items hide themselves. “Your saved providers” appears only when this device has saved providers.</p>
+        <p>The order and visibility UTSW administrators set in the CMS. Changes show on the phone right away, with no app release. Expired items hide themselves. “Your saved clinicians” appears only when this device has saved clinicians.</p>
         <ol class="cms-list" id="cms"></ol>
       </section>
 
@@ -1249,17 +1255,17 @@ mark{background:var(--c-pastel);color:inherit;border-radius:2px}
         <h2 id="spec-h">Tokens and rules</h2>
         <p>Same tokens, icon family, and logo files as the home screen prototype (<code>design/TOKENS.md</code>, <code>design/icons</code>, <code>mycare-logo/</code>). New in this flow:</p>
         <ul class="notes">
-          <li><b>Type</b>: 12.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0 only. Provider name 16.0/700 Blue on cards, 24.0/700 on the profile. Large text remaps up the same scale.</li>
+          <li><b>Type</b>: 12.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0 only. Clinician name 16.0/700 Blue on cards, 24.0/700 on the profile. Large text remaps up the same scale.</li>
           <li><b>Spacing</b>, one value per relationship: <b>4.0</b> a title and its supporting line, an icon and its label · <b>8.0</b> chips, tags, and pills among themselves; a small label and the group it labels · <b>12.0</b> buttons in a group, cards in a list, a section heading and its content · <b>16.0</b> screen gutter, card padding, groups inside a card, hero, or sheet · <b>24.0</b> between sections, sheet sides, hero bottom · <b>32.0–48.0</b> sheet footer inset and end of scroll. Header links keep a 44 pt target without adding height, and inline text buttons line their label up with the content edge.</li>
           <li><b>Filters</b>: multi-select toggle chips show a check mark and fill when on. Within a group any match counts (OR); across groups all must match (AND). “Clear all” resets the draft; nothing applies until “Show results”. The button carries the live count.</li>
           <li><b>Plain-language search</b>: phrases map to specialties, conditions, languages, gender, and availability (for example “spanish speaking pediatrician”, “heart doctor”, “afib”). Misspellings within one or two letters are corrected and the correction is shown. Mapped filters appear as removable chips.</li>
           <li><b>Location</b>: “Use my location” asks the OS once. If permission is denied or the location can’t be found, the app says so, offers ZIP code or city entry, and keeps searching without distance.</li>
-          <li><b>States</b>: loading uses skeleton cards (no shimmer with reduced motion); service failure and offline each name the problem and offer “Try again”; offline also points to saved providers, which work without a connection.</li>
-          <li><b>Favorites</b>: a heart toggle (outline → filled magenta with a 300 ms pop) with a spoken name (“Save …” / “Remove … from saved”) and an Undo toast that says “saved to Favorites”. Doctors and locations (clinics, hospitals) can be saved; the Favorites tab splits them into Providers and Locations, each with its own empty state. Guest favorites live on the device only.</li>
+          <li><b>States</b>: loading uses skeleton cards (no shimmer with reduced motion); service failure and offline each name the problem and offer “Try again”; offline also points to saved clinicians, which work without a connection.</li>
+          <li><b>Favorites</b>: a heart toggle (outline → filled magenta with a 300 ms pop) with a spoken name (“Save …” / “Remove … from saved”) and an Undo toast that says “saved to Favorites”. Doctors and locations (clinics, hospitals) can be saved; the Favorites tab splits them into Clinicians and Locations, each with its own empty state. Guest favorites live on the device only.</li>
           <li><b>Wayfinding</b>: not a tab. It is an in-app page reached from the Wayfinding quick link, Locations, saved locations, the menu, and a contextual card on Home that appears only when relevant: at a UTSW facility (location allowed) or before an upcoming visit (signed-in, mocked). No appointment or MyChart account is needed to use it.</li>
           <li><b>Home</b>: one “Find Care” heading and one search field (“Doctors, locations, and more”); no repeated description and no top searches. 32 pt between sections.</li>
           <li><b>First run</b>: splash, four slides, then Home as a guest. Sign in stays on Home (app bar pill and the “Sign in for more” card).</li>
-          <li><b>Share</b>: opens the native share sheet with a public profile link and the provider’s name and specialty. No personal or health information is shared.</li>
+          <li><b>Share</b>: opens the native share sheet with a public profile link and the clinician’s name and specialty. No personal or health information is shared.</li>
           <li><b>Profile fields</b>: name, credentials, specialty, and at least one location are required. Bio, languages, education, research, and media show only when the directory has them; a missing section is left out rather than shown empty.</li>
           <li><b>Motion</b>: one transition for every screen, sheet, menu, and search: 420 ms, chips and toggles 150–200 ms. Reduced motion turns all of it into instant changes.</li>
           <li><b>One curve</b>: everything that travels uses <code>cubic-bezier(0.32, 0.72, 0, 1)</code>, a fast start with a long, quiet settle and no overshoot. Screens 480 ms, sheets 500 ms, search 520 ms, tab highlight 460 ms, toasts 420 ms, presses 120 ms down and 320 ms back.</li>

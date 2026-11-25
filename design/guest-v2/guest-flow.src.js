@@ -55,50 +55,50 @@ const PROV=[
  P_({id:"avery-morgan",first:"Avery",last:"Morgan",cred:"M.D.",gender:"Female",spec:"Orthopaedic Surgery",specs:["Orthopaedic Surgery","Sports Medicine"],
   conds:["Knee pain","ACL tears","Arthritis","Sports injuries","Shoulder pain"],langs:["English","Spanish"],hosp:["Lakeview University Hospital"],accepting:true,online:true,featured:true,locs:["L6","L3"],
   title:"Associate Professor of Orthopaedic Surgery (sample)",
-  bio:"Dr. Morgan treats knee and shoulder injuries in athletes of every level, from weekend runners to college teams. She uses minimally invasive surgery when surgery is needed, and starts with physical therapy and bracing whenever she can. Her clinical interests include ACL reconstruction, cartilage repair, and helping patients return to sports safely. Outside the clinic she coaches a youth soccer team. This is a sample profile for a fictional provider.",
+  bio:"Dr. Morgan treats knee and shoulder injuries in athletes of every level, from weekend runners to college teams. She uses minimally invasive surgery when surgery is needed, and starts with physical therapy and bracing whenever she can. Her clinical interests include ACL reconstruction, cartilage repair, and helping patients return to sports safely. Outside the clinic she coaches a youth soccer team. This is a sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Orthopaedic Surgery, Example Medical Center"],["Fellowship","Sports Medicine, Placeholder Institute"],["Board certification","American Board of Orthopaedic Surgery (sample)"]],
   research:[["Return-to-sport timelines after ACL repair (sample study)","Journal of Example Sports Medicine · 2025"],["Bracing versus early surgery for meniscus tears (sample study)","Sample Orthopaedic Review · 2024"]],
   video:["Getting back to sports after a knee injury","3 min video"]}),
  P_({id:"sam-okafor",first:"Sam",last:"Okafor",cred:"M.D.",gender:"Male",spec:"Sports Medicine",specs:["Sports Medicine"],
   conds:["Knee pain","Concussion","Sports injuries","Tendonitis"],langs:["English","French"],hosp:["Northgate Medical Center"],accepting:true,online:false,featured:false,locs:["L3"],
   title:"Sports Medicine physician (sample)",
-  bio:"Dr. Okafor cares for sports injuries without surgery, including sprains, tendon problems, and concussion. He works closely with physical therapists and athletic trainers. Sample profile for a fictional provider.",
+  bio:"Dr. Okafor cares for sports injuries without surgery, including sprains, tendon problems, and concussion. He works closely with physical therapists and athletic trainers. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example State College of Medicine"],["Residency","Family Medicine, Sample Regional Hospital"],["Fellowship","Primary Care Sports Medicine, Example Medical Center"]]}),
  P_({id:"priya-shah",first:"Priya",last:"Shah",cred:"M.D.",gender:"Female",spec:"Cardiology",specs:["Cardiology"],
   conds:["High blood pressure","Heart failure","Chest pain","Atrial fibrillation"],langs:["English","Hindi","Gujarati"],hosp:["Northgate Medical Center"],accepting:false,online:true,featured:true,locs:["L2"],
   title:"Professor of Internal Medicine, Cardiology (sample)",
-  bio:"Dr. Shah specializes in heart failure and preventive cardiology. She helps patients manage blood pressure and cholesterol to lower their risk of heart disease. Sample profile for a fictional provider.",
+  bio:"Dr. Shah specializes in heart failure and preventive cardiology. She helps patients manage blood pressure and cholesterol to lower their risk of heart disease. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Internal Medicine, Example Medical Center"],["Fellowship","Cardiovascular Disease, Placeholder Heart Institute"],["Board certification","Cardiovascular Disease (sample)"]],
   research:[["Home blood pressure monitoring in older adults (sample study)","Example Journal of Cardiology · 2025"]]}),
  P_({id:"daniel-reyes",first:"Daniel",last:"Reyes",cred:"M.D.",gender:"Male",spec:"Cardiology",specs:["Cardiology"],
   conds:["Atrial fibrillation","Heart rhythm disorders","Chest pain"],langs:["English","Spanish"],hosp:["Lakeview University Hospital"],accepting:true,online:true,featured:false,locs:["L2","L4"],
   title:"Cardiac electrophysiologist (sample)",
-  bio:"Dr. Reyes treats heart rhythm problems such as atrial fibrillation. He explains each treatment option in plain language, in English or Spanish. Sample profile for a fictional provider.",
+  bio:"Dr. Reyes treats heart rhythm problems such as atrial fibrillation. He explains each treatment option in plain language, in English or Spanish. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example State College of Medicine"],["Residency","Internal Medicine, Sample Regional Hospital"],["Fellowship","Clinical Cardiac Electrophysiology, Example Medical Center"]]}),
  P_({id:"jordan-avery",first:"Jordan",last:"Avery",cred:"M.D.",gender:"Female",spec:"Internal Medicine",specs:["Internal Medicine"],
   conds:["Annual checkups","Diabetes","High blood pressure","Preventive care"],langs:["English"],hosp:["Lakeview University Hospital"],accepting:true,online:true,featured:false,locs:["L1"],
   title:"Primary care physician (sample)",
-  bio:"Dr. Avery provides primary care for adults, from yearly checkups to managing long-term conditions such as diabetes. Sample profile for a fictional provider.",
+  bio:"Dr. Avery provides primary care for adults, from yearly checkups to managing long-term conditions such as diabetes. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Internal Medicine, Example Medical Center"]]}),
  P_({id:"morgan-lee",first:"Morgan",last:"Lee",cred:"M.D.",gender:"Female",spec:"Pediatrics",specs:["Pediatrics"],
   conds:["Well-child visits","Asthma","Vaccines"],langs:["English","Korean"],hosp:["Riverside Children’s Hospital"],accepting:true,online:true,featured:false,locs:["L1","L5"],
   title:"Pediatrician (sample)",
-  bio:"Dr. Lee cares for children from birth through age 18, with a focus on asthma and healthy growth. Sample profile for a fictional provider.",
+  bio:"Dr. Lee cares for children from birth through age 18, with a focus on asthma and healthy growth. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example State College of Medicine"],["Residency","Pediatrics, Placeholder Children’s Hospital"]]}),
  P_({id:"elena-petrova",first:"Elena",last:"Petrova",cred:"M.D.",gender:"Female",spec:"Dermatology",specs:["Dermatology"],
   conds:["Acne","Eczema","Skin cancer screening","Psoriasis"],langs:["English","Russian"],hosp:["Lakeview University Hospital"],accepting:false,online:false,featured:false,locs:["L4"],
   title:"Dermatologist (sample)",
-  bio:"Dr. Petrova treats skin conditions in adults and teens and performs skin cancer screenings. Sample profile for a fictional provider.",
+  bio:"Dr. Petrova treats skin conditions in adults and teens and performs skin cancer screenings. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Dermatology, Example Medical Center"]]}),
  P_({id:"marcus-bell",first:"Marcus",last:"Bell",cred:"D.O.",gender:"Male",spec:"Family Medicine",specs:["Family Medicine"],
   conds:["Annual checkups","Diabetes","Sports physicals","Preventive care"],langs:["English"],hosp:["Northgate Medical Center"],accepting:true,online:true,featured:false,locs:["L5"],
   title:"Family medicine physician (sample)",
-  bio:"Dr. Bell cares for whole families, from sports physicals to managing chronic conditions. Sample profile for a fictional provider.",
+  bio:"Dr. Bell cares for whole families, from sports physicals to managing chronic conditions. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example College of Osteopathic Medicine"],["Residency","Family Medicine, Sample Regional Hospital"]]}),
  P_({id:"lin-chen",first:"Lin",last:"Chen",cred:"M.D.",gender:"Female",spec:"Obstetrics and Gynecology",specs:["Obstetrics and Gynecology"],
   conds:["Pregnancy care","Menopause","Pelvic pain"],langs:["English","Mandarin"],hosp:["Lakeview University Hospital"],accepting:true,online:false,featured:true,locs:["L6"],
   title:"Obstetrician and gynecologist (sample)",
-  bio:"Dr. Chen cares for women through pregnancy, birth, and every stage of life. Sample profile for a fictional provider.",
+  bio:"Dr. Chen cares for women through pregnancy, birth, and every stage of life. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Obstetrics and Gynecology, Example Medical Center"]],
   research:[["Group prenatal care and patient satisfaction (sample study)","Example Journal of Women’s Health · 2024"]],
   video:["What to expect at your first prenatal visit","4 min video"]}),
@@ -109,26 +109,26 @@ const PROV=[
  P_({id:"grace-nwosu",first:"Grace",last:"Nwosu",cred:"M.D.",gender:"Female",spec:"Dermatology",specs:["Dermatology"],
   conds:["Eczema","Hair loss","Acne"],langs:["English"],hosp:["Northgate Medical Center"],accepting:true,online:true,featured:false,locs:["L2"],
   title:"Dermatologist (sample)",
-  bio:"Dr. Nwosu treats eczema, acne, and hair loss, with special experience in skin of color. Sample profile for a fictional provider.",
+  bio:"Dr. Nwosu treats eczema, acne, and hair loss, with special experience in skin of color. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example State College of Medicine"],["Residency","Dermatology, Placeholder Medical Center"]]}),
  P_({id:"rafael-santos",first:"Rafael",last:"Santos",cred:"M.D.",gender:"Male",spec:"Orthopaedic Surgery",specs:["Orthopaedic Surgery"],
   conds:["Hip pain","Joint replacement","Arthritis","Knee pain"],langs:["English","Spanish","Portuguese"],hosp:["Lakeview University Hospital"],accepting:true,online:true,featured:false,locs:["L6","L5"],
   title:"Joint replacement surgeon (sample)",
-  bio:"Dr. Santos specializes in hip and knee replacement and helps patients get moving again quickly after surgery. Sample profile for a fictional provider.",
+  bio:"Dr. Santos specializes in hip and knee replacement and helps patients get moving again quickly after surgery. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Orthopaedic Surgery, Example Medical Center"],["Fellowship","Adult Reconstruction, Placeholder Institute"]]}),
  P_({id:"hannah-kim",first:"Hannah",last:"Kim",cred:"M.D.",gender:"Female",spec:"Pediatrics",specs:["Pediatrics"],
   conds:["Asthma","ADHD","Well-child visits"],langs:["English","Korean","Spanish"],hosp:["Riverside Children’s Hospital"],accepting:false,online:true,featured:false,locs:["L5"],
   title:"Pediatrician (sample)",
-  bio:"Dr. Kim cares for children and teens, with a focus on asthma and attention disorders. Sample profile for a fictional provider.",
+  bio:"Dr. Kim cares for children and teens, with a focus on asthma and attention disorders. Sample profile for a fictional clinician.",
   edu:[["Medical school","Example State College of Medicine"],["Residency","Pediatrics, Placeholder Children’s Hospital"]]}),
  P_({id:"theo-brooks",first:"Theo",last:"Brooks",cred:"M.D.",gender:"Male",spec:"Internal Medicine",specs:["Internal Medicine"],
   conds:["Annual checkups","High cholesterol","Preventive care"],langs:["English","Vietnamese"],hosp:["Northgate Medical Center"],accepting:true,online:true,featured:false,locs:["L1","L2"],
   title:"Primary care physician (sample)",
-  bio:"Dr. Brooks provides primary care for adults and speaks English and Vietnamese. Sample profile for a fictional provider.",
+  bio:"Dr. Brooks provides primary care for adults and speaks English and Vietnamese. Sample profile for a fictional clinician.",
   edu:[["Medical school","Sample University School of Medicine"],["Residency","Internal Medicine, Sample Regional Hospital"]]})
 ];
 const PBY=Object.fromEntries(PROV.map(p=>[p.id,p]));
-/* Sample ratings, review counts, video visits, and next opening for the provider list (fictional) */
+/* Sample ratings, review counts, video visits, and next opening for the clinician list (fictional) */
 const AVAIL={"avery-morgan":[4.9,312,1,"Tomorrow, 9:30 a.m."],"sam-okafor":[4.7,141,0,"Thursday, 1 p.m."],"priya-shah":[4.9,268,1,"Today, 3:15 p.m."],"daniel-reyes":[4.8,198,0,"Thursday, 1 p.m."],
  "jordan-avery":[4.8,225,1,"Tomorrow, 11 a.m."],"morgan-lee":[4.9,402,1,"Friday, 8:45 a.m."],"elena-petrova":[4.6,87,1,"Oct. 22, 10 a.m."],"marcus-bell":[4.7,156,1,"Tomorrow, 2:30 p.m."],
  "lin-chen":[4.9,289,0,"Monday, 9 a.m."],"omar-haddad":[4.5,64,1,"Oct. 24, 1:30 p.m."],"grace-nwosu":[4.8,173,1,"Today, 4 p.m."],"rafael-santos":[4.7,118,0,"Wednesday, 10:15 a.m."],
@@ -173,7 +173,7 @@ const RESOURCES=[
 const ANN=[
  {d:"Oct. 9",t:"Saturday hours at Lakeview Primary Care",s:"Open 8 a.m. to noon starting Oct. 17.",isNew:true},
  {d:"Oct. 2",t:"Updated visitor guidelines",s:"Two visitors per patient on inpatient units."},
- {d:"Sept. 28",t:"Find a doctor by language",s:"Filter providers by the languages they speak."}
+ {d:"Sept. 28",t:"Find a doctor by language",s:"Filter clinicians by the languages they speak."}
 ];
 const GS_OTHER=[
  {t:"Lakeview Primary Care",s:"4100 Sample Parkway, Suite 200, Dallas",k:"location",kw:"clinic primary care checkup internal medicine pediatrics"},
@@ -187,9 +187,9 @@ const GS_OTHER=[
  {t:"Request medical records",s:"Forms and requests",k:"resource",kw:"records form"},
  {t:"Get a flu shot",s:"Schedule at a clinic or pharmacy",k:"resource",kw:"flu shot vaccine"}
 ];
-const GS_TOP=["Primary care","Knee pain","Urgent care","Heart doctor","Pay a bill","Flu shot"];
-const KIND={provider:["Providers","stethoscope","Doctors by name, specialty, or condition"],location:["Locations","location_on","Clinics, hospitals, and urgent care"],content:["Health content","article","MedBlog articles and patient guides"],resource:["Resources","folder_open","Billing, records, and forms"]};
-const POPULAR=["Primary care","Knee pain","Heart doctor","Spanish-speaking pediatrician","Dermatology","Accepting new patients"];
+/* Follow us: brand glyphs from Font Awesome Free Brands 6.5.2 (CC BY 4.0), drawn in the app's icon color */
+const SOCIAL=[["Facebook",320,512,"M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"],["Instagram",448,512,"M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"],["LinkedIn",448,512,"M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"],["X",512,512,"M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"]];
+const KIND={provider:["Clinicians","stethoscope","Doctors by name, specialty, or condition"],location:["Locations","location_on","Clinics, hospitals, and urgent care"],content:["Health content","article","MedBlog articles and patient guides"],resource:["Resources","folder_open","Billing, records, and forms"]};
 
 /* ---------- Plain-language query understanding (stands in for the approved search service) ---------- */
 const SYN=[
@@ -209,7 +209,7 @@ const SYN=[
  [["diabetic","blood sugar"],{conds:["Diabetes"]}],
  [["cholesterol"],{conds:["High cholesterol"]}]
 ];
-const STOP=new Set(["doctor","doctors","dr","specialist","specialists","a","an","the","for","with","and","who","in","of","to","my","me","i","need","find","see","pain","care","physician","near","provider","providers","clinic","treats","treat","that","speaks","speak","speaking","online","scheduling","schedule","book","accepting","new","patients","patient"]);
+const STOP=new Set(["doctor","doctors","dr","specialist","specialists","a","an","the","for","with","and","who","in","of","to","my","me","i","need","find","see","pain","care","physician","near","provider","providers","clinician","clinicians","clinic","treats","treat","that","speaks","speak","speaking","online","scheduling","schedule","book","accepting","new","patients","patient"]);
 function lev(a,b){const m=a.length,n=b.length;if(Math.abs(m-n)>2)return 9;const d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;
   for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
 function parse(q){
@@ -451,8 +451,6 @@ function idleHTML(){
   return `${S.recent.length?`<section class="grp" aria-labelledby="rec-h"><div class="grp-h"><h2 class="lbl-h" id="rec-h">Recent searches</h2><button class="btn btn-ghost btn-sm" data-action="clear-recent">Clear</button></div>
      <div class="card list">${S.recent.map(r=>`<div class="row-wrap"><button class="row" data-action="run" data-q="${esc(r)}">${ic("history",20)}<span class="rt"><b>${esc(r)}</b></span></button><button class="icon-btn" data-action="rm-recent" data-q="${esc(r)}" aria-label="Remove ${esc(r)} from recent searches">${ic("close",20)}</button></div>`).join("")}</div>
      <p class="fine">Recent searches stay on this device.</p></section>`:""}
-   <section class="grp" aria-labelledby="pop-h"><h2 class="lbl-h" id="pop-h">Popular searches</h2>
-     <div class="chips">${POPULAR.map(t=>`<button class="chip" data-action="run" data-q="${t}">${ic("trending_up",16)}${t}</button>`).join("")}</div></section>
    <section class="grp" aria-labelledby="spec-h2"><h2 class="lbl-h" id="spec-h2">Browse by specialty</h2>
      <div class="card list">${SPECS.map(s=>`<button class="row" data-action="run" data-q="${s}"><span class="rt"><b>${s}</b></span><span class="count">${counts[s]} doctor${counts[s]>1?"s":""}</span>${ic("chevron_right",20)}</button>`).join("")}
        <button class="row" data-action="run" data-q=""><span class="rt"><b>All doctors</b></span><span class="count">${PROV.length} doctors</span>${ic("chevron_right",20)}</button></div></section>`;
@@ -526,11 +524,11 @@ function renderResultsBody0(){
   const b=$("#res-body");if(!b)return;
   if(S.loading){b.setAttribute("aria-busy","true");b.innerHTML=`<div class="res-sum"><div class="skel" style="height:20px;width:50%"></div></div>${skeletonCards()}<span class="sr-only">Loading doctors</span>`;return}
   b.removeAttribute("aria-busy");
-  if(S.data==="error"){b.innerHTML=`<div class="card state">${well("cloud_off",48)}<h2>We couldn’t load doctors</h2><p>The provider directory didn’t respond. Your search and filters are saved, so you can try again now.</p>
-    <div class="row-btns"><button class="btn btn-primary" data-action="retry">${ic("refresh")}<span>Try again</span></button><button class="btn btn-ghost" data-action="tab" data-tab="saved">View saved providers</button></div>
+  if(S.data==="error"){b.innerHTML=`<div class="card state">${well("cloud_off",48)}<h2>We couldn’t load doctors</h2><p>The clinician directory didn’t respond. Your search and filters are saved, so you can try again now.</p>
+    <div class="row-btns"><button class="btn btn-primary" data-action="retry">${ic("refresh")}<span>Try again</span></button><button class="btn btn-ghost" data-action="tab" data-tab="saved">View saved clinicians</button></div>
     <p class="fine">Still not working? Call 214-555-0100 to find a doctor by phone.</p></div>`;return}
-  if(S.data==="offline"){b.innerHTML=`<div class="card state">${well("wifi_off",48)}<h2>You’re offline</h2><p>Connect to Wi-Fi or mobile data to search for doctors. Saved providers are still on this device.</p>
-    <div class="row-btns"><button class="btn btn-primary" data-action="retry">${ic("refresh")}<span>Try again</span></button><button class="btn btn-secondary" data-action="tab" data-tab="saved">${ic("favorite",20)}<span>Saved providers</span></button></div></div>`;return}
+  if(S.data==="offline"){b.innerHTML=`<div class="card state">${well("wifi_off",48)}<h2>You’re offline</h2><p>Connect to Wi-Fi or mobile data to search for doctors. Saved clinicians are still on this device.</p>
+    <div class="row-btns"><button class="btn btn-primary" data-action="retry">${ic("refresh")}<span>Try again</span></button><button class="btn btn-secondary" data-action="tab" data-tab="saved">${ic("favorite",20)}<span>Saved clinicians</span></button></div></div>`;return}
   const list=results(),pq=S.pq||parse("");
   const topical=[...pq.specs,...pq.conds];
   const interp=S.q&&topical.length&&(topical.join(" ").toLowerCase()!==S.q.toLowerCase())?`<p>Showing doctors for <b>${esc(topical.join(", "))}</b>${pq.fixed.length?` (searched for “${esc(pq.fixed.map(f=>f[1]).join(", "))}” instead of “${esc(pq.fixed.map(f=>f[0]).join(", "))}”)`:""}</p>`:"";
@@ -550,7 +548,7 @@ function renderResultsBody0(){
   }
   b.innerHTML=`${locBanner()}<div class="res-sum"><h2><span data-count="${list.length}">${list.length}</span> doctor${list.length>1?"s":""}${S.loc?" "+esc(nearTxt()):""}</h2>${interp}</div>
     ${list.map((p,i)=>pcard(p,Math.min(i,6))).join("")}
-    <p class="fine">Sample results from fictional providers. ${S.sort==="featured"?"Featured providers are chosen by UTSW and marked.":"Best match weighs your search, distance, and availability."}</p>`;
+    <p class="fine">Sample results from fictional clinicians. ${S.sort==="featured"?"Featured clinicians are chosen by UTSW and marked.":"Best match weighs your search, distance, and availability."}</p>`;
 }
 
 /* ---------- Profile ---------- */
@@ -589,13 +587,13 @@ function viewProfile(id){
      ${(p.research||[]).map(([t,s])=>`<button class="row" data-action="toast" data-kind="out" data-msg="Opens the publication website">${well("menu_book")}<span class="rt"><b>${esc(t)}</b><span>${esc(s)}</span></span>${ic("chevron_right",20)}</button>`).join("")}</div></section>`:""}
    ${rel.length?`<section class="p-sec" aria-labelledby="ps-rel"><h3 id="ps-rel">Related doctors</h3><div class="h-scroll">
      ${rel.map(r=>`<button class="card mini rel press" data-action="profile" data-id="${r.id}">${avatar(r,56)}<b>${esc(name(r))}</b><span>${esc(r.spec)}${distTo(r)!=null?` · ${fmtMi(distTo(r))}`:""}</span></button>`).join("")}</div></section>`:""}
-   <p class="fine pad">Profile details come from the UTSW provider directory. Sample profile of a fictional provider.${!p.bio?" This directory entry has no biography or education yet, so those sections are hidden.":""}</p>
+   <p class="fine pad">Profile details come from the UTSW clinician directory. Sample profile of a fictional clinician.${!p.bio?" This directory entry has no biography or education yet, so those sections are hidden.":""}</p>
   </div>`;
 }
 
 /* ---------- Favorites, Wayfinding, Locations, Menu ---------- */
-/* Favorites tab: one place for everything a guest saves on this device, split into Providers and Locations */
-function favSeg(){const segs=[["providers","Providers",S.saved.length],["locations","Locations",S.savedLocs.length]];
+/* Favorites tab: one place for everything a guest saves on this device, split into Clinicians and Locations */
+function favSeg(){const segs=[["providers","Clinicians",S.saved.length],["locations","Locations",S.savedLocs.length]];
   return `<div class="segm fav-seg" role="radiogroup" aria-label="Show saved">${segs.map(([v,l,n])=>`<label><input type="radio" name="favseg" value="${v}" ${S.favSeg===v?"checked":""}><span>${l}${n?` <b class="seg-n">${n}</b>`:""}</span></label>`).join("")}</div>`}
 function viewSaved(){
   const note=`<p class="fine">Favorites stay on this device. Find them any time under Favorites in the tab bar. If you delete the app, they’re removed.</p>`;
@@ -607,18 +605,18 @@ function viewSaved(){
       <div class="card list">${ls.map(l=>locRow(l)).join("")}</div>${note}</div>`;
   }
   const ps=S.saved.map(id=>PBY[id]).filter(Boolean);
-  if(!ps.length)return `<div class="res-body">${favSeg()}<div class="card state">${well("favorite",48)}<h2>No saved providers yet</h2><p>Tap the heart on a doctor’s profile or search result to keep them here.</p>
+  if(!ps.length)return `<div class="res-body">${favSeg()}<div class="card state">${well("favorite",48)}<h2>No saved clinicians yet</h2><p>Tap the heart on a doctor’s profile or search result to keep them here.</p>
     <button class="btn btn-primary" data-action="tab" data-tab="find">${ic("stethoscope",20)}<span>Find a doctor</span></button></div>${note}</div>`;
-  return `<div class="res-body">${favSeg()}<div class="res-sum"><h2>${ps.length} saved provider${ps.length>1?"s":""}</h2><p>Saved on this device. They stay until you remove them or delete the app.</p></div>
+  return `<div class="res-body">${favSeg()}<div class="res-sum"><h2>${ps.length} saved clinician${ps.length>1?"s":""}</h2><p>Saved on this device. They stay until you remove them or delete the app.</p></div>
     ${ps.map((p,i)=>pcard(p,i)).join("")}${note}</div>`;
 }
-/* Heart for a location (clinic, hospital); same toggle as providers, smaller target sits at the end of a row */
+/* Heart for a location (clinic, hospital); same toggle as clinicians, smaller target sits at the end of a row */
 function locFavBtn(l){const on=isLocSaved(l.id);
   return `<button class="icon-btn fav-loc" data-action="fav-loc" data-id="${l.id}" aria-pressed="${on}" aria-label="${on?`Remove ${esc(l.n)} from saved`:`Save ${esc(l.n)}`}">${on?heart(24):ic("favorite")}</button>`}
 function locRow(l,act){const d=locDist(l);
   return `<div class="row-wrap" data-loc="${l.id}"><button class="row" ${act||`data-action="push" data-v="wayfinding" data-to="${l.id}"`}>${well(/Hospital/.test(l.n)?"local_hospital":"location_on")}<span class="rt"><b>${esc(l.n)}</b><span>${esc(l.a)}${d!=null?` · ${fmtMi(d)}`:""}</span></span></button>${locFavBtn(l)}</div>`}
 /* Wayfinding: an in-app page (push), reached from the Wayfinding quick link, the contextual card on Home, Locations, saved locations, and the menu.
-   Works for any visitor: no appointment or MyChart account needed. Indoor routes hand off to the wayfinding provider (simulated). */
+   Works for any visitor: no appointment or MyChart account needed. Indoor routes hand off to the wayfinding clinician (simulated). */
 const WF_DEST=[["local_parking","Parking"],["door_front","Main entrance"],["local_pharmacy","Pharmacy"],["restaurant","Cafeteria"],["wc","Restrooms"],["elevator","Elevators"]];
 const WF_ROOM={Pharmacy:"lv1-pharm",Cafeteria:"lv1-cafe",Restrooms:"lv1-wc",Elevators:"lv1-elev"};
 const WF_FAC="L6",WF_VISIT={when:"Today, 2:30 p.m.",what:"Primary care visit",loc:"L1",room:"Suite 200, Floor 2"};
@@ -656,7 +654,7 @@ function viewWayfinding(){
      <div class="card list">${roomsOn("lv"+f).filter(r=>r.kind!=="other"&&r.kind!=="core").map(r=>`<button class="row" data-action="geo-nav" data-room="${r.id}">${well(r.ic||roomGlyph(r.id))}<span class="rt"><b>${r.name}${r.suite?`, Suite ${r.suite}`:""}</b><span>${whereL(r)}</span></span>${ic("directions",20)}</button>`).join("")}</div></section>
    <section class="mod" aria-labelledby="wf-c"><div class="mod-head"><h2 class="sec-h" id="wf-c">Campuses and buildings</h2></div>
      <div class="card list">${ls.map(l=>locRow(l,`data-action="push" data-v="wayfinding" data-to="${l.id}"`)).join("")}</div></section>
-   <p class="fine pad">No appointment or MyChart account needed. Every building uses the same sample indoor map here; live maps and positions come from the wayfinding provider in the real app.</p></div>`;
+   <p class="fine pad">No appointment or MyChart account needed. Every building uses the same sample indoor map here; live maps and positions come from the wayfinding clinician in the real app.</p></div>`;
 }
 const roomGlyph=id=>({"lv2-lab":"science","lv1-img":"medical_information","lv7-heart":"cardiology","lv2-pc":"stethoscope"}[id]||"accessibility_new");
 /* Where are you going? – every room, by floor, in a sheet; each starts directions in the app */
@@ -697,7 +695,7 @@ function viewMenu(){
      ${mrow("medical_information","Resources for physicians","Referrals and clinical tools",`data-action="toast" data-kind="out" data-msg="Opens physician resources on the UTSW website"`,OUT)}
      ${mrow("language","Visit the full website","utsouthwestern.edu",`data-action="toast" data-kind="out" data-msg="Opens the UT Southwestern website"`,OUT)}</div></section>
    <section class="grp" aria-labelledby="mn-4"><h2 class="lbl-h" id="mn-4">Follow us</h2>
-     <div class="chips">${["Facebook","Instagram","LinkedIn","X"].map(x=>`<button class="chip" data-action="toast" data-kind="out" data-msg="Opens UT Southwestern on ${x}" aria-label="${x}, opens in the ${x} app">${x}</button>`).join("")}</div></section>
+     <div class="social">${SOCIAL.map(([x,w,h,d])=>`<button class="soc-btn press" data-action="toast" data-kind="out" data-msg="Opens UT Southwestern on ${x}" aria-label="${x}, opens the ${x} app"><span class="soc-ic" aria-hidden="true"><svg viewBox="0 0 ${w} ${h}" width="20" height="20" focusable="false"><path fill="currentColor" d="${d}"/></svg></span><span class="soc-l" aria-hidden="true">${x}</span></button>`).join("")}</div></section>
    <section class="grp" aria-labelledby="mn-ap"><h2 class="lbl-h" id="mn-ap">Appearance</h2>
      <div class="card ap-card"><div class="segm" role="radiogroup" aria-labelledby="mn-ap">${[["light","Light"],["dark","Dark"],["system","System"]].map(([v,l])=>`<label><input type="radio" name="theme" value="${v}" ${S.theme===v?"checked":""}><span>${ic(v==="system"?"brightness_auto":v==="light"?"light_mode":"dark_mode",20)}${l}</span></label>`).join("")}</div>
      <p class="fine" id="ap-note">${S.theme==="system"?"Follows your phone’s setting.":`Always ${S.theme}.`} Saved on this device.</p></div></section>
@@ -731,7 +729,7 @@ function viewMyChart(err){
    <section class="grp" aria-labelledby="mc-guest-h"><h2 class="sec-h" id="mc-guest-h">Without signing in</h2>
      <div class="card list">
        ${mrow("receipt_long","Pay as a guest","Pay a bill with your statement number",`data-action="toast" data-kind="out" data-msg="Opens guest bill pay"`,CHEV)}
-       ${mrow("stethoscope","Find a doctor","Search providers and request an appointment",`data-action="tab" data-tab="find"`,CHEV)}
+       ${mrow("stethoscope","Find a doctor","Search clinicians and request an appointment",`data-action="tab" data-tab="find"`,CHEV)}
        ${mrow("support_agent","MyChart help","Call 214-555-0190, Monday – Friday, 7 a.m. – 7 p.m.",`data-action="toast" data-kind="go" data-msg="Opens MyChart help"`,CHEV)}
      </div></section>
    <p class="fine">Sign-in goes to MyChart. This guest prototype doesn’t sign you in.</p></div>`;
@@ -1668,30 +1666,30 @@ function closeSearch(cb){
   const a=s.animate(ZOOM_OUT_KF,{duration:ZOOM_OUT+40,easing:"ease-in"});
   a.onfinish=done;
 }
-/* Search screen: Saved providers and Search history share one card behind a two-way toggle (both on this device) */
+/* Search screen: Saved clinicians and Search history share one card behind a two-way toggle (both on this device) */
 function yoursHTML(){
-  const t=S.yours||"saved",ps=S.saved.map(id=>PBY[id]).filter(Boolean),chev=ic("chevron_right",20);
-  const tab=(k,l,n)=>`<button class="yt-btn" role="tab" id="yt-${k}" aria-controls="yt-panel" aria-selected="${t===k}" tabindex="${t===k?0:-1}" data-action="yours" data-k="${k}">${l}${n?` <span class="yt-n">${n}</span>`:""}</button>`;
-  const body=t==="saved"
-    ?(ps.length?ps.map(p=>`<button class="row" data-action="gs-profile" data-id="${p.id}">${avatar(p,40)}<span class="rt"><b>${esc(name(p))}</b><span>${esc(p.spec)} · ${esc(LOCS[p.locs[0]].n)}</span></span>${chev}</button>`).join("")
-      :`<button class="row" data-action="search-saved">${well("favorite")}<span class="rt"><b>No saved providers yet</b><span>Tap the heart on a provider to save them</span></span>${chev}</button>`)
-    :(S.recent.length?S.recent.map(r=>`<button class="row" data-action="search-all" data-q="${esc(r)}">${well("history")}<span class="rt"><b>${esc(r)}</b></span>${chev}</button>`).join("")
-      :`<div class="row" style="cursor:default">${well("history")}<span class="rt"><b>No searches yet</b><span>Your recent searches show here</span></span></div>`);
-  return `<section class="res-group yours" aria-label="Saved providers and search history">
-    <div class="yt-bar"><div class="yt" role="tablist" aria-label="Show">${tab("saved","Saved providers",ps.length)}${tab("history","Search history",S.recent.length)}</div></div>
-    <div class="card list" role="tabpanel" id="yt-panel" aria-labelledby="yt-${t}">${body}</div>
-    <div class="grp-h"><p class="fine">On this device</p>${t==="history"&&S.recent.length?`<button class="btn btn-ghost btn-sm" data-action="clear-history">Clear</button>`:""}</div></section>`;
+  const ps=S.saved.map(id=>PBY[id]).filter(Boolean),chev=ic("chevron_right",20);
+  const body=ps.length?ps.map(p=>`<button class="row" data-action="gs-profile" data-id="${p.id}">${avatar(p,40)}<span class="rt"><b>${esc(name(p))}</b><span>${esc(p.spec)} · ${esc(LOCS[p.locs[0]].n)}</span></span>${chev}</button>`).join("")
+    :`<button class="row" data-action="search-saved">${well("favorite")}<span class="rt"><b>No saved clinicians yet</b><span>Tap the heart on a clinician to save them</span></span>${chev}</button>`;
+  return `<section class="res-group yours" aria-labelledby="yt-h"><div class="grp-h"><h2 class="lbl-h" id="yt-h">Saved clinicians${ps.length?` <span class="yt-n">${ps.length}</span>`:""}</h2></div>
+    <div class="card list">${body}</div></section>`;
 }
-/* Provider filters right in search: tune button beside the field (count badge); a summary line with Clear when any are on */
+/* Recent searches: personal, newest first, kept on this device (they replace the old Top searches) */
+function recentHTML(){
+  return `<section class="res-group" aria-labelledby="grec-h"><div class="grp-h"><h2 class="lbl-h" id="grec-h">Recent searches</h2>${S.recent.length?`<button class="btn btn-ghost btn-sm" data-action="clear-history">Clear</button>`:""}</div>
+    ${S.recent.length?`<div class="chips chips-row">${S.recent.map(t=>`<button class="chip chip-sm" data-action="search-all" data-q="${esc(t)}">${ic("history",20)}${esc(t)}</button>`).join("")}</div><p class="fine">On this device</p>`
+      :`<div class="card list"><div class="row" style="cursor:default">${well("history")}<span class="rt"><b>No searches yet</b><span>Your recent searches show here, on this device only</span></span></div></div>`}</section>`;
+}
+/* Clinician filters right in search: tune button beside the field (count badge); a summary line with Clear when any are on */
 function syncSearchFilters(){const n=filterCount(),b=$("#search-filters");if(!b)return;
   b.innerHTML=ic("tune",20)+(n?`<span class="sf-n" aria-hidden="true">${n}</span>`:"");b.setAttribute("aria-label",n?`Filters, ${n} on`:"Filters");b.classList.toggle("on",!!n)}
 function sfSummary(){const n=filterCount();if(!n)return"";const f=S.filters,parts=[...f.specs,...f.conds,...f.langs,...f.hosp];
   if(f.gender!=="any")parts.push(f.gender==="f"?"Female":f.gender==="m"?"Male":f.gender);if(f.dist!=="any")parts.push(`Within ${f.dist} miles`);if(f.accepting)parts.push("Accepting new patients");if(f.online)parts.push("Online scheduling");
-  return `<div class="sf-sum" role="group" aria-label="Provider filters">${ic("tune",20)}<span><b>${n} filter${n>1?"s":""} on</b> ${esc(parts.slice(0,3).join(", "))}${parts.length>3?` and ${parts.length-3} more`:""}</span><button class="btn btn-ghost btn-sm" data-action="search-clear-filters">Clear</button></div>`}
-function renderYours(focusTab){const y=$("#search-body .yours");if(!y)return;y.outerHTML=yoursHTML();if(focusTab)$(`#yt-${S.yours}`)?.focus()}
+  return `<div class="sf-sum" role="group" aria-label="Clinician filters">${ic("tune",20)}<span><b>${n} filter${n>1?"s":""} on</b> ${esc(parts.slice(0,3).join(", "))}${parts.length>3?` and ${parts.length-3} more`:""}</span><button class="btn btn-ghost btn-sm" data-action="search-clear-filters">Clear</button></div>`}
+function renderYours(){const y=$("#search-body .yours");if(y)y.outerHTML=yoursHTML();const r=$("#grec-h")?.closest(".res-group");if(r)r.outerHTML=recentHTML()}
 function renderSearch(q){
   const b=$("#search-body");q=q.trim();$("#q-clear").hidden=!q;
-  if(!q){b.innerHTML=sfSummary()+yoursHTML()+`<section class="res-group" aria-labelledby="gtop-h"><h2 class="lbl-h" id="gtop-h">Top searches</h2><div class="chips chips-row">${GS_TOP.map(t=>`<button class="chip chip-sm" data-action="search-term" data-q="${t}">${ic("trending_up",16)}${t}</button>`).join("")}</div></section>
+  if(!q){b.innerHTML=sfSummary()+recentHTML()+yoursHTML()+`
      <section class="res-group" aria-labelledby="by-h"><h2 class="lbl-h" id="by-h">Search for</h2><div class="card list">${Object.values(KIND).map(([l,g,d])=>`<div class="row" style="cursor:default">${well(g)}<span class="rt"><b>${l}</b><span>${d}</span></span></div>`).join("")}</div></section>`;return}
   const pq=parse(q);const saveP=S.pq;S.pq=pq;const provs=results(S.filters);S.pq=saveP;
   const words=q.toLowerCase().split(/\s+/);
@@ -1706,7 +1704,6 @@ function renderSearch(q){
   sayPolite(groups.length?"Results updated":"No results");
 }
 $("#q").addEventListener("input",e=>renderSearch(e.target.value));
-$("#search-body").addEventListener("keydown",e=>{const t=e.target.closest(".yt-btn");if(!t||!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();S.yours=S.yours==="history"?"saved":"history";renderYours(true)});
 $("#q").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.value.trim()){const v=e.target.value.trim();closeSearch(()=>runSearch(v,{keepFilters:true}))}});
 
 /* ---------- Events ---------- */
@@ -1755,16 +1752,15 @@ screen.addEventListener("click",e=>{
    case "search-term":if($("#search").hidden)openSearch(el.dataset.q);else{$("#q").value=el.dataset.q;renderSearch(el.dataset.q);$("#q").focus()}break;
    case "search-pick":closeSearch();toast("Opens: "+el.dataset.msg,"go");break;
    case "search-all":closeSearch(()=>runSearch(el.dataset.q,{keepFilters:true}));break;
-   case "yours":S.yours=el.dataset.k;renderYours(true);break;
    case "search-saved":closeSearch(()=>switchTab("saved",true));break;
-   case "clear-history":S.recent=[];store.set("recent",[]);renderYours(false);$("#yt-history")?.focus();sayPolite("Search history cleared");break;
+   case "clear-history":S.recent=[];store.set("recent",[]);renderYours();$("#grec-h")?.setAttribute("tabindex","-1");$("#grec-h")?.focus();sayPolite("Recent searches cleared");break;
    case "gs-profile":closeSearch(()=>push({v:"profile",id}));break;
    case "tile":{const k=el.dataset.k;if(k==="find")switchTab("find",true);else if(k==="locations")push({v:"locations"});else if(k==="wayfinding")push({v:"wayfinding"});else openMyChart(el.dataset.l);break}
    case "near-me":S.fcText="";runSearch("",{});if(!S.loc)setTimeout(useMyLocation,rm()?0:350);break;
    case "run":{const go=()=>{S.fcText="";runSearch(el.dataset.q)};if(!$("#layer").hidden)closeSheet(go);else go();break}
    case "run-accepting":S.fcText="";runSearch(el.dataset.q);S.filters.accepting=true;render();load();break;
    case "fc-clear":S.fcText="";$("#fq").value="";$("#fq-clear").hidden=true;$("#fc-sug").innerHTML=idleHTML();$("#fq").focus();break;
-   case "clear-recent":S.recent=[];store.set("recent",[]);$("#fc-sug").innerHTML=idleHTML();$("#pop-h")?.setAttribute("tabindex","-1");$("#pop-h")?.focus();sayPolite("Recent searches cleared");break;
+   case "clear-recent":S.recent=[];store.set("recent",[]);$("#fc-sug").innerHTML=idleHTML();$("#spec-h2")?.setAttribute("tabindex","-1");$("#spec-h2")?.focus();sayPolite("Recent searches cleared");break;
    case "rm-recent":{S.recent=S.recent.filter(x=>x!==el.dataset.q);store.set("recent",S.recent);$("#fc-sug").innerHTML=idleHTML();(S.recent.length?$('[data-action="rm-recent"]'):$("#pop-h"))?.focus();sayPolite("Removed");break}
    case "edit-query":{S.fcText=S.q;const st=S.stacks.find;st.splice(1);render("pop",{scroll:0});setTimeout(()=>{const f=$("#fq");if(f){f.focus();f.setSelectionRange(f.value.length,f.value.length)}},rm()?0:60);break}
    case "loc-sheet":openLoc();break;
@@ -1886,8 +1882,9 @@ const JUMPS=[
  ["wf-visit","Home before a visit","Upcoming visit with directions",()=>{S.wf="visit";goTab("home");render("fade")}],
  ["wayfinding","Wayfinding","In-app page, no account needed",()=>{goTab("home");S.stacks.home.push({v:"wayfinding"});render("fade")}],
  ["locations","Locations","Save a location with the heart",()=>{goTab("home");S.stacks.home.push({v:"locations"});render("fade")}],
- ["gsearch","Global search","Top searches and grouped results",()=>{goTab("home");render("fade");setTimeout(()=>openSearch("knee"),50)}],
- ["find","Find Care","Recent, popular, specialties",()=>{goTab("find");render("fade")}],
+ ["gsearch-recent","Search – recent searches","Your recent searches, on this device",()=>{if(!S.recent.length){S.recent=["Knee pain","Primary care","Spanish-speaking pediatrician"];store.set("recent",S.recent)}goTab("home");render("fade");setTimeout(()=>openSearch(""),50)}],
+ ["gsearch","Global search","Recent searches and grouped results",()=>{goTab("home");render("fade");setTimeout(()=>openSearch("knee"),50)}],
+ ["find","Find Care","Recent searches, browse by specialty",()=>{goTab("find");render("fade")}],
  ["suggest","Auto-suggestions","Typing “derm”",()=>{goTab("find");S.fcText="derm";render("fade")}],
  ["plain","Plain-language search","“spanish speaking pediatrician”",()=>{S.data="live";setResults("spanish speaking pediatrician")}],
  ["typo","Spelling correction","“dermotology”",()=>{S.data="live";setResults("dermotology")}],
@@ -1897,15 +1894,15 @@ const JUMPS=[
  ["loading","Loading","Skeleton results",()=>{S.data="slow";setResults("Cardiology")}],
  ["empty","No results","Alternatives offered",()=>{S.data="live";setResults("Cardiology",()=>{S.filters.langs.add("Korean")})}],
  ["error","Service error","Retry",()=>{S.data="error";setResults("Cardiology")}],
- ["offline","Offline","Retry and saved providers",()=>{S.data="offline";setResults("Cardiology")}],
+ ["offline","Offline","Retry and saved clinicians",()=>{S.data="offline";setResults("Cardiology")}],
  ["denied","Location denied","Fallback to ZIP or city",()=>{S.data="live";S.perm="denied";S.osAnswer="denied";S.loc=null;setResults("Pediatrics");setTimeout(openLoc,rm()?0:400)}],
- ["profile","Provider profile","Full profile with research",()=>{goTab("find");S.stacks.find.push({v:"profile",id:"avery-morgan"});render("fade")}],
+ ["profile","Clinician profile","Full profile with research",()=>{goTab("find");S.stacks.find.push({v:"profile",id:"avery-morgan"});render("fade")}],
  ["missing","Profile, missing data","Optional sections hidden",()=>{goTab("find");S.stacks.find.push({v:"profile",id:"omar-haddad"});render("fade")}],
  ["share","Share sheet","Public link only",()=>{goTab("find");S.stacks.find.push({v:"profile",id:"avery-morgan"});render("fade");setTimeout(()=>openShare("avery-morgan"),rm()?0:350)}],
  ["menu","Menu","Drawer from the top-left button",()=>{goTab("home");render("fade");setTimeout(openDrawer,rm()?0:200)}],
  ["mychart","MyChart","Sign-in screen and guest options",()=>{goTab("mychart");render("fade")}],
  ["medblog","MedBlog, see all","Topic filter and story list",()=>{S.blogCat="All";S.blogMore=false;goTab("home");S.stacks.home.push({v:"medblog"});render("fade")}],
- ["saved","Favorites · Providers","Stored on this device",()=>{if(!S.saved.length){S.saved=["avery-morgan","priya-shah"];store.set("saved",S.saved);renderTabbar()}S.favSeg="providers";goTab("saved");render("fade")}],
+ ["saved","Favorites · Clinicians","Stored on this device",()=>{if(!S.saved.length){S.saved=["avery-morgan","priya-shah"];store.set("saved",S.saved);renderTabbar()}S.favSeg="providers";goTab("saved");render("fade")}],
  ["saved-locs","Favorites · Locations","Saved clinics and hospitals",()=>{if(!S.savedLocs.length){S.savedLocs=["L6","L1"];store.set("saved-locs",S.savedLocs);renderTabbar()}S.favSeg="locations";goTab("saved");render("fade")}]
 ];
 $("#jumps").innerHTML=JUMPS.map(([k,t,s])=>`<button class="page-btn" data-jump="${k}">${t}<span>${s}</span></button>`).join("");
@@ -1916,18 +1913,18 @@ $("#jumps").addEventListener("click",e=>{const b=e.target.closest("[data-jump]")
 const REQ=[
  ["Home layout","Guest composition from CMS modules, configured order, visibility rules, expiry","home"],
  ["Emergency alert banner","Banner, details sheet, emergency-first priority, dismiss where allowed","home"],
- ["Search and quick access","One Find Care search field on Home (no repeated text, no top searches); Quick links with Wayfinding and locations, then MyChart tasks","gsearch"],
+ ["Search and quick access","One Find Care search field on Home (no repeated text); the search sheet opens on your Recent searches (on this device) instead of Top searches; Quick links with Wayfinding and locations, then MyChart tasks","gsearch"],
  ["Wayfinding (Nov 19)","No tab; contextual Home card at a facility or before a visit, Quick link, Locations, menu; in-app page that works without an account","wf-here"],
  ["Featured content and services","MedBlog carousel, flu shot campaign, UTSW resources, announcements","home"],
- ["Provider search","Keyword, plain-language mapping, auto-suggestions, recent and popular searches, spelling","plain"],
+ ["Clinician search","Keyword, plain-language mapping, auto-suggestions, recent searches, browse by specialty, spelling","plain"],
  ["Location-based search","Near me with OS prompt, ZIP or city entry, denied and can’t-locate fallbacks","denied"],
- ["Provider filters","Specialty, condition, distance, language, gender, hospital, accepting, online; OR within, AND across; clear all","filters"],
+ ["Clinician filters","Specialty, condition, distance, language, gender, hospital, accepting, online; OR within, AND across; clear all","filters"],
  ["Sorting and ranking","Best match, distance, name A–Z, featured (marked)","sort"],
  ["Results and states","Result cards, no results with alternatives, loading, service error, offline, retry","empty"],
- ["Provider profile","Credentials, bio, specialties, conditions, languages, locations, contact, research and media, related","profile"],
- ["Favorites","Providers and Locations segments, each with its own empty state; save and remove with Undo; Favorites tab; stored on the device","saved-locs"],
+ ["Clinician profile","Credentials, bio, specialties, conditions, languages, locations, contact, research and media, related","profile"],
+ ["Favorites","Clinicians and Locations segments, each with its own empty state; save and remove with Undo; Favorites tab; stored on the device","saved-locs"],
  ["Share","Native share sheet with public link only","share"],
- ["Onboarding (old app’s intro)","Splash and four slides (provider, MyChart, location, wayfinding) with swipe-linked motion; Get started or Skip goes straight to Home as a guest; Sign in stays on Home","onboarding"],
+ ["Onboarding (old app’s intro)","Splash and four slides (clinician, MyChart, location, wayfinding) with swipe-linked motion; Get started or Skip goes straight to Home as a guest; Sign in stays on Home","onboarding"],
  ["MyChart (old app’s MyChart login)","Tab with sign-in form, show password, forgot link, create account, and guest options","mychart"],
  ["Menu (old app’s More options)","Inbox, MedBlog, patient resources, shuttle, COVID-19, about UTSW, physicians, full website, social, privacy","menu"],
  ["MedBlog see all (old app)","Latest story, topic filter, dated list with read times, show more","medblog"]
@@ -2137,7 +2134,7 @@ function endSplash(){
 
 /* ---------- Onboarding: splash, four slides, then Home as a guest (no separate welcome screen; Sign in stays on Home) ---------- */
 const OB=[
- {t:"Find the right doctor",p:"Search by name, specialty, or condition, and read full profiles to choose the provider who fits your care.",scene:()=>`
+ {t:"Find the right doctor",p:"Search by name, specialty, or condition, and read full profiles to choose the clinician who fits your care.",scene:()=>`
   <div class="sc sc-pill in" data-z="1.6" style="--d:0;left:24px;top:8px;width:248px">${ic("search",20)}<span>Knee pain doctor</span></div>
   <div class="sc sc-card in" data-z=".5" style="--d:3;left:36px;top:252px;width:224px;padding:12px;display:flex;gap:12px;align-items:center;opacity:.9"><span class="avatar av-40 a2">RS</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><b style="font-size:14px;line-height:20px;color:var(--c-blue)">Rafael Santos, M.D.</b><span class="sc-line" style="width:96px"></span></span></div>
   <div class="sc sc-card in" data-z="1" style="--d:1;left:12px;top:72px;width:272px;padding:16px;display:flex;flex-direction:column;gap:12px">
@@ -2226,7 +2223,7 @@ function closeDrawer(keepFocus){
 S.theme=store.get("theme","light");applyTheme();
 $("#drawer-body").addEventListener("change",e=>{if(e.target.name==="theme")setTheme(e.target.value)});
 view.addEventListener("change",e=>{if(e.target.name!=="favseg")return;S.favSeg=e.target.value;rerenderKeep(true);$(`#view input[name="favseg"][value="${S.favSeg}"]`)?.focus();
-  sayPolite(S.favSeg==="locations"?`Saved locations, ${S.savedLocs.length}`:`Saved providers, ${S.saved.length}`)});
+  sayPolite(S.favSeg==="locations"?`Saved locations, ${S.savedLocs.length}`:`Saved clinicians, ${S.saved.length}`)});
 $("#search-back").innerHTML=ico("arrow_back");syncSearchFilters();
 $("#search-ic").outerHTML=ic("search");
 $("#q-clear").innerHTML=ic("close",20);

@@ -186,7 +186,7 @@ function DrawerEditor({ working, set, ro }: EditorProps) {
   };
   return (
     <>{secs.map((s, si) => (
-      <section key={s.id} className="dr-sec" aria-labelledby={`ds-${s.id}`}><h3 className="sub-h" id={`ds-${s.id}`} tabIndex={-1}>{s.label || 'Legal and settings'}{s.style === 'chips' && <> <span className="muted">(chips)</span></>}</h3>
+      <section key={s.id} className="dr-sec" aria-labelledby={`ds-${s.id}`}><h3 className="sub-h" id={`ds-${s.id}`} tabIndex={-1}>{s.label || 'Legal and settings'}{s.id === 'social' ? <> <span className="muted">(brand icons)</span></> : s.style === 'chips' && <> <span className="muted">(chips)</span></>}</h3>
         <ol className="mod-list">{s.items.map((it, i) => (
           <li key={it.id} className={cx('mod-row', !it.visible && 'is-off')} data-s={si} data-i={i}>
             <span className="mod-pos" aria-hidden="true">{i + 1}</span><span className="mod-ic"><Icon name={it.icon} size={20} /></span>
@@ -206,7 +206,7 @@ function DrawerEditor({ working, set, ro }: EditorProps) {
 }
 const drawerPages = defineSingleton({
   route: 'content-drawer', id: 'drawer', area: 'drawer', section: 'Content and navigation', title: 'Menu', noun: 'menu',
-  lede: 'The menu that opens from the round button on the home bar (its dot means unread Inbox items). Items are grouped in sections, and “Follow us” shows as chips. Which items are fixed and whether sections can be reordered is pending confirmation (§10.11).',
+  lede: 'The menu that opens from the round button on the home bar (its dot means unread Inbox items). Items are grouped in sections, and “Follow us” shows as round brand icons (Facebook, Instagram, LinkedIn, X) with a label under each. Which items are fixed and whether sections can be reordered is pending confirmation (§10.11).',
   formTitle: 'Menu items',
   describe: (a, b) => {
     const out: string[] = [];
@@ -271,26 +271,26 @@ function rowsSingleton(o: RowsSingletonOpts) {
   });
 }
 const dupCheck = (key: string, label: string) => (v: Data, others: Row[]): Errors => others.some(r => String(r[key]).trim().toLowerCase() === String(v[key]).trim().toLowerCase()) ? { [key]: `“${v[key]}” already has a ${label}.` } : {};
-const SEARCH_PLACES: [string, string][] = [['home', 'Top searches in the search sheet'], ['popular', 'Popular searches on Find Care']];
 const Listed = ({ ok, yes, no, children }: { ok: boolean; yes: string; no: string; children: ReactNode }) => <>{ok ? <Badge kind="live" text={yes} /> : <Badge kind="hidden" text={no} />}{children}</>;
+/* Browse by specialty (replaces Popular searches on Find Care). Recent searches replace Top searches: they are personal,
+   stay on each phone, and the Admin never sees or edits them. */
 const topPages = rowsSingleton({
-  route: 'search-top', id: 'search-top', title: 'Top and popular searches', noun: 'search term', caption: 'Top and popular searches',
-  lede: 'The chips patients tap instead of typing: four Top searches when the search sheet opens (Nov 19: no longer repeated under the search on Home), and Popular searches on the Find Care screen.',
+  route: 'search-top', id: 'search-top', title: 'Browse by specialty', noun: 'specialty', caption: 'Browse by specialty',
+  lede: 'The specialties listed under Browse by specialty on Find Care, in this order, each with its clinician count. It replaces Popular searches. Recent searches (which replace Top searches) are personal: they stay on each phone and are not managed here.',
   columns: [
-    { key: 'term', label: 'Chip text', sortable: true, render: r => r.term },
-    { key: 'where', label: 'Shows in', sortable: true, render: r => (SEARCH_PLACES.find(x => x[0] === r.where) || [, r.where])[1] }],
+    { key: 'term', label: 'Specialty', sortable: true, render: r => r.term },
+    { key: 'order', label: 'Position', sortable: true, render: r => String(r.order) }],
   sections: [{ fields: [
-    { key: 'term', label: 'Chip text', required: true, max: 32, hint: 'What the chip says and searches for, for example “Knee pain”.' },
-    { key: 'where', label: 'Shows in', type: 'radio', options: SEARCH_PLACES }] }],
-  blank: () => ({ term: '', where: 'home' }),
-  validate: (v, others) => others.some(r => r.where === v.where && r.term.trim().toLowerCase() === v.term.trim().toLowerCase()) ? { term: `“${v.term}” is already in this list.` } : {},
+    { key: 'term', label: 'Specialty', required: true, max: 40, hint: 'Must match a specialty in Specialty mapping, for example “Cardiology”.' },
+    { key: 'order', label: 'Position', type: 'number', min: 1, maxNum: 30 }] }],
+  blank: () => ({ term: '', order: 99 }),
+  validate: (v, others) => others.some(r => r.term.trim().toLowerCase() === v.term.trim().toLowerCase()) ? { term: `“${v.term}” is already in the list.` } : {},
   searchText: r => r.term, rowTitle: r => `“${r.term}”`,
-  tester: { placeholder: 'for example, knee pain', fn: (d, q) => {
-    const rows = d.rows as Row[], home = rows.filter(r => r.where === 'home'), hit = rows.filter(r => r.term.toLowerCase().includes(q));
-    const shown = home.slice(0, 4).map(r => r.term);
+  tester: { placeholder: 'for example, cardiology', fn: (d, q) => {
+    const rows = (d.rows as Row[]).slice().sort((x, y) => x.order - y.order), hit = rows.filter(r => r.term.toLowerCase().includes(q));
     return <><Listed ok={!!hit.length} yes="Listed" no="Not listed">{hit.length
-      ? <p>“{q}” is {hit.map(r => r.where === 'home' ? (shown.includes(r.term) ? 'a top search in the search sheet' : 'a top search, but only the first four show') : 'a popular search on Find Care').join(' and ')}.</p>
-      : <p>No chip says “{q}”.</p>}</Listed><p className="muted">Home shows: {shown.join(', ') || 'none'}.</p></>;
+      ? <p>{hit.map(r => `“${r.term}” is number ${rows.indexOf(r) + 1}`).join('; ')} under Browse by specialty.</p>
+      : <p>No specialty matches “{q}”.</p>}</Listed><p className="muted">Find Care lists: {rows.map(r => r.term).join(', ') || 'none'}, then All doctors.</p></>;
   } }
 });
 const mappingPages = rowsSingleton({
@@ -347,7 +347,7 @@ const specialtyPages = rowsSingleton({
 /* ---- Ranking: only approved parameters ---- */
 const rankingPages = defineSingleton({
   route: 'search-ranking', id: 'search-ranking', area: 'search', section: 'Search configuration', title: 'Ranking', noun: 'ranking setting',
-  lede: 'How provider results are ordered under Best match. Only the parameters UTSW approved are shown; which of them the search platform really exposes is pending (§10.12).',
+  lede: 'How clinician results are ordered under Best match. Only the parameters UTSW approved are shown; which of them the search platform really exposes is pending (§10.12).',
   formTitle: 'Best match weights',
   sections: [{ note: 'Weights are relative and must add up to 100.', fields: [
     { key: 'relevance', label: 'Relevance to the search (specialty and condition fit)', type: 'number', min: 0, maxNum: 100, wide: false },
@@ -355,7 +355,7 @@ const rankingPages = defineSingleton({
     { key: 'availability', label: 'Availability (accepting new patients, online scheduling)', type: 'number', min: 0, maxNum: 100, wide: false },
     { key: 'language', label: 'Language and accessibility match', type: 'number', min: 0, maxNum: 100, wide: false },
     { key: 'defaultSort', label: 'Default sort', type: 'select', options: ['Best match', 'Distance', 'Name A–Z', 'Featured'], hint: 'Patients can change the sort: Best match, Distance, Name A–Z, or Featured.' },
-    { key: 'featuredLabelled', label: 'Always label featured providers', type: 'switch', readonly: true, hint: 'Required by the guest design: featured providers are always marked and only move up under the Featured sort.' }] }],
+    { key: 'featuredLabelled', label: 'Always label featured clinicians', type: 'switch', readonly: true, hint: 'Required by the guest design: featured clinicians are always marked and only move up under the Featured sort.' }] }],
   validate: d => { const sum = ['relevance', 'distance', 'availability', 'language'].reduce((s, k) => s + (+d[k] || 0), 0); return sum !== 100 ? { relevance: `The weights add up to ${sum}. Make them add up to 100.` } : {}; },
   side: d => {
     const rows: [string, number][] = [['Relevance', d.relevance], ['Distance', d.distance], ['Availability', d.availability], ['Language and accessibility', d.language]];

@@ -31,7 +31,7 @@ export const NAV: NavSection[] = [
     { route: 'content-app-entry', label: 'App entry', area: 'appEntry' }
   ] },
   { id: 'search', label: 'Search configuration', icon: 'manage_search', items: [
-    { route: 'search-top', label: 'Top and popular searches', area: 'search' },
+    { route: 'search-top', label: 'Browse by specialty', area: 'search' },
     { route: 'search-query-mappings', label: 'Query mappings', area: 'search' },
     { route: 'search-synonyms', label: 'Synonyms', area: 'search' },
     { route: 'search-specialties', label: 'Specialty mapping', area: 'search' },

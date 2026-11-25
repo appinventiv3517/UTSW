@@ -50,8 +50,6 @@ export const alertView = (d: Data) => ({ level: d.level === 'advisory' ? 'adviso
   posted: d.start ? `Posted ${fmtDay(d.start.slice(0, 10))}` : 'Posted now', window: d.end ? `Ends ${fmtLocal(d.end, false)}` : '', start: d.start || '' });
 type AlertView = ReturnType<typeof alertView>;
 export const alertOrder = (a: AlertView, b: AlertView) => (+(b.level === 'emergency') - +(a.level === 'emergency')) || String(b.start).localeCompare(String(a.start));
-/* Top searches on the home hero (four) or popular searches on Find Care, from Search configuration */
-export const topSearches = (pick: (r: ConfigRecord) => Data | null, where: string): string[] => { const r = ConfigService.peek('search-top'); const d = r && pick(r); return d ? d.rows.filter((x: Data) => x.where === where).map((x: Data) => x.term) : []; };
 export const layoutFor = (audience: string, env = 'production'): Data => ENV_PICK(ConfigService.peek(`home-layout-${audience}`), env) || { head: [], modules: [] };
 export const colorsFor = (env: string): Data | null => ENV_PICK(ConfigService.peek('global-colors'), env);
 export interface ContentOpts { env?: string; overrides?: Record<string, Data | null>; audience?: string; allAlerts?: boolean; newItem?: { type: string; data: Data } | null }
@@ -74,7 +72,6 @@ export function appContent({ env = 'production', overrides = {}, audience = 'gue
   const withNew = (type: string, list: X[]) => [...list, ...add(type).filter(x => x.d.enabled !== false)].sort((a, b) => a.d.order - b.d.order);
   return {
     ...STATIC_CONTENT,
-    top: topSearches(pick, 'home'),
     /* At a facility (guest geolocation): the four Wayfinding and facilities records */
     facility: (() => { const g = (id: string) => { const r = ConfigService.peek(id); return r ? pick(r) : null; };
       const pl = g('facility-places'); return { why: g('facility-why'), near: g('facility-nearby'), places: pl ? pl.rows : [], map: g('wayfinding-3d') }; })(),

@@ -349,3 +349,9 @@ html:not(.ms-ready) .ms{color:transparent!important}
 .geo-cat li{display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-12); padding:var(--sp-8) 0; font-size:var(--fs-14); line-height:var(--lh-14); color:var(--c-text)}
 .geo-cat li + li{box-shadow:0 -1px 0 var(--c-border)}
 .geo-cat li b{font-variant-numeric:tabular-nums; text-align:right; flex:none; max-width:50%}
+
+/* Menu footer: Follow us as brand icons (Nov 25) */
+.social{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--sp-8)}
+.soc-btn{display:flex; flex-direction:column; align-items:center; gap:var(--sp-8); padding:var(--sp-8) 0; border:0; background:transparent; color:var(--c-text); font:inherit}
+.soc-ic{display:grid; place-items:center; width:48px; height:48px; border-radius:var(--r-full); background:var(--c-surface); color:var(--c-blue); box-shadow:0 0 0 1px var(--c-border),0 1px 2px rgba(0,30,60,.06)}
+.soc-l{font-size:var(--fs-12); line-height:var(--lh-12); font-weight:600; color:var(--c-text-2)}

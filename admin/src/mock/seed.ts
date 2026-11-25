@@ -34,7 +34,7 @@ export const APPROVED_ICONS = [
   { key: 'terms', glyph: 'description', label: 'Terms of use' },
   { key: 'a11y', glyph: 'accessibility_new', label: 'Accessibility' },
   { key: 'inbox', glyph: 'inbox', label: 'Inbox' },
-  { key: 'favorite', glyph: 'favorite', label: 'Favorites – saved providers' },
+  { key: 'favorite', glyph: 'favorite', label: 'Favorites – saved clinicians' },
   { key: 'signin', glyph: 'login', label: 'Sign in to MyChart' },
   { key: 'shuttle', glyph: 'airport_shuttle', label: 'Shuttle' },
   { key: 'guide', glyph: 'menu_book', label: 'Patient resource guide' },
@@ -69,8 +69,8 @@ export const ART = {
 };
 export const ART_NAMES = { a: 'Sample image A – arcs on Blue', b: 'Sample image B – circles on sky', c: 'Sample image C – card on Blue', d: 'Sample image D – ring on light blue', e: 'Sample image E – peaks on Blue', f: 'Sample image F – dashed ring on tint' };
 
-/* Content that stays outside the Admin (MedBlog feed, announcements, sample saved providers) – Guest Flow 2 sample content.
-   Top and popular searches are managed in Search configuration. */
+/* Content that stays outside the Admin (MedBlog feed, announcements, sample saved clinicians) – Guest Flow 2 sample content.
+   Browse by specialty is managed in Search configuration; Recent searches stay on each phone. */
 export const STATIC_CONTENT = {
   blog: [
     { t: 'Starting a new medicine? Five questions to ask your pharmacist', cat: 'Medicines', d: 'Oct. 7', read: '4 min' },
@@ -82,9 +82,9 @@ export const STATIC_CONTENT = {
   announcements: [
     { d: 'Oct. 9', t: 'Saturday hours at Lakeview Primary Care', s: 'Open 8 a.m. to noon starting Oct. 17.', isNew: true },
     { d: 'Oct. 2', t: 'Updated visitor guidelines', s: 'Two visitors per patient on inpatient units.' },
-    { d: 'Sept. 28', t: 'Find a doctor by language', s: 'Filter providers by the languages they speak.' }
+    { d: 'Sept. 28', t: 'Find a doctor by language', s: 'Filter clinicians by the languages they speak.' }
   ],
-  /* Shown only on devices that have saved providers (fictional providers from the design) */
+  /* Shown only on devices that have saved clinicians (fictional clinicians from the design) */
   saved: [
     { n: 'Avery Morgan, M.D.', s: 'Orthopaedic Surgery · Lakeview University Hospital', i: 'AM', a: 'a1' },
     { n: 'Priya Shah, M.D.', s: 'Cardiology · Northgate Heart and Skin Clinic', i: 'PS', a: 'a2' }
@@ -105,7 +105,7 @@ export const STATIC_CONTENT = {
    Authenticated modules come from the personalised homepage prototype until the signed-in home is designed. */
 export const HOME_FIXED = [
   { id: 'alerts', label: 'Emergency alerts', desc: 'Pinned to top while active · Emergency before advisory, then newest. Managed in Emergency alerts.', icon: 'warning', link: 'home-alerts' },
-  { id: 'hero', label: 'Find Care search', desc: 'Pinned below alerts · One Find Care heading and one search field (Nov 19). Top searches show in the search sheet, managed in Search configuration.', icon: 'search', link: 'search-top' },
+  { id: 'hero', label: 'Find Care search', desc: 'Pinned below alerts · One Find Care heading and one search field (Nov 19). The search sheet opens on the person’s own Recent searches, kept on their phone.', icon: 'search', link: 'search-top' },
   { id: 'facility', label: 'At a facility: 3D map first', desc: 'Only when location puts a guest at a facility: the live 3D map leads Home, then Why you’re here, Care near you, Doctors open today and Facilities; the modules below follow. Managed in Wayfinding and facilities.', icon: 'directions_walk', link: 'wayfinding-3d' }
 ];
 export const HOME_MODULES = {
@@ -238,10 +238,8 @@ export function seedDb(): Db {
     ['Primary care', 'checkup, physical, annual exam'], ['Gastroenterology', 'stomach, reflux, colonoscopy'], ['Neurology', 'headache, migraine, seizures'],
     ['Obstetrics and Gynecology', 'pregnancy, prenatal, women’s health'], ['Allied Health – Physical Therapy', 'rehab, physical therapy, sports injury']
   ].map(([specialty, terms], i) => ({ id: `sp${i + 1}`, specialty, terms })) }, { at: '2026-09-20T15:00:00Z' }));
-  records.push(rec('search-top', 'searchTop', 'Top and popular searches', { rows: [
-    ['Primary care', 'home'], ['Knee pain', 'home'], ['Urgent care', 'home'], ['Heart doctor', 'home'],
-    ['Primary care', 'popular'], ['Knee pain', 'popular'], ['Heart doctor', 'popular'], ['Spanish-speaking pediatrician', 'popular'], ['Dermatology', 'popular'], ['Accepting new patients', 'popular']
-  ].map(([term, where], i) => ({ id: `t${i + 1}`, term, where })) }, { at: '2026-10-02T15:00:00Z' }));
+  records.push(rec('search-top', 'searchTop', 'Browse by specialty', { rows: ['Cardiology', 'Dermatology', 'Family Medicine', 'Internal Medicine', 'Neurology', 'Obstetrics and Gynecology', 'Orthopaedic Surgery', 'Pediatrics', 'Sports Medicine']
+    .map((term, i) => ({ id: `t${i + 1}`, term, order: i + 1 })) }, { at: '2026-11-25T15:00:00Z' }));
   records.push(rec('search-ranking', 'searchRanking', 'Ranking', { relevance: 60, distance: 25, availability: 10, language: 5, featuredLabelled: true, defaultSort: 'Best match', sorts: ['Best match', 'Distance', 'Name A–Z', 'Featured'] }, { at: '2026-09-20T15:00:00Z', by: 'u1' }));
 
   /* ---- Location-aware configuration (LOCS, line 1829) ---- */
@@ -357,5 +355,5 @@ export function seedDb(): Db {
     { id: uid('au'), at: t('2026-09-01T15:00:00Z'), by: 'u1', action: 'User deactivated', target: 'Grace Liu', targetId: 'u7', targetType: 'user', environment: null, version: null, comment: 'Moved to another department', before: { status: 'Active' }, after: { status: 'Deactivated' } },
     { id: uid('au'), at: t('2026-08-10T15:00:00Z'), by: 'u1', action: 'Role changed', target: 'Theo Adams', targetId: 'u8', targetType: 'user', environment: null, version: null, comment: '', before: { role: 'Admin' }, after: { role: 'Marketing' } });
 
-  return { schema: 9, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
+  return { schema: 10, records: Object.fromEntries(records.map(r => [r.id, r])), users, notifications, wayfinding, integrations, settings, audit, zeroResults };
 }

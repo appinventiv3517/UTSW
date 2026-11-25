@@ -20,6 +20,8 @@ const ICONS = {
   medicines: 'medication', joints: 'directions_run', heart: 'favorite', prevention: 'vaccines', cancer: 'health_and_safety', pregnancy: 'pregnant_woman',
   article: 'article', newspaper: 'newspaper'
 };
+/* Follow us: brand glyphs from Font Awesome Free Brands 6.5.2 (CC BY 4.0), drawn in the app's icon color */
+const SOCIAL: [string, number, number, string][] = [["Facebook",320,512,"M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"],["Instagram",448,512,"M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"],["LinkedIn",448,512,"M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"],["X",512,512,"M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"]];
 const APP_ICON = `data:image/svg+xml;base64,${LOGO_ICON_B64}`;
 const LOGO = `data:image/svg+xml;base64,${LOGO_REVERSED_B64}`;
 
@@ -156,6 +158,9 @@ function Menu({ C }: { C: Data }) {
       <div className="drawer-head"><h2>Menu</h2><B className="icon-btn" aria-label="Close menu"><Ico k="close" /></B></div>
       <div className="drawer-body"><div className="res-body">{(C.drawer.sections as Data[]).map((s, si) => {
         const items = (s.items as Data[]).filter(it => it.visible || C.showHidden);
+        if (s.id === 'social') return <section key={si} className="grp">{s.label && <h2 className="lbl-h">{s.label}</h2>}<div className="social">{items.length ? items.map((it, i) => { const b = SOCIAL.find(x => x[0] === it.label);
+          return <B key={i} className="soc-btn" style={it.visible ? undefined : { opacity: .45 }} aria-label={it.label}><span className="soc-ic" aria-hidden="true">{b ? <svg viewBox={`0 0 ${b[1]} ${b[2]}`} width="20" height="20"><path fill="currentColor" d={b[3]} /></svg> : <Ico k="public" size={20} />}</span><span className="soc-l" aria-hidden="true">{it.label}</span></B>; })
+          : <p className="fine">No visible items</p>}</div></section>;
         if (s.style === 'chips') return <section key={si} className="grp">{s.label && <h2 className="lbl-h">{s.label}</h2>}<div className="chips">{items.length ? items.map((it, i) => <B key={i} className={`chip${it.visible ? '' : ' off'}`} style={it.visible ? undefined : { opacity: .45 }}>{it.label}</B>) : <p className="fine">No visible items</p>}</div></section>;
         return <section key={si} className="grp">{s.label && <h2 className="lbl-h">{s.label}</h2>}<div className="card list">{items.length ? items.map((it, i) => <Row key={i} g={it.icon} title={it.label} sub={it.sub} ext={!!it.destination && it.destination.type === 'url'} cls={it.visible ? '' : 'off'} />)
           : <p className="fine" style={{ padding: 'var(--sp-12) var(--sp-16)' }}>No visible items</p>}</div></section>;
@@ -173,7 +178,7 @@ const Onboarding = () => (
         <span className="sc-tag"><Ico k="checked" size={16} cls="f" />Accepting new patients</span><span className="sc-line" style={{ width: '92%' }}></span><span className="sc-line" style={{ width: '64%' }}></span></div>
       <div className="sc sc-card" style={{ left: 36, top: 236, width: 224, padding: 12, display: 'flex', gap: 12, alignItems: 'center', opacity: .9 }}><span className="avatar a2">RS</span><span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}><b style={{ fontSize: 14, lineHeight: '20px', color: 'var(--c-blue)' }}>Rafael Santos, M.D.</b><span className="sc-line" style={{ width: 96 }}></span></span></div>
       <div className="sc sc-heart" style={{ left: 236, top: 52 }}><Ico k="favorites" cls="f" /></div></div></div>
-    <div className="ob-copy"><h2>Find the right doctor</h2><p>Search by name, specialty, or condition, and read full profiles to choose the provider who fits your care.</p></div>
+    <div className="ob-copy"><h2>Find the right doctor</h2><p>Search by name, specialty, or condition, and read full profiles to choose the clinician who fits your care.</p></div>
     <div className="ob-foot"><div className="ob-dots" aria-hidden="true"><i className="on"></i><i></i><i></i><i></i></div><B className="btn btn-primary"><span>Next</span><Ico k="go" size={20} /></B></div></div>
 );
 interface Out { home?: boolean; title?: string; tab?: number; view?: ReactNode; overlay?: ReactNode; dark?: boolean; ctx?: ReactNode; facility?: boolean; noBar?: boolean }

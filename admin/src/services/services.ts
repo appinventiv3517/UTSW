@@ -9,7 +9,7 @@ import type { ConfigRecord, ConfigType, Data, Db, Env, Store, User, Notification
 export const MockSettings = { latency: [160, 380] as [number, number], simulateErrors: false };
 export class ServiceError extends Error {}
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
-export const SCHEMA = 9;
+export const SCHEMA = 10;
 export let DB: Store = null as unknown as Store;
 export function loadDb(): void {
   const saved = store.read<Store>();
@@ -63,7 +63,7 @@ export const CONFIG_TYPES: Record<ConfigType, { label: string; area: Area; suppo
   searchMappings: { label: 'Query mappings', area: 'search', supportsRollback: true, route: 'search-query-mappings' },
   searchSynonyms: { label: 'Synonyms', area: 'search', supportsRollback: true, route: 'search-synonyms' },
   searchSpecialties: { label: 'Specialty mapping', area: 'search', supportsRollback: true, route: 'search-specialties' },
-  searchTop: { label: 'Top and popular searches', area: 'search', supportsRollback: true, route: 'search-top' },
+  searchTop: { label: 'Browse by specialty', area: 'search', supportsRollback: true, route: 'search-top' },
   searchRanking: { label: 'Ranking', area: 'search', supportsRollback: true, route: 'search-ranking' },
   segment: { label: 'Audience segment', area: 'audiences', supportsRollback: false, route: 'audiences' },
   locations: { label: 'Location-aware configuration', area: 'locations', supportsRollback: true, route: 'admin-settings-locations' },
@@ -434,7 +434,7 @@ const METRICS: Record<string, MetricDef[]> = {
     { key: 'homeCtr', label: 'Home module click-through rate', unit: '%', base: 27, spread: 4, trend: .01 },
     { key: 'searchSuccess', label: 'Unified search success rate', unit: '%', base: 76, spread: 5, trend: .02 },
     { key: 'zeroRate', label: 'Zero-result search rate', unit: '%', base: 7.8, spread: 1.6, trend: -.008, lowerBetter: true },
-    { key: 'profileDiscovery', label: 'Provider profile discovery rate', unit: '%', base: 33, spread: 4, trend: .01 }
+    { key: 'profileDiscovery', label: 'Clinician profile discovery rate', unit: '%', base: 33, spread: 4, trend: .01 }
   ],
   content: [
     { key: 'articleEng', label: 'Article engagement rate', unit: '%', base: 22, spread: 4, trend: .005 },

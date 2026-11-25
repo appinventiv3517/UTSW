@@ -1,6 +1,6 @@
 # UTSW MyCare – guest flow v2 (Home and Find care)
 
-Interactive prototype of the **guest** experience only: guest Home, the global search, and the Find care provider flow (search → results → filters and sort → provider profile → save and share → Favorites with providers and locations), contextual wayfinding,, including loading, empty, service-error, offline, and location-denied states.
+Interactive prototype of the **guest** experience only: guest Home, the global search, and the Find care clinician flow (search → results → filters and sort → clinician profile → save and share → Favorites with clinicians and locations), contextual wayfinding,, including loading, empty, service-error, offline, and location-denied states.
 
 - `guest-flow.html` – the built prototype (publish this file).
 - `guest-flow.src.html` – markup and styles. `guest-flow.src.js` – behavior and fictional sample data.
@@ -8,4 +8,4 @@ Interactive prototype of the **guest** experience only: guest Home, the global s
 
 Tokens, iconography, and logo rules are shared with the home screen prototype; see `../TOKENS.md` and `../icons/README.md`. The right-hand panels of the prototype list the new rules for this flow (filters, plain-language search, location fallback, favorites, share, missing profile data) and map each Find care and Home requirement to a state you can jump to.
 
-All providers, locations, phone numbers (555 numbers), and links (`mycare.example`) are fictional. Favorites (providers and locations) and recent searches are stored in the browser's local storage, standing in for on-device storage.
+All clinicians, locations, phone numbers (555 numbers), and links (`mycare.example`) are fictional. Favorites (clinicians and locations) and recent searches are stored in the browser's local storage, standing in for on-device storage.
