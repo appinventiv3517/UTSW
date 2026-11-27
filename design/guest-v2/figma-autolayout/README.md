@@ -26,6 +26,7 @@ Fonts: Inter (Regular, Medium, Semi Bold, Bold, Extra Bold). The plugin stops wi
 
 - **Fill means equal**: leftover space inside a box is left as space, never written as padding. Figma won’t shrink a Fill layer below its content (padding included), so padding standing in for empty space would make side-by-side tiles unequal.
 - **Chip groups wrap in Figma**: wrapping rows of chips (filters, specialties, conditions) are one horizontal auto-layout frame with Wrap on, so if Figma’s Inter runs a pixel wider a chip moves to the next line instead of overflowing.
+- **Cut-off text stays cut off**: a label the app ends with “…” is a fixed-width, one-line Figma text with Truncate text on.
 - **Hidden layers stay out**: anything the app hides (a chip’s collapsed check mark, closed panels) is not exported.
 - **One-line labels never wrap**: the plugin measures each one-line label with your Figma’s Inter; if it is any wider than its box, the label hugs its text instead of wrapping.
 - **Every frame is an auto-layout frame**, with direction, padding, spacing, alignment and Hug, Fill or Fixed sizing on each axis.

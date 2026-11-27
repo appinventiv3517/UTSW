@@ -87,6 +87,8 @@ function build(n, parent) {
     if (n.single) { t.setPluginData('single', '1'); t.setPluginData('lh', String(n.lh)); }
     if (n.auto === 'WH') t.textAutoResize = 'WIDTH_AND_HEIGHT';
     else { t.resize(Math.max(1, n.w), Math.max(1, n.h)); t.textAutoResize = 'HEIGHT'; }
+    /* Cut off with “…” in the app: one line at this width, truncated by Figma */
+    if (n.trunc) { t.textAutoResize = 'NONE'; t.resize(Math.max(1, n.w), Math.max(1, n.h)); t.textTruncation = 'ENDING'; t.maxLines = 1; }
     node = t;
   } else if (n.k === 'I') {
     const comp = ICON[`${n.g}${n.f ? '-fill' : ''}`];

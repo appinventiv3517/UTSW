@@ -153,9 +153,12 @@ window.__alWalk = function (opts) {
   function textLeaf(el, cs, box) {
     const { chars, runs } = textRuns(el);
     if (!chars.trim()) return null;
-    const ink = inkOf(el);
+    let ink = inkOf(el);
     const base = runs[0].st;
-    return { k: 'T', n: chars.slice(0, 40), box, ink, chars, runs, fs: base.fs, fw: base.fw, c: base.c, lh: lineH(cs), ls: base.ls,
+    /* Text the app cuts off with “…”: Figma truncates it at the same width */
+    const trunc = cs.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 0.5 ? 1 : 0;
+    if (trunc && ink) ink = { ...ink, x: box.x, w: box.w, lines: 1 };
+    return { k: 'T', n: chars.slice(0, 40), box, ink, chars, runs, trunc, fs: base.fs, fw: base.fw, c: base.c, lh: lineH(cs), ls: base.ls,
       al: { center: 'CENTER', right: 'RIGHT', end: 'RIGHT', justify: 'JUSTIFIED' }[cs.textAlign] || 'LEFT', lines: ink ? ink.lines : 1, h: hints(cs) };
   }
   /* A loose text run between element siblings (for example a button's label written as plain text) */

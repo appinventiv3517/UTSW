@@ -20,7 +20,7 @@ function conv0(n, parentHints) {
   if (n.k === 'T') {
     const single = (n.lines || 1) <= 1;
     const w = n.box.w, h = n.box.h;
-    const out = { k: 'T', n: n.n, _b: { ...n.box }, w, h, chars: n.chars, runs: n.runs, fs: n.fs, fw: n.fw, c: n.c, lh: n.lh, ls: n.ls, al: n.al, lines: n.lines || 1, abs: n.abs ? 1 : 0 };
+    const out = { k: 'T', n: n.n, _b: { ...n.box }, w, h, chars: n.chars, runs: n.runs, fs: n.fs, fw: n.fw, c: n.c, lh: n.lh, ls: n.ls, al: n.al, lines: n.lines || 1, abs: n.abs ? 1 : 0, trunc: n.trunc ? 1 : undefined };
     /* Hug width = the inked text; a block of text keeps its box (it fills or is fixed) */
     out._hugW = single && n.ink ? n.ink.w : w;
     out._hugH = Math.max(1, n.lines || 1) * n.lh;
@@ -188,6 +188,7 @@ function mode(a) { const m = {}; a.forEach(x => { m[x] = (m[x] || 0) + 1; }); re
 function finishText(n) {
   if (n.k !== 'T') return;
   /* A one-line text boxed at exactly its own width would wrap in Figma if Inter measures a hair wider there: it hugs instead */
+  if (n.trunc) { if (n.sh === 'HUG') n.sh = 'FIXED'; n.auto = 'H'; if (n.sv !== 'FIXED') n.sv = 'HUG'; return; }
   if (n.sh === 'FIXED' && n._single && near(n._hugW, n.w, 1.5)) n.sh = 'HUG';
   if (n.sh === 'HUG' && n._single) n.auto = 'WH';
   else n.auto = 'H';
@@ -294,7 +295,7 @@ function clean(n) {
   if (fw) n = { ...n, ...fw };
   const o = {};
   for (const [k, v] of Object.entries(n)) if (!k.startsWith('_') && k !== 'lines' && v !== undefined) o[k] = v;
-  if (n.k === 'T') { o.single = n._single ? 1 : 0; }
+  if (n.k === 'T') { o.single = n._single && !n.trunc ? 1 : 0; }
   if (o.ch) o.ch = o.ch.map(clean);
   for (const k of ['w', 'h', 'x', 'y']) if (typeof o[k] === 'number') o[k] = r2(o[k]);
   return o;
