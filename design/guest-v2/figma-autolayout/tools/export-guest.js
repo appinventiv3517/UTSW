@@ -110,7 +110,9 @@ const FLOWS = process.env.LIGHT ? BASE : [...BASE, ...BASE.map(f => f + DARK)];
 
 (async () => {
   const only = process.argv[2];
-  const list = (only ? SCREENS.filter(s => only.split(',').some(o => s.id.includes(o))) : SCREENS).filter(s => FLOWS.includes(s.flow));
+  let list = (only ? SCREENS.filter(s => only.split(',').some(o => s.id.includes(o))) : SCREENS).filter(s => FLOWS.includes(s.flow));
+  /* SHARD=i/n: export every n-th screen (run n copies side by side, then tools/merge.js) */
+  if (process.env.SHARD) { const [i, n] = process.env.SHARD.split('/').map(Number); list = list.filter((_, k) => k % n === i); }
   const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const screens = [], report = [];
   let failed = 0;
