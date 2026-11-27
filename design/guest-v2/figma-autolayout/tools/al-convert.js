@@ -85,6 +85,8 @@ function layout(f, flow, pad, hints) {
       return row;
     });
     dir = 'V';
+    /* A wrapping flex row (chips): Figma gets one wrapping auto-layout frame, so it reflows if its Inter runs a pixel wider */
+    if (hints.wr) f._wrapRows = 1;
   }
   const P = dir === 'H' ? { s: 'x', l: 'w', cs: 'y', cl: 'h' } : { s: 'y', l: 'h', cs: 'x', cl: 'w' };
   flow.sort((p, q) => p._b[P.s] - q._b[P.s]);
@@ -277,7 +279,19 @@ function place(n, x, y, w, h, errs, path) {
 function check(root) { const errs = []; place(root, root._b.x, root._b.y, root.w, root.h, errs, ''); return errs; }
 
 /* Strip working fields; keep what the plugin needs */
+/* Rows of a wrapping flow become one horizontal frame that wraps: item spacing from the rows, line spacing from the stack */
+function flattenWrap(n) {
+  if (!n._wrapRows || n.lay !== 'V' || n.pa !== 'MIN') return null;
+  const kids = (n.ch || []).filter(c => !c.abs), rows = kids.filter(c => c._row);
+  if (!rows.length || rows.some(r => r.pa !== 'MIN' || (r.ch || []).some(c => c.abs || c._wrap)) || kids.some(c => c._wrap)) return null;
+  const gaps = new Set(rows.map(r => r.gap)); if (gaps.size > 1) return null;
+  const items = []; kids.forEach(c => { if (c._row) items.push(...c.ch); else items.push(c); });
+  items.forEach(c => { if (c.sh === 'FILL') c.sh = 'FIXED'; if (c.sv === 'FILL') c.sv = 'FIXED'; });
+  return { lay: 'H', wrap: 1, gap: rows[0].gap, cgap: n.gap, ca: rows[0].ca || 'MIN', sv: 'HUG', sh: n.sh === 'HUG' ? 'FIXED' : n.sh, ch: items };
+}
 function clean(n) {
+  const fw = n.k === 'F' ? flattenWrap(n) : null;
+  if (fw) n = { ...n, ...fw };
   const o = {};
   for (const [k, v] of Object.entries(n)) if (!k.startsWith('_') && k !== 'lines' && v !== undefined) o[k] = v;
   if (n.k === 'T') { o.single = n._single ? 1 : 0; }

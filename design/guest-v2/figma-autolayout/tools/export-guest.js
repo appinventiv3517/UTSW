@@ -17,7 +17,7 @@ const ctl = (k, v) => async p => { await p.click(`[data-ctl="${k}"] [data-v="${v
 const scrollTo = sel => async p => { await p.evaluate(s => { const v = document.querySelector('#view'), e = document.querySelector('#view ' + s); if (e) v.scrollTop = e.getBoundingClientRect().top - v.getBoundingClientRect().top + v.scrollTop - 16; }, sel); await wait(400); };
 const seq = (...f) => async p => { for (const x of f) await x(p); };
 const S = (flow, id, name, act, o = {}) => ({ flow, id, name, act, ...o });
-const START = 'Splash and onboarding', HOME = 'Home', EMPTY = 'Empty and error states', WAY = 'Wayfinding and directions';
+const START = 'Splash and onboarding', HOME = 'Home', EMPTY = 'Search – empty states', FIND = 'Find Care', MYC = 'MyChart', FAV = 'Favorites', WAY = 'Wayfinding and directions';
 const why = k => seq(jump('geo-why'), tap(`[data-action="geo-why"][data-k="${k}"]`));
 const nav = (k, extra) => seq(jump('geo-nav'), async p => { for (let i = 0; i < k; i++) { await p.click('#screen [data-action="geo-step"][data-d="1"]'); await wait(300); } }, extra || (async () => {}));
 const SCREENS = [
@@ -56,12 +56,34 @@ const SCREENS = [
 
   S(EMPTY, 'empty-search-none', '01 Search – no recent searches yet', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search')), { fixed: 1, popup: 1 }),
   S(EMPTY, 'empty-search-nomatch', '02 Search – no matches', seq(ctl('alerts', '0'), jump('home'), tap('#hero-search'), async p => { await p.fill('#q', 'zzqx'); await wait(700); }), { fixed: 1, popup: 1 }),
-  S(EMPTY, 'empty-fav-clin', '03 Favorites – no saved clinicians', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'))),
-  S(EMPTY, 'empty-fav-locs', '04 Favorites – no saved locations', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'), tap('input[name="favseg"][value="locations"]'))),
-  S(EMPTY, 'empty-results', '05 Find Care – no results', seq(ctl('alerts', '0'), jump('empty'))),
-  S(EMPTY, 'empty-error', '06 Find Care – service error', seq(ctl('alerts', '0'), jump('error'))),
-  S(EMPTY, 'empty-offline', '07 Find Care – offline', seq(ctl('alerts', '0'), jump('offline'))),
-  S(EMPTY, 'empty-denied', '08 Find Care – location denied', seq(ctl('alerts', '0'), jump('denied'))),
+
+  S(FIND, 'fc-home', '01 Find Care – recent searches and browse by specialty', seq(ctl('alerts', '0'), ...['Spanish-speaking pediatrician', 'Primary care', 'Knee pain'].map(q => seq(jump('find'), async p => { await p.fill('#fq', q); await p.press('#fq', 'Enter'); await wait(1200); })), jump('find'))),
+  S(FIND, 'fc-suggest', '02 Find Care – auto-suggestions', seq(ctl('alerts', '0'), jump('suggest'))),
+  S(FIND, 'fc-plain', '03 Results – plain-language search', seq(ctl('alerts', '0'), jump('plain'))),
+  S(FIND, 'fc-typo', '04 Results – spelling correction', seq(ctl('alerts', '0'), jump('typo'))),
+  S(FIND, 'fc-results', '05 Results – near me', seq(ctl('alerts', '0'), jump('results'))),
+  S(FIND, 'fc-filters', '06 Pop-up – filters', seq(ctl('alerts', '0'), jump('filters')), { fixed: 1, popup: 1 }),
+  S(FIND, 'fc-filters-full', '06 Pop-up – filters, full length', seq(ctl('alerts', '0'), jump('filters')), { fixed: 1, popup: 1, grow: '#sheet-body' }),
+  S(FIND, 'fc-sort', '07 Pop-up – sort', seq(ctl('alerts', '0'), jump('sort')), { fixed: 1, popup: 1 }),
+  S(FIND, 'fc-loc', '08 Pop-up – set your location', seq(ctl('alerts', '0'), jump('find'), tap('[data-action="loc-sheet"]')), { fixed: 1, popup: 1 }),
+  S(FIND, 'fc-loading', '09 Results – loading', seq(ctl('alerts', '0'), async p => { await p.evaluate(() => { const o = window.setTimeout; window.setTimeout = (fn, d, ...a) => o(fn, d >= 2000 && d < 3000 ? 1e9 : d, ...a); }); }, jump('loading')), { fixed: 1 }),
+  S(FIND, 'fc-empty', '10 Results – no results', seq(ctl('alerts', '0'), jump('empty'))),
+  S(FIND, 'fc-error', '11 Results – service error', seq(ctl('alerts', '0'), jump('error'))),
+  S(FIND, 'fc-offline', '12 Results – offline', seq(ctl('alerts', '0'), jump('offline'))),
+  S(FIND, 'fc-denied', '13 Pop-up – location access off', seq(ctl('alerts', '0'), jump('denied')), { fixed: 1, popup: 1 }),
+  S(FIND, 'fc-profile', '14 Clinician profile', seq(ctl('alerts', '0'), jump('profile'))),
+  S(FIND, 'fc-missing', '15 Clinician profile – missing data', seq(ctl('alerts', '0'), jump('missing'))),
+  S(FIND, 'fc-share', '16 Pop-up – share a profile', seq(ctl('alerts', '0'), jump('share')), { fixed: 1, popup: 1 }),
+
+  S(MYC, 'mc-tab', '01 MyChart – sign in', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="mychart"]'))),
+  S(MYC, 'mc-why', '02 MyChart – sign in from a quick link', seq(ctl('alerts', '0'), jump('home'), async p => { await p.evaluate(() => [...document.querySelectorAll('#screen [data-action="tile"]')].find(b => /Message your doctor/.test(b.textContent)).click()); await wait(900); })),
+  S(MYC, 'mc-errors', '03 MyChart – sign in, fields missing', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="mychart"]'), tap('#mc-submit'))),
+  S(MYC, 'mc-filled', '04 MyChart – sign in, filled in', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="mychart"]'), async p => { await p.fill('#mc-user', 'alex.rivera'); await p.fill('#mc-pw', 'mycare2026'); await wait(300); })),
+
+  S(FAV, 'fav-clin', '01 Favorites – saved clinicians', seq(ctl('alerts', '0'), jump('saved'))),
+  S(FAV, 'fav-locs', '02 Favorites – saved locations', seq(ctl('alerts', '0'), jump('saved-locs'))),
+  S(FAV, 'fav-clin-empty', '03 Favorites – no saved clinicians', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'))),
+  S(FAV, 'fav-locs-empty', '04 Favorites – no saved locations', seq(ctl('alerts', '0'), jump('home'), tap('.tab[data-tab="saved"]'), tap('input[name="favseg"][value="locations"]'))),
 
   S(WAY, 'way-here', '01 Wayfinding – at a facility', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'))),
   S(WAY, 'pop-where', '02 Pop-up – where are you going', seq(ctl('alerts', '0'), jump('wf-here'), tap('[data-action="push"][data-v="wayfinding"]'), tap('[data-action="geo-where"]')), { fixed: 1, popup: 1 }),
@@ -83,7 +105,7 @@ const NUM = {}; SCREENS.forEach(x => { NUM[x.flow] = (NUM[x.flow] || 0) + 1; x.n
 /* Dark theme: every screen again, on its own pages */
 const DARK = ' – Dark';
 SCREENS.push(...SCREENS.map(x => ({ ...x, id: x.id + '-dark', flow: x.flow + DARK, dark: 1 })));
-const BASE = process.env.ALL ? [START, HOME, EMPTY, WAY] : [START, HOME, EMPTY];
+const BASE = process.env.ALL ? [START, HOME, EMPTY, FIND, MYC, FAV, WAY] : [START, HOME, EMPTY, FIND, MYC, FAV];
 const FLOWS = process.env.LIGHT ? BASE : [...BASE, ...BASE.map(f => f + DARK)];
 
 (async () => {
@@ -124,7 +146,7 @@ const FLOWS = process.env.LIGHT ? BASE : [...BASE, ...BASE.map(f => f + DARK)];
       let h = VH;
       if (!fixed) { v.scrollTop = 0; const chrome = sc.getBoundingClientRect().height - v.getBoundingClientRect().height; h = Math.ceil(chrome + v.scrollHeight); }
       /* a scrolling panel (the menu) shown at full length: the screen grows by what the panel hides */
-      if (grow) { const g = sc.querySelector(grow); if (g) { g.scrollTop = 0; h = VH + Math.ceil(g.scrollHeight - g.clientHeight); } }
+      if (grow) { const g = sc.querySelector(grow); if (g) { g.scrollTop = 0; const extra = Math.ceil(g.scrollHeight - g.clientHeight) + (g.closest('.sheet') ? 32 : 0); /* a sheet’s last line clears its footer */ h = VH + extra; const sh = g.closest('.sheet'); if (sh) sh.style.maxHeight = Math.ceil(sh.getBoundingClientRect().height + extra) + 'px'; } }
       sc.style.height = h + 'px';
       const a = document.activeElement; if (a && a.blur && !a.closest('.layer, .drawer-layer, .search-layer, .ob')) a.blur();
       return h;

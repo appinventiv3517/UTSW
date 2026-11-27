@@ -132,6 +132,8 @@ function build(n, parent) {
       f.primaryAxisAlignItems = ALIGN[n.pa] || 'MIN';
       f.counterAxisAlignItems = n.ca === 'BASELINE' ? 'BASELINE' : ALIGN[n.ca] || 'MIN';
       f.primaryAxisSizingMode = 'FIXED'; f.counterAxisSizingMode = 'FIXED';
+      /* Chips: one wrapping row that reflows in Figma, item spacing across, line spacing down */
+      if (n.wrap) { f.layoutWrap = 'WRAP'; f.counterAxisSpacing = n.cgap || 0; }
     } else {
       /* Empty boxes (a blank input, a backdrop) are fixed-size auto-layout frames too */
       f.layoutMode = 'VERTICAL'; f.primaryAxisSizingMode = 'FIXED'; f.counterAxisSizingMode = 'FIXED';

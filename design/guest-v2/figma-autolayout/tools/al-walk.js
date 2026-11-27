@@ -181,6 +181,8 @@ window.__alWalk = function (opts) {
     if (cs.display === 'contents') return { k: 'contents', ch: [...el.childNodes].map(n => n.nodeType === 1 ? walk(n) : null).filter(Boolean) };
     const box = boxOf(r);
     if (r.width < 0.5 || r.height < 0.5) {
+      /* A zero-size box that clips shows nothing (a filter chip's hidden check mark) */
+      if (/hidden|clip/.test(cs.overflowX + cs.overflowY)) return null;
       /* Zero-size wrappers can still hold visible absolutely positioned children */
       const kids = [...el.children].map(walk).filter(Boolean);
       return kids.length ? { k: 'contents', ch: kids } : null;
